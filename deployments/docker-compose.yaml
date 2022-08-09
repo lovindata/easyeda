@@ -1,0 +1,16 @@
+version: "3.9"
+services:
+  mysql:
+    image: mysql:8.0.30
+    restart: always
+    volumes:
+      - "./initdb:/docker-entrypoint-initdb.d"
+    ports:
+      - "3306:3306"
+    environment:
+      # Root env variables
+      MYSQL_ROOT_PASSWORD: root-pwd
+      # RestAPI env variables
+      MYSQL_DATABASE: restapi
+      MYSQL_USER: restapi-user
+      MYSQL_PASSWORD : restapi-pwd
