@@ -4,7 +4,7 @@ services:
     image: mysql:8.0.30
     restart: always
     volumes:
-      - "./initdb:/docker-entrypoint-initdb.d"
+      - "./initdb:/docker-entrypoint-initdb.d" # For .sql script(s) launched just after startup
     ports:
       - "3306:3306"
     environment:
