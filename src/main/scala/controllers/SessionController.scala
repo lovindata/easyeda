@@ -1,11 +1,13 @@
 package com.ilovedatajjia
 package controllers
 
+import cats.effect.Clock
 import cats.effect.IO
+import cats.effect.std.UUIDGen
+import cats.implicits.catsSyntaxTuple2Semigroupal
+import controllers.utils.codec._
 import java.nio.charset.StandardCharsets
-import java.security.MessageDigest
 import java.util.Base64
-import java.util.UUID
 import models.Session
 
 /**
@@ -18,36 +20,23 @@ object SessionController {
    * @return
    *   Authentication token & Created session
    */
-  def createSession: IO[String] = {
+  def createSession: IO[String] = for {
 
     // Generate UUID & Authentication token
-    def genUUID: IO[UUID]        = IO(UUID.randomUUID())
-    def genAuthToken: IO[String] = IO {
-      val intermediateToken: String = s"${System.nanoTime()} ${UUID.randomUUID()}"
-      Base64.getEncoder.encodeToString(intermediateToken.getBytes(StandardCharsets.UTF_8))
-    }
+    sessionUUID             <- UUIDGen[IO].randomUUID
+    authToken               <-
+      (Clock[IO].monotonic, UUIDGen[IO].randomUUID) // `Clock[IO].monotonic` == now unix timestamp in nanoseconds
+        .mapN((nowUnixTimestamp, someUUID) => s"$nowUnixTimestamp $someUUID")
+        .map(intermediateToken => Base64.getEncoder.encodeToString(intermediateToken.getBytes(StandardCharsets.UTF_8)))
 
     // Encode to SHA1 the authentication token
-    def encAuthToken(sessionAuthToken: String): IO[Array[Byte]] = IO {
-      MessageDigest
-        .getInstance("SHA-1")
-        .digest(sessionAuthToken.getBytes(StandardCharsets.UTF_8))
-    }
+    encodedAuthToken: String = authToken.toSha1Hex
 
-    // Create & Persist a new session
-    def createPersistSession(sessionUUID: UUID, encodedAuthToken: Array[Byte]): IO[Session] = {
-      val newCreatedSession: Session = Session(sessionUUID, encodedAuthToken)
-      newCreatedSession.persistSession
-    }
+    // Create & Persist the new session
+    createdSession <- Session(sessionUUID, encodedAuthToken)
+    _              <- createdSession.persistSession
+    _              <- createdSession.startCronJobInactivityCheck() // Start also the inactivity checker
 
-    // Compose IOs
-    for {
-      uuid             <- genUUID
-      authToken        <- genAuthToken
-      encodedAuthToken <- encAuthToken(authToken)
-      _                <- createPersistSession(uuid, encodedAuthToken)
-    } yield authToken
-
-  }
+  } yield authToken
 
 }

@@ -24,10 +24,10 @@ package object utils {
                   )
   } yield transactor
 
-  // Custom converters for `UUID` & `Timestamp`
+  // Custom doobie converters when writing into DB sql"""<X>"""
   implicit val uuidMeta: Meta[UUID]           =
-    Meta[String].imap[UUID](UUID.fromString)(_.toString)
+    Meta[String].timap[UUID](UUID.fromString)(_.toString)
   implicit val timestampMeta: Meta[Timestamp] =
-    Meta[String].imap[Timestamp](Timestamp.valueOf)(_.toString)
+    Meta[String].timap[Timestamp](Timestamp.valueOf)(_.toString)
 
 }

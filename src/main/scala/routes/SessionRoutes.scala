@@ -12,10 +12,17 @@ import routes.utils._
  */
 object SessionRoutes {
 
+  // Define session creation route
+  val routes: HttpRoutes[IO] = HttpRoutes.of[IO] { case POST -> Root / "create" =>
+    SessionController.createSession.redeemWith(
+      (e: Throwable) => InternalServerError(e.toString),
+      (authToken: String) => Ok(authToken)
+    )
+  }
+
   // Define routes
-  val routes: HttpRoutes[IO] = HttpRoutes.of[IO] {
-    case POST -> Root / "create"   => SessionController.createSession.flatMap(Ok(_))
-    case GET -> Root / "state"     => Ok(s"Hello state")
+  val otherRoutes: HttpRoutes[IO] = HttpRoutes.of[IO] {
+    case GET -> Root / "status"    => Ok(s"Hello state")
     case DELETE -> Root / "delete" => Ok(s"Hello deleted")
     case GET -> Root / "counts"    => Ok(s"Hello counted")
   }
