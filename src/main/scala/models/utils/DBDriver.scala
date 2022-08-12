@@ -1,5 +1,5 @@
 package com.ilovedatajjia
-package models
+package models.utils
 
 import cats.effect._
 import cats.effect.unsafe.implicits.global.compute
@@ -11,7 +11,7 @@ import java.util.UUID
 /**
  * Utils for models.
  */
-package object utils {
+object DBDriver {
 
   // Initialize database driver
   val mysqlDriver: Resource[IO, HikariTransactor[IO]] = for {

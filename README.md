@@ -2,5 +2,6 @@
 
 # Logbook
 
-- Implement authentication
-- Continue on DEV with counts & status
+- Implement authorization
+  - When issue of not found session => The error 500 is not clear
+- Continue on DEV with status & counts

@@ -1,5 +1,5 @@
 package com.ilovedatajjia
-package controllers.utils
+package models.utils
 
 import java.nio.charset.StandardCharsets
 import java.security.MessageDigest
@@ -7,7 +7,7 @@ import java.security.MessageDigest
 /**
  * Containing rich functions encoding, decoding and hashing.
  */
-package object codec {
+object Codec {
 
   /**
    * Rich functions applicable on [[String]].

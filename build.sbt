@@ -13,11 +13,11 @@ lazy val root = (project in file("."))
 // https://mvnrepository.com/artifact/org.http4s/http4s-ember-server
 libraryDependencies += "org.http4s"    %% "http4s-ember-server" % "0.23.14"
 // https://mvnrepository.com/artifact/org.http4s/http4s-ember-client
-libraryDependencies += "org.http4s"    %% "http4s-ember-client" % "0.23.12"
+libraryDependencies += "org.http4s"    %% "http4s-ember-client" % "0.23.14"
 // https://mvnrepository.com/artifact/org.http4s/http4s-circe
 libraryDependencies += "org.http4s"    %% "http4s-circe"        % "0.23.14"
 // https://mvnrepository.com/artifact/org.http4s/http4s-dsl
-libraryDependencies += "org.http4s"    %% "http4s-dsl"          % "0.23.12"
+libraryDependencies += "org.http4s"    %% "http4s-dsl"          % "0.23.14"
 // https://mvnrepository.com/artifact/io.circe/circe-generic
 libraryDependencies += "io.circe"      %% "circe-generic"       % "0.14.2"
 // https://mvnrepository.com/artifact/ch.qos.logback/logback-classic
