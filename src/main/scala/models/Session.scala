@@ -58,9 +58,9 @@ case class Session(id: UUID,
   def persist: IO[Unit] = {
     // Build the query
     val query: ConnectionIO[Int] =
-      sql"""INSERT INTO session (id, auth_token_sha1, created_at, updated_at, deleted_at)
-           |VALUES ($id, $authTokenSha1, $createdAt, $updatedAt, $deletedAt)
-           """.stripMargin.update.run
+      sql"""|INSERT INTO session (id, auth_token_sha1, created_at, updated_at, deleted_at)
+            |VALUES ($id, $authTokenSha1, $createdAt, $updatedAt, $deletedAt)
+            |""".stripMargin.update.run
 
     // Compose IO
     for {
@@ -149,10 +149,10 @@ object Session {
   def getWithId(id: UUID): IO[Session] = {
     // Build the query
     val query: ConnectionIO[Session] =
-      sql"""SELECT id, auth_token_sha1, created_at, updated_at, deleted_at
-           |FROM session
-           |WHERE id=$id
-           """.stripMargin.query[Session].unique // Will raise exception if not exactly one value
+      sql"""|SELECT id, auth_token_sha1, created_at, updated_at, deleted_at
+            |FROM session
+            |WHERE id=$id
+            |""".stripMargin.query[Session].unique // Will raise exception if not exactly one value
 
     // Run the query
     for {
@@ -173,10 +173,10 @@ object Session {
 
     // Build the query
     val query: ConnectionIO[Session] =
-      sql"""SELECT id, auth_token_sha1, created_at, updated_at, deleted_at
-           |FROM session
-           |WHERE auth_token_sha1=$authTokenSha1;
-           """.stripMargin.query[Session].unique // Will raise exception if not exactly one value
+      sql"""|SELECT id, auth_token_sha1, created_at, updated_at, deleted_at
+            |FROM session
+            |WHERE auth_token_sha1=$authTokenSha1
+            |""".stripMargin.query[Session].unique // Will raise exception if not exactly one value
 
     // Run the query
     for {
@@ -196,10 +196,10 @@ object Session {
     nowTimestamp            <- Clock[IO].realTime.map(x => new Timestamp(x.toMillis))
     authTokenSha1: String    = authToken.toSha1Hex
     query: ConnectionIO[Int] =
-      sql"""UPDATE session
-             |SET updated_at=$nowTimestamp
-             |WHERE auth_token_sha1=$authTokenSha1;
-             """.stripMargin.update.run
+      sql"""|UPDATE session
+            |SET updated_at=$nowTimestamp
+            |WHERE auth_token_sha1=$authTokenSha1
+            |""".stripMargin.update.run
 
     // Run the query (Raise exception if not exactly one value updated)
     nbAffectedRows          <- mysqlDriver.use(query.transact(_))
@@ -218,10 +218,10 @@ object Session {
     // Build the query
     nowTimestamp            <- Clock[IO].realTime.map(x => new Timestamp(x.toMillis))
     query: ConnectionIO[Int] =
-      sql"""UPDATE session
-           |SET deleted_at=$nowTimestamp
-           |WHERE id=$id
-            """.stripMargin.update.run
+      sql"""|UPDATE session
+            |SET deleted_at=$nowTimestamp
+            |WHERE id=$id
+            |""".stripMargin.update.run
 
     // Run the query
     nbAffectedRows          <- mysqlDriver.use(query.transact(_))
