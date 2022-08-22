@@ -19,15 +19,18 @@ import org.http4s.server.AuthMiddleware
  */
 object Auth {
 
+  // Retrieve session
+  def retrieveUser: Kleisli[IO, String, Session] = Kleisli(authToken => IO(???))
+
   // Authorization verification policy
   private val authPolicy: Kleisli[IO, Request[IO], Either[String, Session]] = Kleisli({ request =>
-    // Build session verification if existing & valid authorization
-    val verifyIO: Either[String, IO[Session]] = for {
+    // Check if valid authorization
+    val validatedAuth: Either[String, String] = for {
       authorizationHeader <-
         request.headers.get[Authorization].toRight("Could not find OAuth 2.0 `Authorization` header")
       session             <- authorizationHeader.credentials match {
                                case Credentials.Token(AuthScheme.Bearer, authToken) =>
-                                 Right(SessionController.verifyAuthorization(authToken))
+                                 Right(authToken)
                                case Credentials.Token(authSchema, _)                =>
                                  Left(s"Expecting `Bearer` authorization prefix but got `$authSchema`")
                                case x                                               =>
@@ -35,8 +38,16 @@ object Auth {
                              }
     } yield session
 
+    // Check if valid session
+    validatedAuth match {
+      case Right(authToken) => SessionController.verifyAuthorization(authToken).red
+      case _                => _
+    }
+
     // Prepare session verification (Either[_, IO[Session]] to IO[Either[_, Session]])
-    verifyIO.sequence
+    validatedAuth.traverse {
+      x => val test = retrieveUser.run(x)
+    }
   })
 
   // Middleware to actual routes

@@ -15,7 +15,7 @@ import models.Session
 object SessionController {
 
   /**
-   * Verify if existing [[Session]] & Report its activity.
+   * Verify if existing [[Session]] & Report its activity. (Exception thrown if no session can be retrieved)
    * @param authTokenToVerify
    *   The brut authorization token
    * @return

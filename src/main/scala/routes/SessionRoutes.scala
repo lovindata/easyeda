@@ -7,7 +7,8 @@ import controllers.SessionController
 import models.Session
 import org.http4s._
 import org.http4s.dsl.io._
-import routes.utils.Auth.withAuth
+import routes.utils.Auth._
+import routes.utils.Exception._
 
 /**
  * Routes related to sessions management.
@@ -16,10 +17,7 @@ object SessionRoutes {
 
   // Define session creation route
   private val sessionCreationRoute: HttpRoutes[IO] = HttpRoutes.of[IO] { case POST -> Root / "create" =>
-    SessionController.createSession.redeemWith(
-      (e: Throwable) => InternalServerError(e.toString),
-      (authToken: String) => Ok(authToken)
-    )
+    SessionController.createSession.toResponseWithDefaultException
   }
 
   // Define routes
