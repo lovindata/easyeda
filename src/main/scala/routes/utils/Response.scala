@@ -8,7 +8,7 @@ import org.http4s.dsl.io._
 /**
  * Exception utils for routes.
  */
-object Exception {
+object Response {
 
   /**
    * Rich functions for [[IO]] result to route [[Response]].
@@ -24,9 +24,9 @@ object Exception {
      * @param w
      *   Make sure to have an existing [[EntityEncoder]] in scope
      * @return
-     *   HTTP response with the result or Default [[InternalServerError]] with the exception message
+     *   HTTP response with the result or Default [[InternalServerError]] with the caught exception message
      */
-    def toResponseWithDefaultException(implicit w: EntityEncoder[IO, A]): IO[Response[IO]] = x.redeemWith(
+    def toResponseWithError500(implicit w: EntityEncoder[IO, A]): IO[Response[IO]] = x.redeemWith(
       (e: Throwable) => InternalServerError(e.toString),
       (result: A) => Ok(result)
     )

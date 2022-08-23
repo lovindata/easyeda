@@ -27,28 +27,28 @@ case class Session(id: UUID,
                    authTokenSha1: String,
                    createdAt: Timestamp,
                    updatedAt: Timestamp,
-                   deletedAt: Option[Timestamp]) {
+                   terminatedAt: Option[Timestamp]) {
 
   /**
    * Get [[createdAt]].
    * @return
-   *   String representation of [[createdAt]].
+   *   Representation of [[createdAt]].
    */
   def getCreatedAt: Timestamp = createdAt
 
   /**
    * Get [[updatedAt]].
    * @return
-   *   String representation of [[updatedAt]].
+   *   Representation of [[updatedAt]].
    */
   def getUpdatedAt: Timestamp = updatedAt
 
   /**
-   * Get [[deletedAt]].
+   * Get [[terminatedAt]].
    * @return
-   *   String representation of [[deletedAt]].
+   *   Representation of [[terminatedAt]].
    */
-  def getDeletedAt: Option[Timestamp] = deletedAt
+  def getTerminatedAt: Option[Timestamp] = terminatedAt
 
   /**
    * Add the new session to the database (Supposed not-existing inside the database).
@@ -58,8 +58,8 @@ case class Session(id: UUID,
   def persist: IO[Unit] = {
     // Build the query
     val query: ConnectionIO[Int] =
-      sql"""|INSERT INTO session (id, auth_token_sha1, created_at, updated_at, deleted_at)
-            |VALUES ($id, $authTokenSha1, $createdAt, $updatedAt, $deletedAt)
+      sql"""|INSERT INTO session (id, auth_token_sha1, created_at, updated_at, terminated_at)
+            |VALUES ($id, $authTokenSha1, $createdAt, $updatedAt, $terminatedAt)
             |""".stripMargin.update.run
 
     // Compose IO
@@ -89,13 +89,13 @@ case class Session(id: UUID,
 
       // Update the cron job & session according the inactivity
       nowTimestamp <- Clock[IO].realTime.map(_.toMillis)
-      _            <- session.deletedAt match {
+      _            <- session.terminatedAt match {
                         case None if nowTimestamp - session.updatedAt.getTime < maxDiffInactivity.toMillis  =>
                           startCronJobInactivityCheck() // Continue cron job if still active session
                         case None if nowTimestamp - session.updatedAt.getTime >= maxDiffInactivity.toMillis =>
-                          Session.deleteWithId(id) // Terminate the cron job & Update to delete status the session
+                          Session.terminateWithId(id) // Terminate the cron job & Update to terminated status the session
                         case _                                                                              =>
-                          IO.unit // Do nothing if already in deletion state (== Some found)
+                          IO.unit // Do nothing if already in terminated state (== Some found)
                       }
     } yield ()
 
@@ -116,10 +116,10 @@ object Session {
       ("id", Json.fromString(session.id.toString)),
       ("createdAt", Json.fromString(session.getCreatedAt.toString)),
       ("updatedAt", Json.fromString(session.getUpdatedAt.toString)),
-      ("deletedAt",
-       session.getDeletedAt match {
-         case None            => Json.Null
-         case Some(deletedAt) => Json.fromString(deletedAt.toString)
+      ("terminatedAt",
+       session.getTerminatedAt match {
+         case None               => Json.Null
+         case Some(terminatedAt) => Json.fromString(terminatedAt.toString)
        })
     )
   implicit def sessionEntityEncoder: EntityEncoder[IO, Session] =
@@ -149,7 +149,7 @@ object Session {
   def getWithId(id: UUID): IO[Session] = {
     // Build the query
     val query: ConnectionIO[Session] =
-      sql"""|SELECT id, auth_token_sha1, created_at, updated_at, deleted_at
+      sql"""|SELECT id, auth_token_sha1, created_at, updated_at, terminated_at
             |FROM session
             |WHERE id=$id
             |""".stripMargin.query[Session].unique // Will raise exception if not exactly one value
@@ -161,7 +161,7 @@ object Session {
   }
 
   /**
-   * Retrieve the session from the database & Will throw exception if not found or deleted.
+   * Retrieve the session from the database & Will throw exception if not found or terminated.
    * @param authToken
    *   Session with this authorization token to find
    * @return
@@ -173,7 +173,7 @@ object Session {
 
     // Build the query
     val query: ConnectionIO[Session] =
-      sql"""|SELECT id, auth_token_sha1, created_at, updated_at, deleted_at
+      sql"""|SELECT id, auth_token_sha1, created_at, updated_at, terminated_at
             |FROM session
             |WHERE auth_token_sha1=$authTokenSha1
             |""".stripMargin.query[Session].unique // Will raise exception if not exactly one value
@@ -181,8 +181,9 @@ object Session {
     // Run the query
     for {
       session <- mysqlDriver.use(query.transact(_))
-      _       <- IO.raiseWhen(session.getDeletedAt.isDefined)(
-                   throw new RuntimeException(s"Session id == `${session.id}` already terminated impossible to retrieve"))
+      _       <-
+        IO.raiseWhen(session.getTerminatedAt.isDefined)(
+          throw new RuntimeException(s"Session with id == `${session.id}` already terminated impossible to retrieve"))
     } yield session
   }
 
@@ -203,23 +204,29 @@ object Session {
 
     // Run the query (Raise exception if not exactly one value updated)
     nbAffectedRows          <- mysqlDriver.use(query.transact(_))
-    _                       <- IO.raiseWhen(nbAffectedRows != 1)(
+    _                       <- IO.raiseWhen(nbAffectedRows == 0)(
                                  throw new RuntimeException(
-                                   s"Trying to persist session with auth_token_sha1 == `$authTokenSha1` " +
-                                     s"causing table number of rows affected `$nbAffectedRows` != 1"))
+                                   s"Trying to update a non-existing session " +
+                                     s"with auth_token_sha1 == `$authTokenSha1` (`nbAffectedRows` == 0)")
+                               )
+    _                       <- IO.raiseWhen(nbAffectedRows >= 2)(
+                                 throw new RuntimeException(
+                                   s"Trying to update multiple session " +
+                                     s"with one unique auth_token_sha1 == `$authTokenSha1` " +
+                                     s"(`nbAffectedRows` != $nbAffectedRows). Table might be corrupted."))
   } yield ()
 
   /**
-   * Delete the session in the database. (Must only be used by the application logic)
+   * Terminate the session in the database. (Must only be used by the application logic)
    * @param id
-   *   ID to delete
+   *   ID to terminate
    */
-  def deleteWithId(id: UUID): IO[Unit] = for {
+  def terminateWithId(id: UUID): IO[Unit] = for {
     // Build the query
     nowTimestamp            <- Clock[IO].realTime.map(x => new Timestamp(x.toMillis))
     query: ConnectionIO[Int] =
       sql"""|UPDATE session
-            |SET deleted_at=$nowTimestamp
+            |SET terminated_at=$nowTimestamp
             |WHERE id=$id
             |""".stripMargin.update.run
 

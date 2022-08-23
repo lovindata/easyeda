@@ -45,4 +45,13 @@ object SessionController {
     _              <- createdSession.startCronJobInactivityCheck() // Start also the inactivity checker
   } yield authToken
 
+  /**
+   * Terminate the provided session. (Exception thrown if issue occurred)
+   * @param validatedSession
+   *   A validated session (DO NOT USE THIS FOR NON VALIDATED)
+   */
+  def terminateSession(validatedSession: Session): IO[Unit] = for {
+    _ <- Session.terminateWithId(validatedSession.id)
+  } yield ()
+
 }

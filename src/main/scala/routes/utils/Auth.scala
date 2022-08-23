@@ -20,12 +20,19 @@ import org.http4s.server.AuthMiddleware
 object Auth {
 
   // Retrieve session
-  def retrieveUser: Kleisli[IO, String, Session] = Kleisli(authToken => IO(???))
+  private def retrieveSession: Kleisli[IO, String, Either[String, Session]] = Kleisli({ authToken =>
+    SessionController
+      .verifyAuthorization(authToken)
+      .redeem(
+        (e: Throwable) => Left(e.toString),
+        (session: Session) => Right(session)
+      )
+  })
 
   // Authorization verification policy
   private val authPolicy: Kleisli[IO, Request[IO], Either[String, Session]] = Kleisli({ request =>
-    // Check if valid authorization
-    val validatedAuth: Either[String, String] = for {
+    // Check valid header `Authorization` & Prepare the `authToken` for session verification
+    val validatedAuthToken: Either[String, String] = for {
       authorizationHeader <-
         request.headers.get[Authorization].toRight("Could not find OAuth 2.0 `Authorization` header")
       session             <- authorizationHeader.credentials match {
@@ -38,16 +45,9 @@ object Auth {
                              }
     } yield session
 
-    // Check if valid session
-    validatedAuth match {
-      case Right(authToken) => SessionController.verifyAuthorization(authToken).red
-      case _                => _
-    }
-
-    // Prepare session verification (Either[_, IO[Session]] to IO[Either[_, Session]])
-    validatedAuth.traverse {
-      x => val test = retrieveUser.run(x)
-    }
+    // Do session verification
+    val validatedSession: IO[Either[String, Either[String, Session]]] = validatedAuthToken.traverse(retrieveSession.run)
+    validatedSession.map(_.flatten) // Merge the two `Either`
   })
 
   // Middleware to actual routes
