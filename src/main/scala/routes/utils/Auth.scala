@@ -19,8 +19,8 @@ import org.http4s.server.AuthMiddleware
  */
 object Auth {
 
-  // Retrieve session
-  private def retrieveSession: Kleisli[IO, String, Either[String, Session]] = Kleisli({ authToken =>
+  // Runnable retrieve session with authorization token
+  private val retrieveSession: Kleisli[IO, String, Either[String, Session]] = Kleisli({ authToken =>
     SessionController
       .verifyAuthorization(authToken)
       .redeem(

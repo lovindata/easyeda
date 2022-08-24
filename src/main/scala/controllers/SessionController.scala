@@ -35,8 +35,8 @@ object SessionController {
     // Generate UUID & Authorization token
     sessionUUID    <- UUIDGen[IO].randomUUID
     authToken      <-
-      (Clock[IO].monotonic, UUIDGen[IO].randomUUID) // `Clock[IO].monotonic` == now unix timestamp in nanoseconds
-        .mapN((nowUnixTimestamp, someUUID) => s"$nowUnixTimestamp $someUUID")
+      (UUIDGen[IO].randomUUID, Clock[IO].monotonic) // `Clock[IO].monotonic` == now unix timestamp in nanoseconds
+        .mapN((someUUID, nowUnixTimestamp) => s"$someUUID:$nowUnixTimestamp")
         .map(intermediateToken => Base64.getEncoder.encodeToString(intermediateToken.getBytes(StandardCharsets.UTF_8)))
 
     // Create & Persist the new session
@@ -49,9 +49,23 @@ object SessionController {
    * Terminate the provided session. (Exception thrown if issue occurred)
    * @param validatedSession
    *   A validated session (DO NOT USE THIS FOR NON VALIDATED)
+   * @return
+   *   Updated version of `validatedSession`
    */
-  def terminateSession(validatedSession: Session): IO[Unit] = for {
-    _ <- Session.terminateWithId(validatedSession.id)
-  } yield ()
+  def terminateSession(validatedSession: Session): IO[Session] = for {
+    _              <- Session.terminateWithId(validatedSession.id)
+    updatedSession <- Session.getWithId(validatedSession.id)
+  } yield updatedSession
+
+  /**
+   * List all non terminated sessions.
+   * @param validatedSession
+   *   A validated session
+   * @return
+   *   Listing of all non terminated sessions
+   */
+  def listSessions(validatedSession: Session): IO[Array[Session]] = for {
+    sessions <- Session.listActiveSessions
+  } yield sessions
 
 }

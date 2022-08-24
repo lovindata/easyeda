@@ -58,7 +58,7 @@ case class Session(id: UUID,
   def persist: IO[Unit] = {
     // Build the query
     val query: ConnectionIO[Int] =
-      sql"""|INSERT INTO session (id, auth_token_sha1, created_at, updated_at, terminated_at)
+      sql"""|INSERT INTO session (id, bearer_auth_token_sha1, created_at, updated_at, terminated_at)
             |VALUES ($id, $authTokenSha1, $createdAt, $updatedAt, $terminatedAt)
             |""".stripMargin.update.run
 
@@ -78,7 +78,7 @@ case class Session(id: UUID,
    * @param maxDiffInactivity
    *   Duration to be consider inactive after
    */
-  def startCronJobInactivityCheck(maxDiffInactivity: FiniteDuration = 1.minute): IO[Unit] = {
+  def startCronJobInactivityCheck(maxDiffInactivity: FiniteDuration = 1.hour): IO[Unit] = {
     // Define the cron job
     val cronJobToStart: IO[Unit] = for {
       // Scheduled every certain amount of time
@@ -149,7 +149,7 @@ object Session {
   def getWithId(id: UUID): IO[Session] = {
     // Build the query
     val query: ConnectionIO[Session] =
-      sql"""|SELECT id, auth_token_sha1, created_at, updated_at, terminated_at
+      sql"""|SELECT id, bearer_auth_token_sha1, created_at, updated_at, terminated_at
             |FROM session
             |WHERE id=$id
             |""".stripMargin.query[Session].unique // Will raise exception if not exactly one value
@@ -173,9 +173,9 @@ object Session {
 
     // Build the query
     val query: ConnectionIO[Session] =
-      sql"""|SELECT id, auth_token_sha1, created_at, updated_at, terminated_at
+      sql"""|SELECT id, bearer_auth_token_sha1, created_at, updated_at, terminated_at
             |FROM session
-            |WHERE auth_token_sha1=$authTokenSha1
+            |WHERE bearer_auth_token_sha1=$authTokenSha1
             |""".stripMargin.query[Session].unique // Will raise exception if not exactly one value
 
     // Run the query
@@ -199,7 +199,7 @@ object Session {
     query: ConnectionIO[Int] =
       sql"""|UPDATE session
             |SET updated_at=$nowTimestamp
-            |WHERE auth_token_sha1=$authTokenSha1
+            |WHERE bearer_auth_token_sha1=$authTokenSha1
             |""".stripMargin.update.run
 
     // Run the query (Raise exception if not exactly one value updated)
@@ -207,12 +207,11 @@ object Session {
     _                       <- IO.raiseWhen(nbAffectedRows == 0)(
                                  throw new RuntimeException(
                                    s"Trying to update a non-existing session " +
-                                     s"with auth_token_sha1 == `$authTokenSha1` (`nbAffectedRows` == 0)")
+                                     s"with bearer_auth_token_sha1 == `$authTokenSha1` (`nbAffectedRows` == 0)")
                                )
     _                       <- IO.raiseWhen(nbAffectedRows >= 2)(
                                  throw new RuntimeException(
-                                   s"Trying to update multiple session " +
-                                     s"with one unique auth_token_sha1 == `$authTokenSha1` " +
+                                   s"Updated multiple session with unique bearer_auth_token_sha1 == `$authTokenSha1` " +
                                      s"(`nbAffectedRows` != $nbAffectedRows). Table might be corrupted."))
   } yield ()
 
@@ -232,10 +231,34 @@ object Session {
 
     // Run the query
     nbAffectedRows          <- mysqlDriver.use(query.transact(_))
-    _                       <- IO.raiseWhen(nbAffectedRows != 1)(
+    _                       <- IO.raiseWhen(nbAffectedRows == 0)(
                                  throw new RuntimeException(
-                                   s"Trying to persist session `$id` " +
-                                     s"causing table number of rows affected `$nbAffectedRows` != 1"))
+                                   s"Trying to update a non-existing session " +
+                                     s"with id == `$id` (`nbAffectedRows` == 0)")
+                               )
+    _                       <- IO.raiseWhen(nbAffectedRows >= 2)(
+                                 throw new RuntimeException(
+                                   s"Updated multiple session with unique id == `$id` " +
+                                     s"(`nbAffectedRows` != $nbAffectedRows). Table might be corrupted."))
   } yield ()
+
+  /**
+   * List all active sessions.
+   * @return
+   *   Array of all non terminated sessions
+   */
+  def listActiveSessions: IO[Array[Session]] = {
+    // Build the query
+    val query: ConnectionIO[Array[Session]] =
+      sql"""|SELECT id, bearer_auth_token_sha1, created_at, updated_at, terminated_at
+            |FROM session
+            |WHERE terminated_at IS NULL
+            |""".stripMargin.query[Session].to[Array]
+
+    // Run the query
+    for {
+      sessions <- mysqlDriver.use(query.transact(_))
+    } yield sessions
+  }
 
 }

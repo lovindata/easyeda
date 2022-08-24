@@ -26,9 +26,23 @@ object Response {
      * @return
      *   HTTP response with the result or Default [[InternalServerError]] with the caught exception message
      */
-    def toResponseWithError500(implicit w: EntityEncoder[IO, A]): IO[Response[IO]] = x.redeemWith(
+    def toResponse(implicit w: EntityEncoder[IO, A]): IO[Response[IO]] = x.redeemWith(
       (e: Throwable) => InternalServerError(e.toString),
       (result: A) => Ok(result)
+    )
+
+    /**
+     * Response 200 or 500 according the [[IO]] result.
+     * @param entity
+     *   Custom response entity
+     * @param w
+     *   Make sure to have an existing [[EntityEncoder]] in scope
+     * @return
+     *   HTTP response with the custom entity or Default [[InternalServerError]] with the caught exception message
+     */
+    def toResponseWithEntity[B](entity: B)(implicit w: EntityEncoder[IO, B]): IO[Response[IO]] = x.redeemWith(
+      (e: Throwable) => InternalServerError(e.toString),
+      (_: A) => Ok(entity)
     )
 
   }
