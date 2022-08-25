@@ -1,13 +1,13 @@
 package com.ilovedatajjia
-package routes
+package routes.session
 
 import cats.effect.IO
 import cats.implicits._
 import controllers.SessionController
 import models.Session
 import org.http4s._
-import org.http4s.circe.CirceEntityCodec.circeEntityEncoder // EntityEncoder for default Scala types
 import org.http4s.dsl.io._
+import routes.session.dto._
 import routes.utils.Auth._
 import routes.utils.Response._
 
@@ -18,7 +18,10 @@ object SessionRoutes {
 
   // Define session creation route
   private val sessionCreationRoute: HttpRoutes[IO] = HttpRoutes.of[IO] { case POST -> Root / "create" =>
-    SessionController.createSession.toResponse
+    SessionController.createSession.redeemWith(
+      (e: Throwable) => InternalServerError(CreateFailure(e.toString)),
+      (authToken: String) => Ok(CreateSuccess(authToken = authToken))
+    )
   }
 
   // Define routes

@@ -31,6 +31,10 @@ libraryDependencies += "org.tpolecat" %% "doobie-hikari"        % "1.0.0-RC2"
 // https://mvnrepository.com/artifact/mysql/mysql-connector-java
 libraryDependencies += "mysql"         % "mysql-connector-java" % "8.0.30"
 
+// Tapir
+// https://mvnrepository.com/artifact/com.softwaremill.sttp.tapir/tapir-http4s-server
+libraryDependencies += "com.softwaremill.sttp.tapir" %% "tapir-http4s-server" % "1.0.5"
+
 /**
  * Test dependencies
  */

@@ -1,5 +1,5 @@
 package com.ilovedatajjia
-package server
+package servers
 
 import cats.effect._
 import com.comcast.ip4s._
@@ -7,12 +7,12 @@ import org.http4s._
 import org.http4s.ember.server._
 import org.http4s.implicits._
 import org.http4s.server.Router
-import routes.SessionRoutes
+import routes.session.SessionRoutes
 
 /**
- * HTTP4sServer management.
+ * Application server.
  */
-object Http4sServer {
+object AppServer {
 
   // Retrieve all route(s)
   val combinedRoutes: HttpApp[IO] = Router("/session" -> SessionRoutes.routes).orNotFound
