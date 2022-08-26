@@ -33,7 +33,11 @@ libraryDependencies += "mysql"         % "mysql-connector-java" % "8.0.30"
 
 // Tapir
 // https://mvnrepository.com/artifact/com.softwaremill.sttp.tapir/tapir-http4s-server
-libraryDependencies += "com.softwaremill.sttp.tapir" %% "tapir-http4s-server" % "1.0.5"
+libraryDependencies += "com.softwaremill.sttp.tapir" %% "tapir-http4s-server"     % "1.0.6"
+// https://mvnrepository.com/artifact/com.softwaremill.sttp.tapir/tapir-swagger-ui-bundle
+libraryDependencies += "com.softwaremill.sttp.tapir" %% "tapir-swagger-ui-bundle" % "1.0.6"
+// https://mvnrepository.com/artifact/com.softwaremill.sttp.tapir/tapir-json-circe
+libraryDependencies += "com.softwaremill.sttp.tapir" %% "tapir-json-circe"        % "1.0.6"
 
 /**
  * Test dependencies

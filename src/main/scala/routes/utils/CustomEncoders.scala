@@ -1,29 +1,21 @@
 package com.ilovedatajjia
-package routes.session.dto
+package routes.utils
 
 import cats.effect.IO
+import io.circe.Decoder
 import io.circe.Encoder
 import io.circe.Json
-import io.circe.generic.auto._
+import io.circe.generic.semiauto._
 import models.Session
 import org.http4s.EntityEncoder
 import org.http4s.circe.jsonEncoderOf
 
 /**
- * JSON response for success session creation.
- * @param msg
- *   Message holder
- * @param session
- *   Authentication token of the created session
+ * Custom class [[EntityEncoder]] for responses.
  */
-case class StatusSuccess(msg: String = "Successfully retrieved session.", session: Session)
+object CustomEncoders {
 
-/**
- * Holding encoder(s).
- */
-object StatusSuccess {
-
-  // Session encoders
+  // Session JSON encoders
   implicit val sessionEncoder: Encoder[Session]                 = (session: Session) =>
     Json.obj(
       ("id", Json.fromString(session.id.toString)),
@@ -35,11 +27,8 @@ object StatusSuccess {
          case Some(terminatedAt) => Json.fromString(terminatedAt.toString)
        })
     )
+  implicit val sessionDecoder: Decoder[Session]                 = deriveDecoder
   implicit val sessionEntityEncoder: EntityEncoder[IO, Session] =
     jsonEncoderOf[IO, Session] // useful when sending response
-
-  // StatusSuccess entity encoder
-  implicit val successEntityEncoder: EntityEncoder[IO, StatusSuccess] =
-    jsonEncoderOf[IO, StatusSuccess] // useful when sending response
 
 }

@@ -8,6 +8,7 @@ import org.http4s.ember.server._
 import org.http4s.implicits._
 import org.http4s.server.Router
 import routes.session.SessionRoutes
+import routes.session.SessionSwagger
 
 object SwaggerServer {
 

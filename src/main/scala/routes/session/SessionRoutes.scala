@@ -6,9 +6,10 @@ import cats.implicits._
 import controllers.SessionController
 import models.Session
 import org.http4s._
+import org.http4s.circe.CirceEntityCodec.circeEntityEncoder
 import org.http4s.dsl.io._
-import routes.session.dto._
 import routes.utils.Auth._
+import routes.utils.CustomEncoders._
 import routes.utils.Response._
 
 /**
@@ -19,8 +20,8 @@ object SessionRoutes {
   // Define session creation route
   private val sessionCreationRoute: HttpRoutes[IO] = HttpRoutes.of[IO] { case POST -> Root / "create" =>
     SessionController.createSession.redeemWith(
-      (e: Throwable) => InternalServerError(CreateFailure(e.toString)),
-      (authToken: String) => Ok(CreateSuccess(authToken = authToken))
+      (e: Throwable) => InternalServerError(e.toString),
+      (authToken: String) => Ok(authToken)
     )
   }
 
