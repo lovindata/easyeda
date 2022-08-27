@@ -1,5 +1,5 @@
 package com.ilovedatajjia
-package servers
+package server
 
 import cats.effect._
 import com.comcast.ip4s._

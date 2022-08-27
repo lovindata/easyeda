@@ -34,7 +34,9 @@ object Auth {
     // Check valid header `Authorization` & Prepare the `authToken` for session verification
     val validatedAuthToken: Either[String, String] = for {
       authorizationHeader <-
-        request.headers.get[Authorization].toRight("Could not find OAuth 2.0 `Authorization` header")
+        request.headers
+          .get[Authorization]
+          .toRight("Please verify `Authorization` header and its value are correctly formatted & provided")
       session             <- authorizationHeader.credentials match {
                                case Credentials.Token(AuthScheme.Bearer, authToken) =>
                                  Right(authToken)
@@ -46,8 +48,8 @@ object Auth {
     } yield session
 
     // Do session verification
-    val validatedSession: IO[Either[String, Either[String, Session]]] = validatedAuthToken.traverse(retrieveSession.run)
-    validatedSession.map(_.flatten) // Merge the two `Either`
+    val validatedSession: IO[Either[String, Session]] = validatedAuthToken.flatTraverse(retrieveSession.run)
+    validatedSession // The two `Either` are merged by the `_.flatten` after the `_.traverse`
   })
 
   // Middleware to actual routes

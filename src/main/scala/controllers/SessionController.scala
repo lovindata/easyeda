@@ -4,13 +4,15 @@ package controllers
 import cats.effect.Clock
 import cats.effect.IO
 import cats.effect.std.UUIDGen
-import cats.implicits.catsSyntaxTuple2Semigroupal
+import cats.implicits._
 import java.nio.charset.StandardCharsets
 import java.util.Base64
 import models.Session
+import routes.session.entity.SessionAuthEntity
+import routes.session.entity.SessionStatusEntity
 
 /**
- * Controller for session logic.
+ * Controller for sessions logic.
  */
 object SessionController {
 
@@ -29,9 +31,9 @@ object SessionController {
   /**
    * Create a new [[Session]].
    * @return
-   *   Authorization token & Created session
+   *   Session UUID & Authorization token
    */
-  def createSession: IO[String] = for {
+  def createSession: IO[SessionAuthEntity] = for {
     // Generate UUID & Authorization token
     sessionUUID    <- UUIDGen[IO].randomUUID
     authToken      <-
@@ -43,19 +45,22 @@ object SessionController {
     createdSession <- Session(sessionUUID, authToken)
     _              <- createdSession.persist
     _              <- createdSession.startCronJobInactivityCheck() // Start also the inactivity checker
-  } yield authToken
+  } yield SessionAuthEntity(sessionUUID.toString, authToken)
 
   /**
    * Terminate the provided session. (Exception thrown if issue occurred)
    * @param validatedSession
    *   A validated session (DO NOT USE THIS FOR NON VALIDATED)
    * @return
-   *   Updated version of `validatedSession`
+   *   Session updated status
    */
-  def terminateSession(validatedSession: Session): IO[Session] = for {
+  def terminateSession(validatedSession: Session): IO[SessionStatusEntity] = for {
     _              <- Session.terminateWithId(validatedSession.id)
     updatedSession <- Session.getWithId(validatedSession.id)
-  } yield updatedSession
+  } yield SessionStatusEntity(updatedSession.id,
+                              updatedSession.createdAt.toString,
+                              updatedSession.updatedAt.toString,
+                              updatedSession.terminatedAt.map(_.toString))
 
   /**
    * List all non terminated sessions.
@@ -64,8 +69,13 @@ object SessionController {
    * @return
    *   Listing of all non terminated sessions
    */
-  def listSessions(validatedSession: Session): IO[Array[Session]] = for {
-    sessions <- Session.listActiveSessions
-  } yield sessions
+  def listSessions(validatedSession: Session): IO[Array[SessionStatusEntity]] = for {
+    sessions      <- Session.listActiveSessions
+    sessionsStatus = sessions.map(session =>
+                       SessionStatusEntity(session.id,
+                                           session.createdAt.toString,
+                                           session.updatedAt.toString,
+                                           session.terminatedAt.map(_.toString)))
+  } yield sessionsStatus
 
 }
