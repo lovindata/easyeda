@@ -1,0 +1,53 @@
+{
+	"info": {
+		"_postman_id": "c6e0bb66-3b85-4db8-9bb2-3cf8ee646cd0",
+		"name": "Job",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "localhost:8080/job/csv/preview",
+			"id": "b1a91081-c405-4b75-badd-1b2a91688dde",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "YTRjYTI2MzQtYTMyMC00MDJmLTg3N2ItMTYzZGZjYzFkMjk2OjcyNjIzODEwMDY3MTAwMCBuYW5vc2Vjb25kcw==",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "file",
+							"type": "file",
+							"src": "/C:/Users/33650/Downloads/twitter_training.csv"
+						}
+					]
+				},
+				"url": {
+					"raw": "localhost:8080/job/csv/preview",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"job",
+						"csv",
+						"preview"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

@@ -29,7 +29,51 @@
 					]
 				}
 			},
-			"response": []
+			"response": [
+				{
+					"id": "093d065f-091e-4f66-aabe-1d958946b3b1",
+					"name": "localhost:8080/session/create",
+					"originalRequest": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "localhost:8080/session/create",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"session",
+								"create"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Date",
+							"value": "Sat, 27 Aug 2022 16:31:06 GMT"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"key": "Content-Length",
+							"value": "157"
+						}
+					],
+					"cookie": [],
+					"responseTime": null,
+					"body": "{\n    \"sessionUUID\": \"cf3bdc83-e7a5-435b-880e-eba090fbf6af\",\n    \"authToken\": \"YTRjZTZjMjQtNzk3YS00MjRlLWI4ZWYtM2JiZDNhMTQ3YjQyOjcyNjE2Nzk3MzA2NzYwMCBuYW5vc2Vjb25kcw==\"\n}"
+				}
+			]
 		},
 		{
 			"name": "localhost:8080/session/status",
@@ -39,7 +83,14 @@
 			},
 			"request": {
 				"auth": {
-					"type": "bearer"
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "YTRjZTZjMjQtNzk3YS00MjRlLWI4ZWYtM2JiZDNhMTQ3YjQyOjcyNjE2Nzk3MzA2NzYwMCBuYW5vc2Vjb25kcw==",
+							"type": "string"
+						}
+					]
 				},
 				"method": "GET",
 				"header": [],
@@ -55,7 +106,51 @@
 					]
 				}
 			},
-			"response": []
+			"response": [
+				{
+					"id": "c70115ba-9cda-4c39-bd56-3a936a3006c8",
+					"name": "localhost:8080/session/status",
+					"originalRequest": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "localhost:8080/session/status",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"session",
+								"status"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Date",
+							"value": "Sat, 27 Aug 2022 16:31:32 GMT"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"key": "Content-Length",
+							"value": "141"
+						}
+					],
+					"cookie": [],
+					"responseTime": null,
+					"body": "{\n    \"id\": \"cf3bdc83-e7a5-435b-880e-eba090fbf6af\",\n    \"createdAt\": \"2022-08-27 18:31:04.696\",\n    \"updatedAt\": \"2022-08-27 18:31:31.587\",\n    \"terminatedAt\": null\n}"
+				}
+			]
 		},
 		{
 			"name": "localhost:8080/session/listing",
@@ -65,7 +160,14 @@
 			},
 			"request": {
 				"auth": {
-					"type": "bearer"
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "YTRjYTI2MzQtYTMyMC00MDJmLTg3N2ItMTYzZGZjYzFkMjk2OjcyNjIzODEwMDY3MTAwMCBuYW5vc2Vjb25kcw==",
+							"type": "string"
+						}
+					]
 				},
 				"method": "GET",
 				"header": [],
@@ -81,7 +183,51 @@
 					]
 				}
 			},
-			"response": []
+			"response": [
+				{
+					"id": "ebede50d-92e4-42aa-bd63-65066de535fb",
+					"name": "localhost:8080/session/listing",
+					"originalRequest": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "localhost:8080/session/listing",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"session",
+								"listing"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Date",
+							"value": "Sat, 27 Aug 2022 16:32:27 GMT"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"key": "Content-Length",
+							"value": "285"
+						}
+					],
+					"cookie": [],
+					"responseTime": null,
+					"body": "[\n    {\n        \"id\": \"2fbb06b1-3014-45db-a0a8-d157f45fa87d\",\n        \"createdAt\": \"2022-08-27 18:32:14.795\",\n        \"updatedAt\": \"2022-08-27 18:32:26.754\",\n        \"terminatedAt\": null\n    },\n    {\n        \"id\": \"cf3bdc83-e7a5-435b-880e-eba090fbf6af\",\n        \"createdAt\": \"2022-08-27 18:31:04.696\",\n        \"updatedAt\": \"2022-08-27 18:31:47.506\",\n        \"terminatedAt\": null\n    }\n]"
+				}
+			]
 		},
 		{
 			"name": "localhost:8080/session/terminate",
@@ -91,7 +237,14 @@
 			},
 			"request": {
 				"auth": {
-					"type": "bearer"
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "YTRjYTI2MzQtYTMyMC00MDJmLTg3N2ItMTYzZGZjYzFkMjk2OjcyNjIzODEwMDY3MTAwMCBuYW5vc2Vjb25kcw==",
+							"type": "string"
+						}
+					]
 				},
 				"method": "POST",
 				"header": [],
@@ -107,7 +260,51 @@
 					]
 				}
 			},
-			"response": []
+			"response": [
+				{
+					"id": "0d1865c0-12f1-48e9-a9c5-935b2189567e",
+					"name": "localhost:8080/session/terminate",
+					"originalRequest": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "localhost:8080/session/terminate",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"session",
+								"terminate"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Date",
+							"value": "Sat, 27 Aug 2022 16:32:39 GMT"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"key": "Content-Length",
+							"value": "162"
+						}
+					],
+					"cookie": [],
+					"responseTime": null,
+					"body": "{\n    \"id\": \"2fbb06b1-3014-45db-a0a8-d157f45fa87d\",\n    \"createdAt\": \"2022-08-27 18:32:14.795\",\n    \"updatedAt\": \"2022-08-27 18:32:38.693\",\n    \"terminatedAt\": \"2022-08-27 18:32:38.991\"\n}"
+				}
+			]
 		}
 	]
 }

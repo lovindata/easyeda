@@ -85,8 +85,8 @@ components:
           examples:
             - Something went wrong
   securitySchemes:
-    BerearToken:
+    BearerAuth:
       type: http
-      scheme: basic
+      scheme: bearer
 security:
   - BerearToken: []
