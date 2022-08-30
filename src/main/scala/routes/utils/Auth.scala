@@ -37,7 +37,7 @@ object Auth {
         request.headers
           .get[Authorization]
           .toRight("Please verify `Authorization` header and its value are correctly formatted & provided")
-      session             <- authorizationHeader.credentials match {
+      authToken           <- authorizationHeader.credentials match {
                                case Credentials.Token(AuthScheme.Bearer, authToken) =>
                                  Right(authToken)
                                case Credentials.Token(authSchema, _)                =>
@@ -45,7 +45,7 @@ object Auth {
                                case x                                               =>
                                  Left(s"Expecting `Token` credentials but got `${x.getClass}` credentials")
                              }
-    } yield session
+    } yield authToken
 
     // Do session verification
     val validatedSession: IO[Either[String, Session]] = validatedAuthToken.flatTraverse(retrieveSession.run)

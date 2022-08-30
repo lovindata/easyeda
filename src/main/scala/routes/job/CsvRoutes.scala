@@ -6,9 +6,9 @@ import fs2.Stream
 import fs2.text
 import models.Session
 import org.http4s._
+import org.http4s.circe.CirceEntityCodec.circeEntityEncoder
 import org.http4s.dsl.io._
-import org.http4s.multipart.Multipart
-import org.http4s.multipart.Part
+import org.http4s.headers.`Content-Type`
 import routes.utils.Auth._
 
 /**
@@ -18,22 +18,29 @@ object CsvRoutes {
 
   def test(req: Request[IO]): Response[IO] = {
 
-    // Validate InputStream
-    for {
-      _ <- req.decode[Multipart[IO]] { m: Multipart[IO] =>
-             m.parts.map { p: Part[IO] =>
-               val test: Stream[IO, String] = p.body.through(text.utf8.decode)
-               test.interr
-             }
-           }
-    } yield ???
+    // Validate header request & Retrieve the body
+    val validatedStream: Either[String, Stream[IO, Byte]] = for {
+      contentTypeValue <-
+        req.headers
+          .get[`Content-Type`]
+          .toRight("Please verify `Content-Type` header and its value are correctly formatted & provided")
+      stream           <- contentTypeValue.mediaType match {
+                            case MediaType.multipart.`form-data` =>
+                              Right(req.body)
+                            case _                               =>
+                              Left("Please verify your request contains a multipart/form-data")
+                          }
+    } yield stream
+
+    // Drain the stream as a String
+    ???
 
   }
 
   // Define other routes
   private val previewRoute: AuthedRoutes[Session, IO] = AuthedRoutes.of {
     case req @ POST -> Root / "csv" / "preview" as session =>
-      ???
+      Ok(req.req.body.through(text.utf8.decode).compile.string)
   }
 
   // Merge all routes
