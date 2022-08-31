@@ -10,12 +10,12 @@ import org.http4s.circe.jsonEncoderOf
 
 /**
  * For JSON automatic derivation.
- * @param sessionUUID
+ * @param id
  *   Session ID
  * @param authToken
  *   Authorization token
  */
-case class SessionAuthEntity(sessionUUID: String, authToken: String)
+case class SessionAuthEntity(id: String, authToken: String)
 
 /**
  * [[SessionAuthEntity]] companion object with encoders & decoders.

@@ -4,11 +4,13 @@ package routes.job
 import cats.effect.IO
 import fs2.Stream
 import fs2.text
+import java.sql.Timestamp
 import models.Session
 import org.http4s._
 import org.http4s.circe.CirceEntityCodec.circeEntityEncoder
 import org.http4s.dsl.io._
 import org.http4s.headers.`Content-Type`
+import org.http4s.multipart.Multipart
 import routes.utils.Auth._
 
 /**
@@ -40,7 +42,18 @@ object CsvRoutes {
   // Define other routes
   private val previewRoute: AuthedRoutes[Session, IO] = AuthedRoutes.of {
     case req @ POST -> Root / "csv" / "preview" as session =>
-      Ok(req.req.body.through(text.utf8.decode).compile.string)
+      // Ok(req.req.body.through(text.utf8.decode).compile.string)
+      req.req.decode[Multipart[IO]] { m =>
+        val wholeStream   = m.parts.head.body.through(text.utf8.decode)
+        // val test          = wholeStream.compile.toList.map(_.length)
+        // println("#####")
+        // test.map(println)
+        val partialStream = wholeStream.take(2)
+        Ok(partialStream)
+      // Ok(s"""Multipart Data\nParts:${m.parts.head.body.through(text.utf8.decode).compile.string}\n${m.parts
+      //    .map(_.name)
+      //    .mkString("\n")}""")
+      }
   }
 
   // Merge all routes
