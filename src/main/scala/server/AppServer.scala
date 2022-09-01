@@ -24,7 +24,7 @@ object AppServer {
     .withHost(ipv4"127.0.0.1") // localhost equivalent
     .withPort(port"8080")
     .withHttpApp(combinedRoutes)
-    .withReceiveBufferSize()
+    .withReceiveBufferSize(256 * 1024) // Default value is 256 * 1024
 
   /**
    * Run the HTTP4s server.
