@@ -15,7 +15,7 @@ import org.http4s.circe.jsonEncoderOf
  * @param authToken
  *   Authorization token
  */
-case class SessionAuthEntity(id: String, authToken: String)
+case class SessionAuthEntity(id: Long, authToken: String)
 
 /**
  * [[SessionAuthEntity]] companion object with encoders & decoders.

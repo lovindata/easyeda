@@ -18,7 +18,7 @@ import org.http4s.circe.jsonEncoderOf
  * @param updatedAt
  *   Authorization token
  */
-case class SessionStatusEntity(id: UUID, createdAt: String, updatedAt: String, terminatedAt: Option[String])
+case class SessionStatusEntity(id: Long, createdAt: String, updatedAt: String, terminatedAt: Option[String])
 
 /**
  * [[SessionAuthEntity]] companion object with encoders & decoders.

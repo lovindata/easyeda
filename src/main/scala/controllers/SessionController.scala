@@ -34,18 +34,16 @@ object SessionController {
    *   Session UUID & Authorization token
    */
   def createSession: IO[SessionAuthEntity] = for {
-    // Generate UUID & Authorization token
-    sessionUUID    <- UUIDGen[IO].randomUUID
+    // Generate authorization token
     authToken      <-
       (UUIDGen[IO].randomUUID, Clock[IO].monotonic) // `Clock[IO].monotonic` == now unix timestamp in nanoseconds
         .mapN((someUUID, nowUnixTimestamp) => s"$someUUID:$nowUnixTimestamp")
         .map(intermediateToken => Base64.getEncoder.encodeToString(intermediateToken.getBytes(StandardCharsets.UTF_8)))
 
     // Create & Persist the new session
-    createdSession <- Session(sessionUUID, authToken)
-    _              <- createdSession.persist
+    createdSession <- Session(authToken)
     _              <- createdSession.startCronJobInactivityCheck() // Start also the inactivity checker
-  } yield SessionAuthEntity(sessionUUID.toString, authToken)
+  } yield SessionAuthEntity(createdSession.id, authToken)
 
   /**
    * Terminate the provided session. (Exception thrown if issue occurred)

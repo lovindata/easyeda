@@ -19,7 +19,7 @@ import scala.concurrent.duration.FiniteDuration
  * @param authTokenSha1
  *   SHA-1 hashed authorization token
  */
-case class Session(id: UUID,
+case class Session(id: Long,
                    authTokenSha1: String,
                    createdAt: Timestamp,
                    updatedAt: Timestamp,
@@ -108,17 +108,23 @@ object Session {
 
   /**
    * Constructor of [[Session]].
-   * @param id
-   *   Session ID
    * @param authToken
    *   Brut authorization token that will be hashed to SHA-1 hexadecimal string
    * @return
    *   A new created session
    */
-  def apply(id: UUID, authToken: String): IO[Session] = for {
-    nowTimestamp         <- Clock[IO].realTime.map(x => new Timestamp(x.toMillis))
-    authTokenSha1: String = authToken.toSha1Hex // Hash with SHA1 the authorization token
-  } yield Session(id, authTokenSha1, nowTimestamp, nowTimestamp, None)
+  def apply(authToken: String): IO[Session] = for {
+    // Prepare the query
+    nowTimestamp             <- Clock[IO].realTime.map(x => new Timestamp(x.toMillis))
+    authTokenSha1: String     = authToken.toSha1Hex // Hash with SHA1 the authorization token
+    query: ConnectionIO[Long] =
+      sql"""|INSERT INTO session (bearer_auth_token_sha1, created_at, updated_at)
+            |VALUES ($authTokenSha1, $nowTimestamp, $nowTimestamp)
+            |""".stripMargin.update.withUniqueGeneratedKeys[Long]("id")
+
+    // Run & Get the auto-incremented session ID
+    id                       <- mysqlDriver.use(query.transact(_))
+  } yield new Session(id, authTokenSha1, nowTimestamp, nowTimestamp, None)
 
   /**
    * Retrieve the session from the database. (Must only be used by the application logic)
@@ -127,7 +133,7 @@ object Session {
    * @return
    *   The corresponding Session
    */
-  def getWithId(id: UUID): IO[Session] = {
+  def getWithId(id: Long): IO[Session] = {
     // Build the query
     val query: ConnectionIO[Session] =
       sql"""|SELECT id, bearer_auth_token_sha1, created_at, updated_at, terminated_at
@@ -201,7 +207,7 @@ object Session {
    * @param id
    *   ID to terminate
    */
-  def terminateWithId(id: UUID): IO[Unit] = for {
+  def terminateWithId(id: Long): IO[Unit] = for {
     // Build the query
     nowTimestamp            <- Clock[IO].realTime.map(x => new Timestamp(x.toMillis))
     query: ConnectionIO[Int] =

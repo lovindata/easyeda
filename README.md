@@ -17,4 +17,3 @@
 
 - `_.withReceiveBufferSize(256 * 1024)` & `_.take(2)` both are related. The buffer size is exactly defining how many
 elements you have in your `Stream[IO, String]`
-- 

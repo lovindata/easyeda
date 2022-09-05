@@ -25,8 +25,6 @@ object DBDriver {
   } yield transactor
 
   // Custom doobie converters when writing into DB sql"""<X>"""
-  implicit val uuidMeta: Meta[UUID]           =
-    Meta[String].timap[UUID](UUID.fromString)(_.toString)
   implicit val timestampMeta: Meta[Timestamp] =
     Meta[String].timap[Timestamp](Timestamp.valueOf)(_.toString)
 
