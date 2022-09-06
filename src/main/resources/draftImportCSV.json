@@ -1,0 +1,12 @@
+{
+  "kind": "ImportCSV",
+  "sep": ",",
+  "quote": "\"",
+  "escape": "\\",
+  "header": true,
+  "inferSchema": true,
+  "dateFormat": "yyyy-MM-dd",
+  "timestampFormat": "yyyy-MM-dd HH:mm:ss.SSSSSS",
+  "customSchema": null,
+  "test": "https://www.postman-echo.com/post"
+}

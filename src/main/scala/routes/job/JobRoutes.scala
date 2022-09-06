@@ -16,8 +16,9 @@ import routes.utils.Auth._
 /**
  * Routes related to CSV files management.
  */
-object CsvRoutes {
+object JobRoutes {
 
+  /*
   def test(req: Request[IO]): Response[IO] = {
 
     // Validate header request & Retrieve the body
@@ -38,13 +39,14 @@ object CsvRoutes {
     ???
 
   }
+   */
 
   // Define other routes
   private val previewRoute: AuthedRoutes[Session, IO] = AuthedRoutes.of {
-    case req @ POST -> Root / "csv" / "preview" as session =>
-      // Ok(req.req.body.through(text.utf8.decode).compile.string)
+    case req @ POST -> Root / "preview" as session =>
+      // Request with `multipart/form-data`
       req.req.decode[Multipart[IO]] { m =>
-        val wholeStream   = m.parts.head.body.through(text.utf8.decode)
+        val wholeStream   = m.parts.find(_.name.get == "kind").get.body.through(text.utf8.decode)
         // val test          = wholeStream.compile.toList.map(_.length)
         // println("#####")
         // test.map(println)

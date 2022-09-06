@@ -7,7 +7,7 @@ import org.http4s._
 import org.http4s.ember.server._
 import org.http4s.implicits._
 import org.http4s.server.Router
-import routes.job.CsvRoutes
+import routes.job.JobRoutes
 import routes.session.SessionRoutes
 
 /**
@@ -16,7 +16,7 @@ import routes.session.SessionRoutes
 object AppServer {
 
   // Retrieve all route(s)
-  val combinedRoutes: HttpApp[IO] = Router("/session" -> SessionRoutes.routes, "/job" -> CsvRoutes.routes).orNotFound
+  val combinedRoutes: HttpApp[IO] = Router("/session" -> SessionRoutes.routes, "/job" -> JobRoutes.routes).orNotFound
 
   // Build the server
   val serverBuilder: EmberServerBuilder[IO] = EmberServerBuilder
