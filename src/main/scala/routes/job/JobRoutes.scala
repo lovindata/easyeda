@@ -4,6 +4,8 @@ package routes.job
 import cats.effect.IO
 import fs2.Stream
 import fs2.text
+import io.circe.fs2._
+import io.circe.generic.auto._
 import java.sql.Timestamp
 import models.Session
 import org.http4s._
@@ -46,11 +48,34 @@ object JobRoutes {
     case req @ POST -> Root / "preview" as session =>
       // Request with `multipart/form-data`
       req.req.decode[Multipart[IO]] { m =>
-        val wholeStream   = m.parts.find(_.name.get == "kind").get.body.through(text.utf8.decode)
-        // val test          = wholeStream.compile.toList.map(_.length)
-        // println("#####")
-        // test.map(println)
-        val partialStream = wholeStream.take(2)
+        val wholeStream = m.parts
+          .find { x =>
+            println("#################################################")
+            println(x.contentType.get.mediaType.satisfies(MediaType.application.json))
+            println("#################################################")
+            x.name.get == "params"
+          }
+          .get
+          .body
+          .through(text.utf8.decode)
+
+        /*
+        val wholeStreamFile = m.parts
+          .find { x =>
+            println("#################################################")
+            println(x.contentType.get.mediaType.satisfies(MediaType.application.json))
+            println("#################################################")
+            x.name.get == "bytes"
+          }
+          .get
+          .body
+          .through(text.utf8.decode)
+          .compile
+          .drain
+
+         */
+
+        val partialStream = wholeStream.through(stringStreamParser).compile.lastOrError
         Ok(partialStream)
       // Ok(s"""Multipart Data\nParts:${m.parts.head.body.through(text.utf8.decode).compile.string}\n${m.parts
       //    .map(_.name)
