@@ -6,7 +6,7 @@
 	},
 	"item": [
 		{
-			"name": "localhost:8080/job/csv/preview",
+			"name": "localhost:8080/job/preview",
 			"id": "b1a91081-c405-4b75-badd-1b2a91688dde",
 			"protocolProfileBehavior": {
 				"disableBodyPruning": true
@@ -17,7 +17,7 @@
 					"bearer": [
 						{
 							"key": "token",
-							"value": "YTRjYTI2MzQtYTMyMC00MDJmLTg3N2ItMTYzZGZjYzFkMjk2OjcyNjIzODEwMDY3MTAwMCBuYW5vc2Vjb25kcw==",
+							"value": "ODVmOTA1ZDAtNGQzNS00ZjY4LThjNWMtZjc2ZDBjMDVhMTQzOjM1NDAzMjI4MjQ1MDIwMCBuYW5vc2Vjb25kcw==",
 							"type": "string"
 						}
 					]
@@ -28,26 +28,91 @@
 					"mode": "formdata",
 					"formdata": [
 						{
-							"key": "file",
+							"key": "bytes",
 							"type": "file",
-							"src": "/C:/Users/33650/Downloads/twitter_training.csv"
+							"src": "/D:/prog/proj/learning-http4s/src/main/scala/Main.scala"
+						},
+						{
+							"key": "params",
+							"value": "{\n  \"kind\": \"ImportCSV\",\n  \"sep\": \",\",\n  \"quote\": \"\\\"\",\n  \"escape\": \"\\\\\",\n  \"header\": true,\n  \"inferSchema\": true,\n  \"dateFormat\": \"yyyy-MM-dd\",\n  \"timestampFormat\": \"yyyy-MM-dd HH:mm:ss.SSSSSS\",\n  \"customSchema\": null,\n  \"test\": \"https://www.postman-echo.com/post\"\n}",
+							"type": "text",
+							"contentType": "application/json"
 						}
 					]
 				},
 				"url": {
-					"raw": "localhost:8080/job/csv/preview",
+					"raw": "localhost:8080/job/preview",
 					"host": [
 						"localhost"
 					],
 					"port": "8080",
 					"path": [
 						"job",
-						"csv",
 						"preview"
 					]
 				}
 			},
-			"response": []
+			"response": [
+				{
+					"id": "cfbb6098-123d-4b3f-9f41-d13f115dcc28",
+					"name": "localhost:8080/job/preview",
+					"originalRequest": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "bytes",
+									"type": "file",
+									"src": "/D:/prog/proj/learning-http4s/src/main/scala/Main.scala"
+								},
+								{
+									"key": "params",
+									"value": "{\n  \"kind\": \"ImportCSV\",\n  \"sep\": \",\",\n  \"quote\": \"\\\"\",\n  \"escape\": \"\\\\\",\n  \"header\": true,\n  \"inferSchema\": true,\n  \"dateFormat\": \"yyyy-MM-dd\",\n  \"timestampFormat\": \"yyyy-MM-dd HH:mm:ss.SSSSSS\",\n  \"customSchema\": null,\n  \"test\": \"https://www.postman-echo.com/post\"\n}",
+									"type": "text",
+									"contentType": "application/json"
+								}
+							]
+						},
+						"url": {
+							"raw": "localhost:8080/job/preview",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"job",
+								"preview"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Date",
+							"value": "Wed, 07 Sep 2022 04:58:43 GMT"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"key": "Content-Length",
+							"value": "226"
+						}
+					],
+					"cookie": [],
+					"responseTime": null,
+					"body": "{\n    \"kind\": \"ImportCSV\",\n    \"sep\": \",\",\n    \"quote\": \"\\\"\",\n    \"escape\": \"\\\\\",\n    \"header\": true,\n    \"inferSchema\": true,\n    \"dateFormat\": \"yyyy-MM-dd\",\n    \"timestampFormat\": \"yyyy-MM-dd HH:mm:ss.SSSSSS\",\n    \"customSchema\": null,\n    \"test\": \"https://www.postman-echo.com/post\"\n}"
+				}
+			]
 		}
 	]
 }
