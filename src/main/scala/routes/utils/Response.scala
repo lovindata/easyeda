@@ -7,7 +7,7 @@ import org.http4s.circe.CirceEntityCodec.circeEntityEncoder
 import org.http4s.dsl.io._
 
 /**
- * Exception utils for routes.
+ * Containing rich class related to responses.
  */
 object Response {
 

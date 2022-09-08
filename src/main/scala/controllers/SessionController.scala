@@ -46,9 +46,9 @@ object SessionController {
   } yield SessionAuthEntity(createdSession.id, authToken)
 
   /**
-   * Terminate the provided session. (Exception thrown if issue occurred)
+   * Terminate the provided session.
    * @param validatedSession
-   *   A validated session (DO NOT USE THIS FOR NON VALIDATED)
+   *   A validated session
    * @return
    *   Session updated status
    */

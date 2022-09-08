@@ -29,7 +29,8 @@ object SessionRoutes {
                             session.createdAt.toString,
                             session.updatedAt.toString,
                             session.terminatedAt.map(_.toString)))
-    case POST -> Root / "terminate" as session => SessionController.terminateSession(session).toResponse
+    case POST -> Root / "terminate" as session =>
+      SessionController.terminateSession(session).toResponse
     case GET -> Root / "listing" as session    => SessionController.listSessions(session).toResponse
   }
 
