@@ -3,15 +3,6 @@
 USE restapi;
 
 
--- restapi.custom_params definition
-
-CREATE TABLE `custom_params` (
-  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `params` json NOT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
-
 -- restapi.csv_params definition
 
 CREATE TABLE `csv_params` (
@@ -79,17 +70,15 @@ CREATE TABLE `success_result` (
 
 CREATE TABLE `job_params` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `type` enum('csv','json','custom') NOT NULL,
+  `paramsType` enum('csv','json') CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   `csv_params_id` bigint unsigned DEFAULT NULL,
   `json_params_id` bigint unsigned DEFAULT NULL,
-  `custom_params_id` bigint unsigned DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `csv_params_id` (`csv_params_id`),
   KEY `json_params_id` (`json_params_id`),
-  KEY `custom_params_id_FK` (`custom_params_id`),
   CONSTRAINT `csv_params_id_FK` FOREIGN KEY (`csv_params_id`) REFERENCES `csv_params` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT,
   CONSTRAINT `json_params_id_FK` FOREIGN KEY (`json_params_id`) REFERENCES `json_params` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT,
-  CONSTRAINT `just_one_csv_or_json` CHECK ((((_utf8mb4'type' = _utf8mb4'csv') and (_utf8mb4'csv_params_id' is not null)) or ((_utf8mb4'type' = _utf8mb4'json') and (_utf8mb4'json_params_id' is not null))))
+  CONSTRAINT `just_one_csv_or_json` CHECK ((((_utf8mb4'paramsType' = _utf8mb4'csv') and (_utf8mb4'csv_params_id' is not null)) or ((_utf8mb4'paramsType' = _utf8mb4'json') and (_utf8mb4'json_params_id' is not null))))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 
@@ -114,7 +103,7 @@ CREATE TABLE `job_result` (
 CREATE TABLE `job` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
   `session_id` bigint unsigned NOT NULL,
-  `type` enum('preview','full') NOT NULL,
+  `jobType` enum('preview','analyze') CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   `status` enum('running','terminated') CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   `job_params_id` bigint unsigned NOT NULL,
   `job_result_id` bigint unsigned NOT NULL,

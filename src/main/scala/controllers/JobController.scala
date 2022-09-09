@@ -14,15 +14,24 @@ object JobController {
    * Compute the DataFrame preview of the file using the json parameters.
    * @param validatedSession
    *   Validated session
-   * @param jsonParams
-   *   Json parameters
-   * @param file
+   * @param fileParamsDrained
+   *   File parameters in JSON
+   * @param fileStrDrained
    *   String representation of the file
    * @return
-   *   DataFrame
+   *   DataFrame in JSON
    */
-  def computePreview(validatedSession: Session, jsonParams: Json, file: String): IO[Json] = {
-    ???
-  }
+  def computePreview(validatedSession: Session, fileParamsDrained: IO[Json], fileStrDrained: IO[String]): IO[Json] =
+    for {
+      // Get file parameters & content
+      fileParams <- fileParamsDrained
+      fileBytes  <- fileStrDrained
+
+      // Create & Compute preview Job
+      job <- Job()
+
+      // Save & Return result
+
+    } yield ???
 
 }
