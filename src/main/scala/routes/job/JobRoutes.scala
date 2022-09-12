@@ -10,7 +10,6 @@ import io.circe.Json
 import io.circe.fs2._
 import io.circe.generic.auto._
 import java.sql.Timestamp
-import models.Session
 import org.http4s._
 import org.http4s.circe.CirceEntityCodec.circeEntityEncoder
 import org.http4s.dsl.io._
@@ -20,6 +19,7 @@ import org.http4s.multipart.Part
 import routes.utils.Auth._
 import routes.utils.Request._
 import routes.utils.Response._
+import com.ilovedatajjia.models.session.Session
 
 /**
  * Routes related to CSV files management.

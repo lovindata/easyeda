@@ -4,12 +4,12 @@ package routes.session
 import cats.effect.IO
 import cats.implicits._
 import controllers.SessionController
-import models.Session
 import org.http4s._
 import org.http4s.dsl.io._
 import routes.session.entity.SessionStatusEntity
 import routes.utils.Auth._
 import routes.utils.Response._
+import com.ilovedatajjia.models.session.Session
 
 /**
  * Routes related to sessions management.

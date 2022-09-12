@@ -1,12 +1,11 @@
 package com.ilovedatajjia
-package models
+package models.session
 
 import cats.effect.Clock
 import cats.effect.IO
 import doobie._
 import doobie.implicits._
 import java.sql.Timestamp
-import java.util.UUID
 import models.utils.Codec._
 import models.utils.DBDriver._
 import scala.concurrent.duration.DurationInt
@@ -18,55 +17,18 @@ import scala.concurrent.duration.FiniteDuration
  *   Session ID
  * @param authTokenSha1
  *   SHA-1 hashed authorization token
+ * @param createdAt
+ *   Session creation timestamp
+ * @param updatedAt
+ *   Session update timestamp
+ * @param terminatedAt
+ *   Session termination timestamp
  */
 case class Session(id: Long,
                    authTokenSha1: String,
                    createdAt: Timestamp,
                    updatedAt: Timestamp,
                    terminatedAt: Option[Timestamp]) {
-
-  /**
-   * Get [[createdAt]].
-   * @return
-   *   Representation of [[createdAt]].
-   */
-  def getCreatedAt: Timestamp = createdAt
-
-  /**
-   * Get [[updatedAt]].
-   * @return
-   *   Representation of [[updatedAt]].
-   */
-  def getUpdatedAt: Timestamp = updatedAt
-
-  /**
-   * Get [[terminatedAt]].
-   * @return
-   *   Representation of [[terminatedAt]].
-   */
-  def getTerminatedAt: Option[Timestamp] = terminatedAt
-
-  /**
-   * Add the new session to the database (Supposed not-existing inside the database).
-   * @return
-   *   An IO containing the execution
-   */
-  def persist: IO[Unit] = {
-    // Build the query
-    val query: ConnectionIO[Int] =
-      sql"""|INSERT INTO session (id, bearer_auth_token_sha1, created_at, updated_at, terminated_at)
-            |VALUES ($id, $authTokenSha1, $createdAt, $updatedAt, $terminatedAt)
-            |""".stripMargin.update.run
-
-    // Compose IO
-    for {
-      nbAffectedRows <- mysqlDriver.use(query.transact(_))
-      _              <- IO.raiseWhen(nbAffectedRows != 1)(
-                          throw new RuntimeException(
-                            s"Trying to persist session `$id` " +
-                              s"causing table number of rows affected incoherence `$nbAffectedRows` != 1"))
-    } yield ()
-  }
 
   /**
    * Launch the cron job checking inactivity status. If session inactive the cron job will terminate & updated in the
@@ -124,7 +86,7 @@ object Session {
 
     // Run & Get the auto-incremented session ID
     id                       <- mysqlDriver.use(query.transact(_))
-  } yield new Session(id, authTokenSha1, nowTimestamp, nowTimestamp, None)
+  } yield Session(id, authTokenSha1, nowTimestamp, nowTimestamp, None)
 
   /**
    * Retrieve the session from the database. (Must only be used by the application logic)
@@ -169,7 +131,7 @@ object Session {
     for {
       session <- mysqlDriver.use(query.transact(_))
       _       <-
-        IO.raiseWhen(session.getTerminatedAt.isDefined)(
+        IO.raiseWhen(session.terminatedAt.isDefined)(
           throw new RuntimeException(s"Session with id == `${session.id}` already terminated impossible to retrieve"))
     } yield session
   }

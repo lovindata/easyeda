@@ -2,8 +2,8 @@ package com.ilovedatajjia
 package controllers
 
 import cats.effect.IO
+import com.ilovedatajjia.models.session.Session
 import io.circe.Json
-import models.Session
 
 /**
  * Controller for jobs logic.

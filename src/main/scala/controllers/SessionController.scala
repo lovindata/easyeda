@@ -7,9 +7,9 @@ import cats.effect.std.UUIDGen
 import cats.implicits._
 import java.nio.charset.StandardCharsets
 import java.util.Base64
-import models.Session
 import routes.session.entity.SessionAuthEntity
 import routes.session.entity.SessionStatusEntity
+import com.ilovedatajjia.models.session.Session
 
 /**
  * Controller for sessions logic.

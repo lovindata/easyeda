@@ -5,7 +5,7 @@ import cats.data._
 import cats.effect.IO
 import cats.implicits._
 import controllers.SessionController
-import models.Session
+import com.ilovedatajjia.models.session.Session
 import org.http4s._
 import org.http4s.AuthScheme
 import org.http4s.Credentials
