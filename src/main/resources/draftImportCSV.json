@@ -1,5 +1,5 @@
 {
-  "kind": "ImportCSV",
+  "class": "CsvParams",
   "sep": ",",
   "quote": "\"",
   "escape": "\\",

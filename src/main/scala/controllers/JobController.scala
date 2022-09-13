@@ -2,8 +2,11 @@ package com.ilovedatajjia
 package controllers
 
 import cats.effect.IO
-import com.ilovedatajjia.models.session.Session
 import io.circe.Json
+import models.job.FileParams
+import models.job.Job
+import models.job.Job.JobType._
+import models.session.Session
 
 /**
  * Controller for jobs logic.
@@ -27,8 +30,10 @@ object JobController {
       fileParams <- fileParamsDrained
       fileBytes  <- fileStrDrained
 
-      // Create & Compute preview Job
-      job <- Job()
+      // Starting preview Job
+      job <- Job(validatedSession.id, Preview)
+      _   <- fileParams
+               .as[FileParams] // TODO in to find a good way to deal with decoding + fileParams insert DB at the same time
 
       // Save & Return result
 

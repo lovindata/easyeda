@@ -6,7 +6,7 @@ import cats.effect.unsafe.implicits.global.compute
 import doobie._
 import doobie.hikari.HikariTransactor
 import java.sql.Timestamp
-import java.util.UUID
+import java.text.SimpleDateFormat
 
 /**
  * Utils for models.
@@ -25,7 +25,9 @@ object DBDriver {
   } yield transactor
 
   // Custom doobie converters when writing into DB sql"""<X>"""
-  implicit val timestampMeta: Meta[Timestamp] =
+  implicit val timestampMeta: Meta[Timestamp]               =
     Meta[String].timap[Timestamp](Timestamp.valueOf)(_.toString)
+  implicit val simpleDateFormatMeta: Meta[SimpleDateFormat] =
+    Meta[String].timap[SimpleDateFormat](x => new SimpleDateFormat(x))(_.toString)
 
 }
