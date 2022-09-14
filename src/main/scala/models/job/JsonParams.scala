@@ -4,14 +4,11 @@ package models.job
 import cats.effect.IO
 import doobie._
 import doobie.implicits._
-import io.circe.Decoder
-import io.circe.generic.extras.semiauto.deriveConfiguredDecoder
 import java.text.SimpleDateFormat
 import models.utils.DBDriver.mysqlDriver
 
 /**
  * DB representation of a json file parameters ([[FileParams]]).
- *
  * @param id
  *   Json parameters ID
  * @param jobId
@@ -34,9 +31,6 @@ case class JsonParams(id: Long,
  * Additional [[JsonParams]] functions.
  */
 object JsonParams {
-
-  // Decoder
-  implicit val jsonParamsDecoder: Decoder[JsonParams] = deriveConfiguredDecoder
 
   /**
    * Constructor of [[JsonParams]].

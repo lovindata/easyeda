@@ -3,6 +3,7 @@
 # Logbook
 
 - Building whole execution of preview
+  - TODO implement the local Spark service & Make the link with your job run
   - find a good way to deal with decoding + fileParams insert DB at the same time
   - Then convert String into DataFrame with [link](https://stackoverflow.com/questions/39111918/can-i-read-a-csv-represented-as-a-string-into-apache-spark-using-spark-csv)
 - Think about cron jobs not terminated but still here sessions ?

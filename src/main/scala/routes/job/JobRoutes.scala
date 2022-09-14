@@ -9,6 +9,7 @@ import fs2.text
 import io.circe.Json
 import io.circe.fs2._
 import io.circe.generic.auto._
+
 import java.sql.Timestamp
 import org.http4s._
 import org.http4s.circe.CirceEntityCodec.circeEntityEncoder
@@ -19,7 +20,9 @@ import org.http4s.multipart.Part
 import routes.utils.Auth._
 import routes.utils.Request._
 import routes.utils.Response._
+
 import com.ilovedatajjia.models.session.Session
+import com.ilovedatajjia.routes.job.entity.FileParamsEntity
 
 /**
  * Routes related to CSV files management.
@@ -31,7 +34,7 @@ object JobRoutes {
     case req @ POST -> Root / "preview" as session =>
       // Request with file upload and its parameters
       req.req.withJSONAndFileBytesMultipart("fileParams", "fileBytes", partial = true) {
-        (fileParamsDrained: IO[Json], fileStrDrained: IO[String]) =>
+        (fileParamsDrained: IO[FileParamsEntity], fileStrDrained: IO[String]) =>
           {
             JobController.computePreview(session, fileParamsDrained, fileStrDrained).toResponse
           }

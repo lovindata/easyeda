@@ -4,14 +4,11 @@ package models.job
 import cats.effect.IO
 import doobie._
 import doobie.implicits._
-import io.circe.Decoder
-import io.circe.generic.extras.semiauto.deriveConfiguredDecoder
 import java.text.SimpleDateFormat
 import models.utils.DBDriver.mysqlDriver
 
 /**
  * DB representation of a csv file parameters ([[FileParams]]).
- *
  * @param id
  *   Csv parameters ID
  * @param jobId
@@ -46,9 +43,6 @@ case class CsvParams(id: Long,
  * Additional [[CsvParams]] functions.
  */
 object CsvParams {
-
-  // Decoder
-  implicit val csvParamsDecoder: Decoder[CsvParams] = deriveConfiguredDecoder
 
   /**
    * Constructor of [[CsvParams]].
