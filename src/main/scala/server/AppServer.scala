@@ -21,7 +21,7 @@ object AppServer {
   // Build the server
   val serverBuilder: EmberServerBuilder[IO] = EmberServerBuilder
     .default[IO]
-    .withHost(ipv4"127.0.0.1") // localhost equivalent
+    .withHost(ipv4"127.0.0.1")         // localhost equivalent
     .withPort(port"8080")
     .withHttpApp(combinedRoutes)
     .withReceiveBufferSize(256 * 1024) // Default value is 256 * 1024
@@ -29,7 +29,7 @@ object AppServer {
   /**
    * Run the HTTP4s server.
    */
-  def runServer(): IO[ExitCode] = serverBuilder.build
+  def run: IO[ExitCode] = serverBuilder.build
     .use(_ => IO.never)
     .as(ExitCode.Success)
 

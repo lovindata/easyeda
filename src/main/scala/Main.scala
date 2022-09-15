@@ -3,7 +3,7 @@ package com.ilovedatajjia
 import cats.effect.ExitCode
 import cats.effect.IO
 import cats.effect.IOApp
-import server.AppServer
+import server.{AppServer, SparkServer}
 
 /**
  * Application entrypoint.
@@ -11,12 +11,12 @@ import server.AppServer
 object Main extends IOApp {
 
   /**
-   * Entrypoint of the application.
+   * Run all the required services and server.
    * @param args
-   *   Arguments
+   *   Entrypoint arguments
    * @return
    *   Exit code
    */
-  override def run(args: List[String]): IO[ExitCode] = AppServer.runServer()
+  override def run(args: List[String]): IO[ExitCode] = SparkServer.run >> AppServer.run
 
 }

@@ -2,16 +2,15 @@ package com.ilovedatajjia
 package controllers
 
 import cats.effect.IO
-import com.ilovedatajjia.routes.job.entity.FileParamsEntity.CsvParamsEntity
-import com.ilovedatajjia.routes.job.entity.FileParamsEntity.JsonParamsEntity
 import io.circe.Json
 import models.job.CsvParams
-import models.job.FileParams
 import models.job.Job
 import models.job.Job.JobType._
 import models.job.JsonParams
 import models.session.Session
 import routes.job.entity.FileParamsEntity
+import routes.job.entity.FileParamsEntity.CsvParamsEntity
+import routes.job.entity.FileParamsEntity.JsonParamsEntity
 
 /**
  * Controller for jobs logic.
@@ -35,9 +34,9 @@ object JobController {
     for {
       // Get file parameters & content
       fileParamsEnt <- fileParamsEntDrained
-      fileBytes     <- fileStrDrained
+      fileStr       <- fileStrDrained
 
-      // Starting preview Job
+      // Starting preview job
       job        <- Job(validatedSession.id, Preview)
       fileParams <- fileParamsEnt match {
                       case csvParEnt: CsvParamsEntity   =>
@@ -59,7 +58,7 @@ object JobController {
                     }
 
       // Run preview Job
-      _          <- job.run(fileParams) // TODO implement the local Spark service & Make the link with your job run
+      _          <- job.run(fileParams, fileStr) // TODO implement the local Spark service & Make the link with your job run
 
       // Save & Return result
 
