@@ -3,14 +3,13 @@ package controllers
 
 import cats.effect.IO
 import io.circe.Json
-import models.job.CsvParams
 import models.job.Job
 import models.job.Job.JobType._
-import models.job.JsonParams
 import models.session.Session
 import routes.job.entity.FileParamsEntity
 import routes.job.entity.FileParamsEntity.CsvParamsEntity
 import routes.job.entity.FileParamsEntity.JsonParamsEntity
+import com.ilovedatajjia.models.operation.{ReadJsonOperation, ReadCsvOperation}
 
 /**
  * Controller for jobs logic.
@@ -40,7 +39,7 @@ object JobController {
       job        <- Job(validatedSession.id, Preview)
       fileParams <- fileParamsEnt match {
                       case csvParEnt: CsvParamsEntity   =>
-                        CsvParams(
+                        ReadCsvOperation(
                           jobId = job.id,
                           sep = csvParEnt.sep,
                           quote = csvParEnt.quote,
@@ -51,7 +50,7 @@ object JobController {
                           timestampFormat = csvParEnt.timestampFormat
                         )
                       case jsonParEnt: JsonParamsEntity =>
-                        JsonParams(jobId = job.id,
+                        ReadJsonOperation(jobId = job.id,
                                    inferSchema = jsonParEnt.inferSchema,
                                    dateFormat = jsonParEnt.dateFormat,
                                    timestampFormat = jsonParEnt.timestampFormat)

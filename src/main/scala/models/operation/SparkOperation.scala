@@ -16,10 +16,12 @@ trait SparkOperation {
 
   /**
    * Apply the Spark operation.
+   * @param input
+   *   The input DataFrame in string representation OR actual Spark DataFrame
    * @return
    *   Spark [[DataFrame]] with the operation applied
    */
-  def apply: IO[DataFrame]
+  def applyOperation(input: Either[String, DataFrame]): IO[DataFrame]
 
 }
 

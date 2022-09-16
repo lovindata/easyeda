@@ -5,18 +5,19 @@ import cats.effect.IO
 import org.apache.spark.sql.SparkSession
 
 /**
- * Spark service.
+ * Spark single node server.
  */
 object SparkServer {
 
   // Variable to use for Spark API
-  var spark: SparkSession = _
+  private var sparkInitialization: SparkSession = _
+  lazy val spark: SparkSession                  = sparkInitialization // Scala `var` cannot be used with Spark implicits
 
   /**
    * Run the Spark single node service.
    */
   def run: IO[Unit] = IO {
-    spark = SparkSession
+    sparkInitialization = SparkSession
       .builder()
       .appName("")
       .master("local[*]")
