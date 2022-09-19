@@ -1,12 +1,30 @@
-{
-  "class": "CsvParams",
-  "sep": ",",
-  "quote": "\"",
-  "escape": "\\",
-  "header": true,
-  "inferSchema": true,
-  "dateFormat": "yyyy-MM-dd",
-  "timestampFormat": "yyyy-MM-dd HH:mm:ss.SSSSSS",
-  "customSchema": null,
-  "test": "https://www.postman-echo.com/post"
-}
+[
+  {
+    "_$OP_": "CsvOp",
+    "sep": ",",
+    "quote": "\"",
+    "escape": "\\",
+    "header": true,
+    "inferSchema": true,
+    "dateFormat": "yyyy-MM-dd",
+    "timestampFormat": "yyyy-MM-dd HH:mm:ss.SSSSSS"
+  },
+  {
+    "_$OP_": "CustomSchOp",
+    "schema": [
+      {
+        "natIdx": 2,
+        "normType": "Numerical"
+      },
+      {
+        "natIdx": 0,
+        "normType": "Timestamp",
+        "format": "yyyy-MM-dd HH:mm:ss.SSSSSS"
+      },
+      {
+        "natIdx": 3,
+        "normType": "Categorical"
+      }
+    ]
+  }
+]

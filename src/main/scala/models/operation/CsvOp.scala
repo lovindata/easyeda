@@ -14,9 +14,11 @@ import server.SparkServer._
 /**
  * DB representation of a csv read operation.
  * @param id
- *   Csv read operation ID
+ *   Json read operation ID
  * @param jobId
  *   Reference a [[Job]]
+ * @param opIdx
+ *   Operation index for the [[Job]]
  * @param sep
  *   Separator character(s) for the csv
  * @param quote
@@ -32,31 +34,26 @@ import server.SparkServer._
  * @param timestampFormat
  *   Timestamp format to consider when inferring the schema
  */
-case class ReadCsvOperation(id: Long,
-                            jobId: Long,
-                            sep: String,
-                            quote: String,
-                            escape: String,
-                            header: Boolean,
-                            inferSchema: Boolean,
-                            dateFormat: Option[SimpleDateFormat],
-                            timestampFormat: Option[SimpleDateFormat])
-    extends SparkOperation {
+case class CsvOp(id: Long,
+                 jobId: Long,
+                 opIdx: Int,
+                 sep: String,
+                 quote: String,
+                 escape: String,
+                 header: Boolean,
+                 inferSchema: Boolean,
+                 dateFormat: Option[SimpleDateFormat],
+                 timestampFormat: Option[SimpleDateFormat])
+    extends ReadOp(id, jobId, opIdx) {
 
   /**
-   * Apply the Spark operation.
+   * Fit the Spark operation.
    * @param input
    *   The input DataFrame
    * @return
    *   Spark [[DataFrame]] with the operation applied
    */
-  override def applyOperation(input: Either[String, DataFrame]): IO[DataFrame] = IO {
-
-    // Retrieve the string representation
-    val actInput: String = input match {
-      case Left(input) => input
-      case Right(_)    => throw new IllegalArgumentException("Please make sure `input` is in string representation")
-    }
+  override def fitOp(input: String): IO[DataFrame] = IO {
 
     // Build read options
     val defaultOptions: Map[String, String]  = Map("mode" -> "FAILFAST", "multiLine" -> "true")
@@ -74,7 +71,7 @@ case class ReadCsvOperation(id: Long,
 
     // Build & Return the Spark DataFrame
     import spark.implicits._
-    val inputDS: Dataset[String] = spark.createDataset(actInput.split('\n').toList)
+    val inputDS: Dataset[String] = spark.createDataset(List(input))
     spark.read.options(readOptions).csv(inputDS)
 
   }
@@ -82,14 +79,17 @@ case class ReadCsvOperation(id: Long,
 }
 
 /**
- * Additional [[ReadCsvOperation]] functions.
+ * Additional [[CsvOp]] functions.
  */
-object ReadCsvOperation {
+object CsvOp {
 
   /**
-   * Constructor of [[ReadCsvOperation]].
+   * Constructor of [[CsvOp]].
+   *
    * @param jobId
    *   Reference a [[Job]]
+   * @param opIdx
+   *   Operation index for the [[Job]]
    * @param sep
    *   Separator character(s) for the csv
    * @param quote
@@ -108,24 +108,25 @@ object ReadCsvOperation {
    *   A new created csv operation
    */
   def apply(jobId: Long,
+            opIdx: Int,
             sep: String,
             quote: String,
             escape: String,
             header: Boolean,
             inferSchema: Boolean,
             dateFormat: Option[SimpleDateFormat],
-            timestampFormat: Option[SimpleDateFormat]): IO[ReadCsvOperation] = {
+            timestampFormat: Option[SimpleDateFormat]): IO[CsvOp] = {
 
     // Define query
-    val csvParamsTableQuery: ConnectionIO[Long] =
-      sql"""|INSERT INTO csv_params (job_id, sep, quote, escape, header, infer_schema, date_format, timestamp_format)
-            |VALUES ($jobId, $sep, $quote, $escape, $header, $inferSchema, $dateFormat, $timestampFormat)
+    val query: ConnectionIO[Long] =
+      sql"""|INSERT INTO csv_r_op (job_id, opIdx, sep, quote, escape, header, infer_schema, date_format, timestamp_format)
+            |VALUES ($jobId, $opIdx, $sep, $quote, $escape, $header, $inferSchema, $dateFormat, $timestampFormat)
             |""".stripMargin.update.withUniqueGeneratedKeys[Long]("id")
 
     // Run & Get the auto-incremented ID
     for {
-      csvParamsId <- mysqlDriver.use(csvParamsTableQuery.transact(_))
-    } yield ReadCsvOperation(csvParamsId, jobId, sep, quote, escape, header, inferSchema, dateFormat, timestampFormat)
+      id <- mysqlDriver.use(query.transact(_))
+    } yield CsvOp(id, jobId, opIdx, sep, quote, escape, header, inferSchema, dateFormat, timestampFormat)
 
   }
 

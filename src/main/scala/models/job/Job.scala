@@ -42,7 +42,7 @@ object Job {
    */
   object JobType extends Enumeration {
     type JobType = Value
-    val Preview, Analyze: JobType = Value
+    val Preview, Full: JobType = Value
   }
 
   /**

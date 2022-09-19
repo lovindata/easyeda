@@ -17,6 +17,8 @@ import server.SparkServer._
  *   Json read operation ID
  * @param jobId
  *   Reference a [[Job]]
+ * @param opIdx
+ *   Operation index for the [[Job]]
  * @param inferSchema
  *   If infer the DataFrame schema or not
  * @param dateFormat
@@ -24,27 +26,22 @@ import server.SparkServer._
  * @param timestampFormat
  *   Timestamp format to consider when inferring the schema
  */
-case class ReadJsonOperation(id: Long,
-                             jobId: Long,
-                             inferSchema: Boolean,
-                             dateFormat: Option[SimpleDateFormat],
-                             timestampFormat: Option[SimpleDateFormat])
-    extends SparkOperation {
+case class JsonOp(id: Long,
+                  jobId: Long,
+                  opIdx: Int,
+                  inferSchema: Boolean,
+                  dateFormat: Option[SimpleDateFormat],
+                  timestampFormat: Option[SimpleDateFormat])
+    extends ReadOp(id, jobId, opIdx) {
 
   /**
-   * Apply the Spark operation.
+   * Fit the Spark operation.
    * @param input
    *   The input DataFrame in string representation OR actual Spark DataFrame
    * @return
    *   Spark [[DataFrame]] with the operation applied
    */
-  override def applyOperation(input: Either[String, DataFrame]): IO[DataFrame] = IO {
-
-    // Retrieve the string representation
-    val actInput: String = input match {
-      case Left(input) => input
-      case Right(_)    => throw new IllegalArgumentException("Please make sure `input` is in string representation")
-    }
+  override def fitOp(input: String): IO[DataFrame] = IO {
 
     // Build read options
     val defaultOptions: Map[String, String]  = Map("mode" -> "FAILFAST", "multiLine" -> "true", "encoding" -> "UTF-8")
@@ -58,7 +55,7 @@ case class ReadJsonOperation(id: Long,
 
     // Build & Return the Spark DataFrame
     import spark.implicits._
-    val inputDS: Dataset[String] = spark.createDataset(actInput.split('\n').toList)
+    val inputDS: Dataset[String] = spark.createDataset(input.split('\n').toList)
     spark.read.options(readOptions).csv(inputDS)
 
   }
@@ -66,14 +63,17 @@ case class ReadJsonOperation(id: Long,
 }
 
 /**
- * Additional [[ReadJsonOperation]] functions.
+ * Additional [[JsonOp]] functions.
  */
-object ReadJsonOperation {
+object JsonOp {
 
   /**
-   * Constructor of [[ReadJsonOperation]].
+   * Constructor of [[JsonOp]].
+   *
    * @param jobId
    *   Reference a [[Job]]
+   * @param opIdx
+   *   Operation index for the [[Job]]
    * @param inferSchema
    *   If infer the DataFrame schema or not
    * @param dateFormat
@@ -84,20 +84,21 @@ object ReadJsonOperation {
    *   A new created json operation
    */
   def apply(jobId: Long,
+            opIdx: Int,
             inferSchema: Boolean,
             dateFormat: Option[SimpleDateFormat],
-            timestampFormat: Option[SimpleDateFormat]): IO[ReadJsonOperation] = {
+            timestampFormat: Option[SimpleDateFormat]): IO[JsonOp] = {
 
     // Define query
-    val jsonParamsTableQuery: ConnectionIO[Long] =
-      sql"""|INSERT INTO json_params (job_id, sep, quote, escape, header, infer_schema, date_format, timestamp_format)
-            |VALUES ($jobId, $inferSchema, $dateFormat, $timestampFormat)
+    val query: ConnectionIO[Long] =
+      sql"""|INSERT INTO json_r_op (job_id, opIdx, infer_schema, date_format, timestamp_format)
+            |VALUES ($jobId, $opIdx, $inferSchema, $dateFormat, $timestampFormat)
             |""".stripMargin.update.withUniqueGeneratedKeys[Long]("id")
 
     // Run & Get the auto-incremented ID
     for {
-      jsonParamsId <- mysqlDriver.use(jsonParamsTableQuery.transact(_))
-    } yield ReadJsonOperation(jsonParamsId, jobId, inferSchema, dateFormat, timestampFormat)
+      id <- mysqlDriver.use(query.transact(_))
+    } yield JsonOp(id, jobId, opIdx, inferSchema, dateFormat, timestampFormat)
 
   }
 

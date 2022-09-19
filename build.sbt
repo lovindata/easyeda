@@ -22,6 +22,8 @@ libraryDependencies += "org.http4s"    %% "http4s-dsl"          % "0.23.15"
 libraryDependencies += "ch.qos.logback" % "logback-classic"     % "1.4.0" % Runtime // Needed otherwise SLF4J will failed
 
 // Circe
+// https://mvnrepository.com/artifact/io.circe/circe-parser
+libraryDependencies += "io.circe" %% "circe-parser"         % "0.14.3"
 // https://mvnrepository.com/artifact/io.circe/circe-generic
 libraryDependencies += "io.circe" %% "circe-generic"        % "0.14.2"
 // https://mvnrepository.com/artifact/io.circe/circe-generic-extras

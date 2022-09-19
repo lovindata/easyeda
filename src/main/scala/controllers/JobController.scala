@@ -9,7 +9,7 @@ import models.session.Session
 import routes.job.entity.FileParamsEntity
 import routes.job.entity.FileParamsEntity.CsvParamsEntity
 import routes.job.entity.FileParamsEntity.JsonParamsEntity
-import com.ilovedatajjia.models.operation.{ReadJsonOperation, ReadCsvOperation}
+import com.ilovedatajjia.models.operation.{CsvOp, JsonOp}
 
 /**
  * Controller for jobs logic.
@@ -39,7 +39,7 @@ object JobController {
       job        <- Job(validatedSession.id, Preview)
       fileParams <- fileParamsEnt match {
                       case csvParEnt: CsvParamsEntity   =>
-                        ReadCsvOperation(
+                        CsvReadOperation(
                           jobId = job.id,
                           sep = csvParEnt.sep,
                           quote = csvParEnt.quote,
@@ -50,7 +50,7 @@ object JobController {
                           timestampFormat = csvParEnt.timestampFormat
                         )
                       case jsonParEnt: JsonParamsEntity =>
-                        ReadJsonOperation(jobId = job.id,
+                        JsonReadOperation(jobId = job.id,
                                    inferSchema = jsonParEnt.inferSchema,
                                    dateFormat = jsonParEnt.dateFormat,
                                    timestampFormat = jsonParEnt.timestampFormat)

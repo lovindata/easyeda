@@ -4,6 +4,7 @@ package models.operation
 import cats.effect.IO
 import io.circe.Json
 import io.circe.syntax.EncoderOps
+import models.job.Job
 import org.apache.spark.sql._
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types._
@@ -11,24 +12,21 @@ import scala.collection.mutable
 
 /**
  * DB representation of an operation.
+ * @param id
+ *   Spark operation ID
+ * @param jobId
+ *   Reference a [[Job]]
+ * @param opIdx
+ *   Operation index
+ * @param sparkArg
+ *   Operation arguments
  */
-trait SparkOperation {
-
-  /**
-   * Apply the Spark operation.
-   * @param input
-   *   The input DataFrame in string representation OR actual Spark DataFrame
-   * @return
-   *   Spark [[DataFrame]] with the operation applied
-   */
-  def applyOperation(input: Either[String, DataFrame]): IO[DataFrame]
-
-}
+case class SparkOp(id: Long, jobId: Long, opIdx: Int, sparkArg: SparkArg)
 
 /**
- * Additional functions of [[SparkOperation]].
+ * Additional functions of [[SparkOp]].
  */
-object SparkOperation {
+object SparkOp {
 
   /**
    * Retrieve a preview representation of the input DataFrame.
@@ -40,7 +38,6 @@ object SparkOperation {
    *   [[Json]] array of array of string, representing `sampleSize` rows of the input DataFrame
    */
   def preview(input: DataFrame, sampleSize: Int = 20): IO[Json] = IO {
-
     // Prepare the Spark DAG for sampling
     val inputColsToAllString: Array[Column] =
       input.columns.map(colName => col(colName).cast(StringType) as colName)
@@ -63,7 +60,6 @@ object SparkOperation {
 
     // Return
     scalaValues.asJson
-
   }
 
 }
