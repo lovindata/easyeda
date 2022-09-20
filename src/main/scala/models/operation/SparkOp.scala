@@ -2,9 +2,12 @@ package com.ilovedatajjia
 package models.operation
 
 import cats.effect.IO
+import doobie._
+import doobie.implicits._
 import io.circe.Json
 import io.circe.syntax.EncoderOps
 import models.job.Job
+import models.utils.DBDriver.mysqlDriver
 import org.apache.spark.sql._
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types._
@@ -27,6 +30,30 @@ case class SparkOp(id: Long, jobId: Long, opIdx: Int, sparkArg: SparkArg)
  * Additional functions of [[SparkOp]].
  */
 object SparkOp {
+
+  /**
+   * Constructor of [[SparkOp]].
+   * @param jobId
+   *   Reference to [[Job]]
+   * @param opIdx
+   *   Operation idx for a given [[Job]]
+   * @param sparkArg
+   *   Input parameters
+   * @return
+   *   A new created [[SparkOp]]
+   */
+  def apply(jobId: Long, opIdx: Int, sparkArg: SparkArg): IO[SparkOp] = {
+    // Prepare the query
+    val query: ConnectionIO[Long] =
+      sql"""|INSERT INTO spark_op (job_id, op_idx, spark_arg)
+            |VALUES ($jobId, $opIdx, ${sparkArg.asJson})
+            |""".stripMargin.update.withUniqueGeneratedKeys[Long]("id")
+
+    // Run & Get the auto-incremented ID
+    for {
+      id <- mysqlDriver.use(query.transact(_))
+    } yield SparkOp(id, jobId, opIdx, sparkArg)
+  }
 
   /**
    * Retrieve a preview representation of the input DataFrame.

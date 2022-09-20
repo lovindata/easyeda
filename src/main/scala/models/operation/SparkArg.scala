@@ -3,10 +3,13 @@ package models.operation
 
 import cats.effect.IO
 import io.circe.Decoder
+import io.circe.Encoder
 import io.circe.Json
 import io.circe.generic.extras.Configuration
 import io.circe.generic.extras.semiauto.deriveConfiguredDecoder
+import io.circe.generic.extras.semiauto.deriveConfiguredEncoder
 import io.circe.generic.semiauto.deriveDecoder
+import io.circe.generic.semiauto.deriveEncoder
 import org.apache.spark.sql.Column
 import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.Dataset
@@ -56,11 +59,12 @@ object SparkArg {
 
   }
 
-  // For JSON decoding
+  // For JSON decoding & encoding
   implicit val argConf: Configuration            = Configuration.default.withDiscriminator("_$OP_")
   implicit val argDec: Decoder[SparkArg]         = deriveConfiguredDecoder[SparkArg]
-  implicit val normTypeDec: Decoder[NormType]    = _.value.as[String].map(_.toNormType)
+  implicit val argEnc: Encoder[SparkArg]         = deriveConfiguredEncoder[SparkArg]
   implicit val cstmColDec: Decoder[CustomColArg] = deriveDecoder[CustomColArg]
+  implicit val cstmColEnc: Encoder[CustomColArg] = deriveEncoder[CustomColArg]
 
   /**
    * Csv read arguments.

@@ -3,7 +3,9 @@
 # Logbook
 
 - Building whole execution of preview
-  - WIP on SparkArg to SparkOp
+  - WIP on first testable Job implementation without DB
+  - Just test it with basic Session DB
+  - Job will be launched without saving to DBs for the moment
 - Think about cron jobs not terminated but still here sessions ?
 - Setup config files
 - Start DEV on Spark NLP Service

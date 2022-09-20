@@ -6,8 +6,8 @@ import cats.effect.IO
 import doobie._
 import doobie.implicits._
 import java.sql.Timestamp
-import models.job.Job.JobStatus._
-import models.job.Job.JobType._
+import models.job.Job.JobStatus.JobStatus
+import models.job.Job.JobType.JobType
 import models.utils.DBDriver.mysqlDriver
 
 /**
@@ -18,7 +18,7 @@ import models.utils.DBDriver.mysqlDriver
  *   Corresponding session ID the job is running on
  * @param jobType
  *   Preview Job or Analyze Job
- * @param status
+ * @param jobStatus
  *   If terminated or not
  * @param createdAt
  *   Job creation timestamp
@@ -28,9 +28,67 @@ import models.utils.DBDriver.mysqlDriver
 case class Job(id: Long,
                sessionId: Long,
                jobType: JobType,
-               status: JobStatus,
+               jobStatus: JobStatus,
                createdAt: Timestamp,
-               terminatedAt: Option[Timestamp])
+               terminatedAt: Option[Timestamp]) {
+
+  /**
+   * Update the [[jobStatus]] to running.
+   */
+  def toRunning: IO[Unit] = {
+
+    // Build the query
+    val query: ConnectionIO[Int] =
+      sql"""|UPDATE job
+            |SET job_status=${jobStatus.toString}
+            |WHERE id=$id
+            |""".stripMargin.update.run
+
+    // Run the query
+    for {
+      nbAffectedRows <- mysqlDriver.use(query.transact(_))
+      _              <- IO.raiseWhen(nbAffectedRows == 0)(
+                          throw new RuntimeException(
+                            s"Trying to update a non-existing job " +
+                              s"with id == `$id` (`nbAffectedRows` == 0)")
+                        )
+      _              <- IO.raiseWhen(nbAffectedRows >= 2)(
+                          throw new RuntimeException(
+                            s"Updated multiple job with unique id == `$id` " +
+                              s"(`nbAffectedRows` != $nbAffectedRows). Table might be corrupted."))
+    } yield ()
+
+  }
+
+  /**
+   * Update the [[jobStatus]] to terminated.
+   */
+  def toTerminated: IO[Unit] = {
+
+    // Build the query
+    val query: ConnectionIO[Int] =
+      sql"""|UPDATE job
+            |SET job_status=$jobStatus
+            |WHERE id=$id
+            |""".stripMargin.update.run
+
+    // Run the query
+    for {
+      nbAffectedRows <- mysqlDriver.use(query.transact(_))
+      _              <- IO.raiseWhen(nbAffectedRows == 0)(
+                          throw new RuntimeException(
+                            s"Trying to update a non-existing job " +
+                              s"with id == `$id` (`nbAffectedRows` == 0)")
+                        )
+      _              <- IO.raiseWhen(nbAffectedRows >= 2)(
+                          throw new RuntimeException(
+                            s"Updated multiple job with unique id == `$id` " +
+                              s"(`nbAffectedRows` != $nbAffectedRows). Table might be corrupted."))
+    } yield ()
+
+  }
+
+}
 
 /**
  * Additional [[Job]] functions.
@@ -65,7 +123,7 @@ object Job {
   def apply(sessionId: Long, jobType: JobType): IO[Job] = for {
     // Prepare the query
     nowTimestamp                <- Clock[IO].realTime.map(x => new Timestamp(x.toMillis))
-    jobStatus: JobStatus         = Starting
+    jobStatus: JobStatus         = JobStatus.Starting
     jobQuery: ConnectionIO[Long] =
       sql"""|INSERT INTO job (session_id, job_type, status, created_at)
             |VALUES ($sessionId, ${jobType.toString}, ${jobStatus.toString}, $nowTimestamp)

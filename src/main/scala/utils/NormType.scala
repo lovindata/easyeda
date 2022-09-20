@@ -1,6 +1,9 @@
 package com.ilovedatajjia
 package utils
 
+import io.circe.Decoder
+import io.circe.Encoder
+import io.circe.Json
 import org.apache.spark.sql.Column
 import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.types._
@@ -13,6 +16,9 @@ object NormType extends Enumeration {
   // Possible normalized types
   type NormType = Value
   val Numerical, Categorical, Date, Timestamp: NormType = Value
+
+  implicit val normTypeDec: Decoder[NormType] = _.value.as[String].map(_.toNormType)
+  implicit val normTypeEnc: Encoder[NormType] = x => Json.fromString(x.toString)
 
   /**
    * Rich functions for [[DataType]].
@@ -65,6 +71,18 @@ object NormType extends Enumeration {
       case Categorical => StringType
       case Date        => DateType
       case Timestamp   => TimestampType
+    }
+
+    /**
+     * Get String representation of [[x]].
+     * @return
+     *   String representation
+     */
+    override def toString: String = x match {
+      case Numerical   => "Numerical"
+      case Categorical => "Categorical"
+      case Date        => "Date"
+      case Timestamp   => "Timestamp"
     }
 
   }

@@ -5,8 +5,10 @@ import cats.effect._
 import cats.effect.unsafe.implicits.global.compute
 import doobie._
 import doobie.hikari.HikariTransactor
+import io.circe.Json
 import java.sql.Timestamp
 import java.text.SimpleDateFormat
+import utils.CirceExtension._
 
 /**
  * Utils for models.
@@ -29,5 +31,7 @@ object DBDriver {
     Meta[String].timap[Timestamp](Timestamp.valueOf)(_.toString)
   implicit val simpleDateFormatMeta: Meta[SimpleDateFormat] =
     Meta[String].timap[SimpleDateFormat](x => new SimpleDateFormat(x))(_.toString)
+  implicit val jsonMeta: Meta[Json]                         =
+    Meta[String].timap[Json](_.toJson)(_.noSpaces)
 
 }

@@ -5,11 +5,10 @@ import cats.effect.IO
 import io.circe.Json
 import models.job.Job
 import models.job.Job.JobType._
+import models.operation.SparkArg._
+import models.operation.SparkOp
 import models.session.Session
-import routes.job.entity.FileParamsEntity
-import routes.job.entity.FileParamsEntity.CsvParamsEntity
-import routes.job.entity.FileParamsEntity.JsonParamsEntity
-import com.ilovedatajjia.models.operation.{CsvOp, JsonOp}
+import utils.CatsEffectExtension.RichArray
 
 /**
  * Controller for jobs logic.
@@ -17,50 +16,41 @@ import com.ilovedatajjia.models.operation.{CsvOp, JsonOp}
 object JobController {
 
   /**
-   * Compute the DataFrame preview of the file using the json parameters.
+   * Compute the DataFrame preview of the file using the json operations.
    * @param validatedSession
    *   Validated session
-   * @param fileParamsEntDrained
-   *   File parameters in JSON
+   * @param sparkArgsDrained
+   *   Operations in JSON
    * @param fileStrDrained
    *   String representation of the file
    * @return
    *   DataFrame in JSON
    */
-  def computePreview(validatedSession: Session,
-                     fileParamsEntDrained: IO[FileParamsEntity],
-                     fileStrDrained: IO[String]): IO[Json] =
+  def computePreview(validatedSession: Session, sparkArgsDrained: IO[Json], fileStrDrained: IO[String]): IO[Json] =
     for {
       // Get file parameters & content
-      fileParamsEnt <- fileParamsEntDrained
-      fileStr       <- fileStrDrained
+      sparkArgs <- sparkArgsDrained
+      fileStr   <- fileStrDrained
 
       // Starting preview job
-      job        <- Job(validatedSession.id, Preview)
-      fileParams <- fileParamsEnt match {
-                      case csvParEnt: CsvParamsEntity   =>
-                        CsvReadOperation(
-                          jobId = job.id,
-                          sep = csvParEnt.sep,
-                          quote = csvParEnt.quote,
-                          escape = csvParEnt.escape,
-                          header = csvParEnt.header,
-                          inferSchema = csvParEnt.inferSchema,
-                          dateFormat = csvParEnt.dateFormat,
-                          timestampFormat = csvParEnt.timestampFormat
-                        )
-                      case jsonParEnt: JsonParamsEntity =>
-                        JsonReadOperation(jobId = job.id,
-                                   inferSchema = jsonParEnt.inferSchema,
-                                   dateFormat = jsonParEnt.dateFormat,
-                                   timestampFormat = jsonParEnt.timestampFormat)
-                    }
+      // job            <- Job(validatedSession.id, Preview)
+      sparkArgsParsed     = sparkArgs.toSparkArgs
+      // _              <- sparkArgsParsed.zipWithIndex.traverse { case (sparkArg, opIdx) => SparkOp(job.id, opIdx, sparkArg) }
 
       // Run preview Job
-      _          <- job.run(fileParams, fileStr) // TODO implement the local Spark service & Make the link with your job run
+      // _                  <- job.toRunning
+      inputDf            <- sparkArgsParsed.head match {
+                              case x: SparkArgR => x.fitArg(fileStr)
+                              case _            =>
+                                throw new UnsupportedOperationException("Please make sure your operations start with a read")
+                            }
+      inputFittedDf      <- sparkArgsParsed.tail.foldLeftM(inputDf) { case (output, sparkArgC: SparkArgC) =>
+                              sparkArgC.fitArg(output)
+                            }
+      outputStartCompute <- SparkOp.preview(inputFittedDf)
 
-      // Save & Return result
-
-    } yield ???
+      // Terminate job
+      // _ <- job.toTerminated
+    } yield outputStartCompute
 
 }

@@ -1,6 +1,6 @@
 [
   {
-    "_$OP_": "CsvOp",
+    "_$OP_": "CsvArg",
     "sep": ",",
     "quote": "\"",
     "escape": "\\",
@@ -10,7 +10,7 @@
     "timestampFormat": "yyyy-MM-dd HH:mm:ss.SSSSSS"
   },
   {
-    "_$OP_": "CustomSchOp",
+    "_$OP_": "CustomSchArg",
     "schema": [
       {
         "natIdx": 2,
