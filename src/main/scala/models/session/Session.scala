@@ -7,9 +7,9 @@ import doobie._
 import doobie.implicits._
 import java.sql.Timestamp
 import models.utils.Codec._
-import models.utils.DBDriver._
 import scala.concurrent.duration.DurationInt
 import scala.concurrent.duration.FiniteDuration
+import services.DBDriver._
 
 /**
  * DB representation of a session.

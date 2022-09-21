@@ -48,7 +48,7 @@ object NormType extends Enumeration {
     def toDataTypeNormType: DataType = x match {
       case _: NumericType              => DoubleType
       case _: BooleanType | StringType => StringType
-      case x: DateType | TimestampType => x
+      case _: DateType | TimestampType => x
       case _                           => throw new UnsupportedOperationException(s"$x unsupported type")
     }
 

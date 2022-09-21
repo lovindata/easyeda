@@ -7,11 +7,11 @@ import doobie.implicits._
 import io.circe.Json
 import io.circe.syntax.EncoderOps
 import models.job.Job
-import models.utils.DBDriver.mysqlDriver
 import org.apache.spark.sql._
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types._
 import scala.collection.mutable
+import services.DBDriver._
 
 /**
  * DB representation of an operation.

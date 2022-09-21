@@ -38,7 +38,19 @@ object Request {
      */
     def withJSONAndFileBytesMultipart(jsonPartName: String, fileBytesPartName: String, partial: Boolean)(
         f: (IO[Json], IO[String]) => IO[Response[IO]]): IO[Response[IO]] =
-      req.req.decode[Multipart[IO]] { multiPart: Multipart[IO] =>
+      req.decode[Multipart[IO]] { multiPart: Multipart[IO] =>
+        // Retrieve the byte streams
+        val streams: Map[String, Stream[IO, Byte]] = multiPart.parts
+          .collect {
+            case part: Part[IO] if part.name.isDefined && part.contentType.isDefined =>
+              (part.name.get, part.contentType.get, part.body)
+          }
+          .collect {
+            case (`jsonPartName`, contentType, jsonPartBody)
+                if contentType.mediaType.satisfies(MediaType.application.json) =>
+
+          } // TODO
+
         // Retrieve the byte streams
         val streams: Map[String, Stream[IO, Byte]] = multiPart.parts.collect { part: Part[IO] =>
           (part.name, part.contentType) match {
@@ -49,7 +61,12 @@ object Request {
                 if contentType.mediaType.satisfies(MediaType.multipart.`form-data`) =>
               "fileBytesPart" -> part.body
             case _ =>
-              return UnprocessableEntity(
+              import cats.effect.unsafe.implicits.global
+              println("#####################")
+              println("sparkArgsDrained.unsafeRunSync.noSpaces")
+              println("#####################")
+              throw new UnprocessableEntity(???)
+              UnprocessableEntity(
                 s"Please verify your request body contains only `$jsonPartName` (application/json) " +
                   s"and `$fileBytesPartName` (multipart/form-data)")
           }

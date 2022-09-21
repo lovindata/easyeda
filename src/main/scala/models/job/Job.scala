@@ -8,7 +8,7 @@ import doobie.implicits._
 import java.sql.Timestamp
 import models.job.Job.JobStatus.JobStatus
 import models.job.Job.JobType.JobType
-import models.utils.DBDriver.mysqlDriver
+import services.DBDriver._
 
 /**
  * DB representation of a job.
@@ -68,7 +68,7 @@ case class Job(id: Long,
     // Build the query
     val query: ConnectionIO[Int] =
       sql"""|UPDATE job
-            |SET job_status=$jobStatus
+            |SET job_status=${jobStatus.toString}
             |WHERE id=$id
             |""".stripMargin.update.run
 

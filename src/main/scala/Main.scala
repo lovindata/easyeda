@@ -3,8 +3,8 @@ package com.ilovedatajjia
 import cats.effect.ExitCode
 import cats.effect.IO
 import cats.effect.IOApp
-import server.AppServer
-import server.SparkServer
+import services.AppServer
+import services.SparkServer
 
 /**
  * Application entrypoint.

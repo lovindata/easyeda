@@ -3,8 +3,6 @@ package controllers
 
 import cats.effect.IO
 import io.circe.Json
-import models.job.Job
-import models.job.Job.JobType._
 import models.operation.SparkArg._
 import models.operation.SparkOp
 import models.session.Session

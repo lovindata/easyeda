@@ -16,6 +16,7 @@ sealed trait FileParamsEntity
  */
 object FileParamsEntity {
 
+  /*
   // For encoding & decoding
   implicit val fileParamsEntityConfig: Configuration              = Configuration.default.withDiscriminator("class")
   implicit val fileParamsEntityEncoder: Encoder[FileParamsEntity] = deriveConfiguredEncoder
@@ -27,10 +28,10 @@ object FileParamsEntity {
   implicit class RichJson(x: Json) {
 
     /**
-     * Decode [[x]] as [[FileParamsEntity]].
-     * @return
-     *   Decoded applied on object OR [[DecodingFailure]] exception
-     */
+   * Decode [[x]] as [[FileParamsEntity]].
+   * @return
+   *   Decoded applied on object OR [[DecodingFailure]] exception
+   */
     def toFileParamsEntity: FileParamsEntity = x.as[FileParamsEntity] match {
       case Left(decError) => throw decError
       case Right(result)  => result
@@ -77,5 +78,6 @@ object FileParamsEntity {
                               dateFormat: Option[SimpleDateFormat],
                               timestampFormat: Option[SimpleDateFormat])
       extends FileParamsEntity
+   */
 
 }
