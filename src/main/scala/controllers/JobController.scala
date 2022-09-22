@@ -3,6 +3,7 @@ package controllers
 
 import cats.effect.IO
 import io.circe.Json
+import models.operation.SparkArg
 import models.operation.SparkArg._
 import models.operation.SparkOp
 import models.session.Session
@@ -17,22 +18,22 @@ object JobController {
    * Compute the DataFrame preview of the file using the json operations.
    * @param validatedSession
    *   Validated session
-   * @param sparkArgsDrained
+   * @param sparkArgs
    *   Operations in JSON
-   * @param fileStrDrained
+   * @param fileStr
    *   String representation of the file
    * @return
    *   DataFrame in JSON
    */
-  def computePreview(validatedSession: Session, sparkArgsDrained: IO[Json], fileStrDrained: IO[String]): IO[Json] =
-    for {
-      // Get file parameters & content
-      sparkArgs <- sparkArgsDrained
-      fileStr   <- fileStrDrained
+  def computePreview(validatedSession: Session, sparkArgs: Json, fileStr: String): IO[Json] = {
 
+    val sparkArgsParsed: Array[SparkArg] = sparkArgs.toSparkArgs
+
+    for {
       // Starting preview job
-      // job            <- Job(validatedSession.id, Preview)
-      sparkArgsParsed     = sparkArgs.toSparkArgs
+      _                  <- IO.println("#####################################################")
+      _                  <- IO.println(sparkArgsParsed.mkString("Array(", ",", ")"))
+      _                  <- IO.println("#####################################################")
       // _              <- sparkArgsParsed.zipWithIndex.traverse { case (sparkArg, opIdx) => SparkOp(job.id, opIdx, sparkArg) }
 
       // Run preview Job
@@ -50,5 +51,6 @@ object JobController {
       // Terminate job
       // _ <- job.toTerminated
     } yield outputStartCompute
+  }
 
 }

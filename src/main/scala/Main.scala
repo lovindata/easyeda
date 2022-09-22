@@ -18,6 +18,8 @@ object Main extends IOApp {
    * @return
    *   Exit code
    */
-  override def run(args: List[String]): IO[ExitCode] = SparkServer.run >> AppServer.run
+  override def run(args: List[String]): IO[ExitCode] =
+    // SparkServer.run >>
+    AppServer.run
 
 }

@@ -2,6 +2,7 @@ package com.ilovedatajjia
 package routes.job
 
 import cats.effect.IO
+import cats.effect.unsafe.implicits.global
 import controllers.JobController
 import io.circe.Json
 import models.session.Session
@@ -21,15 +22,14 @@ object JobRoutes {
   private val previewRoute: AuthedRoutes[Session, IO] = AuthedRoutes.of {
     case req @ POST -> Root / "preview" as session =>
       // Request with file upload and its parameters
-      req.req.withJSONAndFileBytesMultipart("sparkArgs", "fileBytes", partial = true) {
-        (sparkArgsDrained: IO[Json], fileStrDrained: IO[String]) =>
-          {
-            import cats.effect.unsafe.implicits.global
-            println("#####################")
-            println(sparkArgsDrained.unsafeRunSync.noSpaces)
-            println("#####################")
-            JobController.computePreview(session, sparkArgsDrained, fileStrDrained).toResponse
-          }
+      req.req.withJSONAndFileBytesMultipart("sparkArgs", "fileBytes") {
+        (sparkArgs: Json, fileStr: String) =>
+          // println("############## sparkArgsDrained")
+          // println(sparkArgsDrained.unsafeRunSync())
+          // println("############## fileStrDrained")
+          // println(fileStrDrained.unsafeRunSync())
+
+          JobController.computePreview(session, sparkArgs, fileStr).toResponse
       }
   }
 
