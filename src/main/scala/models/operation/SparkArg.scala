@@ -161,7 +161,7 @@ object SparkArg {
       // Build & Return the Spark DataFrame
       import spark.implicits._
       val inputDS: Dataset[String] = spark.createDataset(List(input))
-      spark.read.options(readOptions).csv(inputDS)
+      spark.read.options(readOptions).json(inputDS)
     }
 
   }

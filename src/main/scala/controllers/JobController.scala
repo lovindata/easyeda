@@ -7,6 +7,7 @@ import models.operation.SparkArg
 import models.operation.SparkArg._
 import models.operation.SparkOp
 import models.session.Session
+import org.apache.spark.sql.DataFrame
 import utils.CatsEffectExtension.RichArray
 
 /**
@@ -31,18 +32,23 @@ object JobController {
 
     for {
       // Starting preview job
-      _                  <- IO.println("#####################################################")
-      _                  <- IO.println(sparkArgsParsed.mkString("Array(", ",", ")"))
-      _                  <- IO.println("#####################################################")
+      _       <- IO.println("#####################################################")
+      _       <- IO.println(sparkArgsParsed.mkString("Array(", ",", ")"))
+      _       <- IO.println("#####################################################")
       // _              <- sparkArgsParsed.zipWithIndex.traverse { case (sparkArg, opIdx) => SparkOp(job.id, opIdx, sparkArg) }
 
       // Run preview Job
       // _                  <- job.toRunning
-      inputDf            <- sparkArgsParsed.head match {
-                              case x: SparkArgR => x.fitArg(fileStr)
-                              case _            =>
-                                throw new UnsupportedOperationException("Please make sure your operations start with a read")
-                            }
+      inputDf <- sparkArgsParsed.head match {
+                   case x: SparkArgR => x.fitArg(fileStr)
+                   case _            =>
+                     throw new UnsupportedOperationException("Please make sure your operations start with a read")
+                 }
+
+      _ <- IO.println("#####################################################")
+      _ <- IO(inputDf.show(false))
+      _ <- IO.println("#####################################################")
+
       inputFittedDf      <- sparkArgsParsed.tail.foldLeftM(inputDf) { case (output, sparkArgC: SparkArgC) =>
                               sparkArgC.fitArg(output)
                             }

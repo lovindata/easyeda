@@ -22,14 +22,13 @@ object JobRoutes {
   private val previewRoute: AuthedRoutes[Session, IO] = AuthedRoutes.of {
     case req @ POST -> Root / "preview" as session =>
       // Request with file upload and its parameters
-      req.req.withJSONAndFileBytesMultipart("sparkArgs", "fileBytes") {
-        (sparkArgs: Json, fileStr: String) =>
-          // println("############## sparkArgsDrained")
-          // println(sparkArgsDrained.unsafeRunSync())
-          // println("############## fileStrDrained")
-          // println(fileStrDrained.unsafeRunSync())
+      req.req.withJSONAndFileBytesMultipart("sparkArgs", "fileBytes") { (sparkArgs: Json, fileStr: String) =>
+        // println("############## sparkArgsDrained")
+        // println(sparkArgsDrained.unsafeRunSync())
+        // println("############## fileStrDrained")
+        // println(fileStrDrained.unsafeRunSync())
 
-          JobController.computePreview(session, sparkArgs, fileStr).toResponse
+        JobController.computePreview(session, sparkArgs, fileStr).toResponse
       }
   }
 
