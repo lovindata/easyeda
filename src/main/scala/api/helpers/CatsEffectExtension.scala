@@ -1,5 +1,5 @@
 package com.ilovedatajjia
-package utils
+package api.helpers
 
 import cats.effect.IO
 import cats.implicits._

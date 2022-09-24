@@ -1,5 +1,5 @@
 package com.ilovedatajjia
-package routes.utils
+package api.routes.utils
 
 import cats.effect.IO
 import org.http4s._

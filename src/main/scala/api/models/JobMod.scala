@@ -1,13 +1,13 @@
 package com.ilovedatajjia
-package models.job
+package api.models
 
+import api.models.JobMod.JobStatus.JobStatus
+import api.models.JobMod.JobType.JobType
 import cats.effect.Clock
 import cats.effect.IO
 import doobie._
 import doobie.implicits._
 import java.sql.Timestamp
-import models.job.Job.JobStatus.JobStatus
-import models.job.Job.JobType.JobType
 import services.DBDriver._
 
 /**
@@ -25,18 +25,17 @@ import services.DBDriver._
  * @param terminatedAt
  *   Job termination timestamp
  */
-case class Job(id: Long,
-               sessionId: Long,
-               jobType: JobType,
-               jobStatus: JobStatus,
-               createdAt: Timestamp,
-               terminatedAt: Option[Timestamp]) {
+case class JobMod(id: Long,
+                  sessionId: Long,
+                  jobType: JobType,
+                  jobStatus: JobStatus,
+                  createdAt: Timestamp,
+                  terminatedAt: Option[Timestamp]) {
 
   /**
    * Update the [[jobStatus]] to running.
    */
   def toRunning: IO[Unit] = {
-
     // Build the query
     val query: ConnectionIO[Int] =
       sql"""|UPDATE job
@@ -57,14 +56,12 @@ case class Job(id: Long,
                             s"Updated multiple job with unique id == `$id` " +
                               s"(`nbAffectedRows` != $nbAffectedRows). Table might be corrupted."))
     } yield ()
-
   }
 
   /**
    * Update the [[jobStatus]] to terminated.
    */
   def toTerminated: IO[Unit] = {
-
     // Build the query
     val query: ConnectionIO[Int] =
       sql"""|UPDATE job
@@ -85,15 +82,14 @@ case class Job(id: Long,
                             s"Updated multiple job with unique id == `$id` " +
                               s"(`nbAffectedRows` != $nbAffectedRows). Table might be corrupted."))
     } yield ()
-
   }
 
 }
 
 /**
- * Additional [[Job]] functions.
+ * Additional [[JobMod]] functions.
  */
-object Job {
+object JobMod {
 
   /**
    * Possible job types.
@@ -112,7 +108,8 @@ object Job {
   }
 
   /**
-   * Constructor of [[Job]].
+   * Constructor of [[JobMod]].
+ *
    * @param sessionId
    *   Corresponding session ID the job is running on
    * @param jobType
@@ -120,7 +117,7 @@ object Job {
    * @return
    *   A new created job
    */
-  def apply(sessionId: Long, jobType: JobType): IO[Job] = for {
+  def apply(sessionId: Long, jobType: JobType): IO[JobMod] = for {
     // Prepare the query
     nowTimestamp                <- Clock[IO].realTime.map(x => new Timestamp(x.toMillis))
     jobStatus: JobStatus         = JobStatus.Starting
@@ -131,6 +128,6 @@ object Job {
 
     // Run & Get the auto-incremented ID
     jobId                       <- mysqlDriver.use(jobQuery.transact(_))
-  } yield Job(jobId, sessionId, jobType, jobStatus, nowTimestamp, None)
+  } yield JobMod(jobId, sessionId, jobType, jobStatus, nowTimestamp, None)
 
 }

@@ -1,5 +1,5 @@
 package com.ilovedatajjia
-package models.utils
+package api.helpers
 
 import java.nio.charset.StandardCharsets
 import java.security.MessageDigest

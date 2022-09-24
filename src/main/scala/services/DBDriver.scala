@@ -1,13 +1,13 @@
 package com.ilovedatajjia
 package services
 
+import api.helpers.CirceExtension._
 import cats.effect._
 import cats.effect.unsafe.implicits.global.compute
 import doobie._
 import doobie.hikari.HikariTransactor
 import io.circe.Json
 import java.sql.Timestamp
-import utils.CirceExtension._
 
 /**
  * Utils for models.

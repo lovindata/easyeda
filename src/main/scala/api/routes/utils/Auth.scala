@@ -1,11 +1,11 @@
 package com.ilovedatajjia
-package routes.utils
+package api.routes.utils
 
+import api.controllers.SessionCtrl
+import api.models.SessionMod
 import cats.data._
 import cats.effect.IO
 import cats.implicits._
-import controllers.SessionController
-import com.ilovedatajjia.models.session.Session
 import org.http4s._
 import org.http4s.AuthScheme
 import org.http4s.Credentials
@@ -20,17 +20,17 @@ import org.http4s.server.AuthMiddleware
 object Auth {
 
   // Runnable retrieve session with authorization token
-  private val retrieveSession: Kleisli[IO, String, Either[String, Session]] = Kleisli({ authToken =>
-    SessionController
+  private val retrieveSession: Kleisli[IO, String, Either[String, SessionMod]] = Kleisli({ authToken =>
+    SessionCtrl
       .verifyAuthorization(authToken)
       .redeem(
         (e: Throwable) => Left(e.toString),
-        (session: Session) => Right(session)
+        (session: SessionMod) => Right(session)
       )
   })
 
   // Authorization verification policy
-  private val authPolicy: Kleisli[IO, Request[IO], Either[String, Session]] = Kleisli({ request =>
+  private val authPolicy: Kleisli[IO, Request[IO], Either[String, SessionMod]] = Kleisli({ request =>
     // Check valid header `Authorization` & Prepare the `authToken` for session verification
     val validatedAuthToken: Either[String, String] = for {
       authorizationHeader <-
@@ -48,13 +48,13 @@ object Auth {
     } yield authToken
 
     // Do session verification
-    val validatedSession: IO[Either[String, Session]] = validatedAuthToken.flatTraverse(retrieveSession.run)
+    val validatedSession: IO[Either[String, SessionMod]] = validatedAuthToken.flatTraverse(retrieveSession.run)
     validatedSession // The two `Either` are merged by the `_.flatten` after the `_.traverse`
   })
 
   // Middleware to actual routes
   private val onFailure: AuthedRoutes[String, IO] =
     Kleisli(req => OptionT.liftF(Forbidden(req.context))) // Define the error if failure == Left (here Forbidden == 403)
-  val withAuth: AuthMiddleware[IO, Session] = AuthMiddleware(authPolicy, onFailure)
+  val withAuth: AuthMiddleware[IO, SessionMod] = AuthMiddleware(authPolicy, onFailure)
 
 }

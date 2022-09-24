@@ -1,6 +1,7 @@
 package com.ilovedatajjia
-package models.operation
+package api.models
 
+import api.helpers.NormType._
 import cats.effect.IO
 import io.circe.Decoder
 import io.circe.Encoder
@@ -15,7 +16,6 @@ import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.Dataset
 import org.apache.spark.sql.functions._
 import services.SparkServer._
-import utils.NormType._
 
 /**
  * Operation arguments.
@@ -101,7 +101,8 @@ object SparkArg {
      */
     override def fitArg(input: String): IO[DataFrame] = IO {
       // Build read options
-      val defaultOptions: Map[String, String]  = Map("mode" -> "FAILFAST", "multiLine" -> "true")
+      val defaultOptions: Map[String, String]  =
+        Map("mode" -> "FAILFAST") // CSV file "multiLine" -> "true" is not supported
       val parsedOptions: Map[String, String]   = Map("sep" -> sep,
                                                    "quote"       -> quote,
                                                    "escape"      -> escape,
@@ -116,8 +117,8 @@ object SparkArg {
 
       // Build & Return the Spark DataFrame
       import spark.implicits._
-      val inputDS: Dataset[String] = spark.createDataset(List(input))
-      spark.read.options(readOptions).csv(inputDS)
+      val inputDS: Dataset[String] = spark.createDataset(input.linesIterator.toList)
+      spark.read.options(readOptions).csv(inputDS).withNormTypes
     }
 
   }

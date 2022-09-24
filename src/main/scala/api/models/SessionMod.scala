@@ -1,12 +1,12 @@
 package com.ilovedatajjia
-package models.session
+package api.models
 
+import api.helpers.Codec._
 import cats.effect.Clock
 import cats.effect.IO
 import doobie._
 import doobie.implicits._
 import java.sql.Timestamp
-import models.utils.Codec._
 import scala.concurrent.duration.DurationInt
 import scala.concurrent.duration.FiniteDuration
 import services.DBDriver._
@@ -24,11 +24,11 @@ import services.DBDriver._
  * @param terminatedAt
  *   Session termination timestamp
  */
-case class Session(id: Long,
-                   authTokenSha1: String,
-                   createdAt: Timestamp,
-                   updatedAt: Timestamp,
-                   terminatedAt: Option[Timestamp]) {
+case class SessionMod(id: Long,
+                      authTokenSha1: String,
+                      createdAt: Timestamp,
+                      updatedAt: Timestamp,
+                      terminatedAt: Option[Timestamp]) {
 
   /**
    * Launch the cron job checking inactivity status. If session inactive the cron job will terminate & updated in the
@@ -43,7 +43,7 @@ case class Session(id: Long,
       _ <- IO.sleep(maxDiffInactivity)
 
       // Retrieve the actual session state from the database
-      session <- Session.getWithId(id)
+      session <- SessionMod.getWithId(id)
 
       // Update the cron job & session according the inactivity
       nowTimestamp <- Clock[IO].realTime.map(_.toMillis)
@@ -51,7 +51,7 @@ case class Session(id: Long,
                         case None if nowTimestamp - session.updatedAt.getTime < maxDiffInactivity.toMillis  =>
                           startCronJobInactivityCheck() // Continue cron job if still active session
                         case None if nowTimestamp - session.updatedAt.getTime >= maxDiffInactivity.toMillis =>
-                          Session.terminateWithId(id) // Terminate the cron job & Update to terminated status the session
+                          SessionMod.terminateWithId(id) // Terminate the cron job & Update to terminated status the session
                         case _                                                                              =>
                           IO.unit // Do nothing if already in terminated state (== Some found)
                       }
@@ -64,18 +64,19 @@ case class Session(id: Long,
 }
 
 /**
- * Additional [[Session]] functions.
+ * Additional [[SessionMod]] functions.
  */
-object Session {
+object SessionMod {
 
   /**
-   * Constructor of [[Session]].
+   * Constructor of [[SessionMod]].
+   *
    * @param authToken
    *   Brut authorization token that will be hashed to SHA-1 hexadecimal string
    * @return
    *   A new created session
    */
-  def apply(authToken: String): IO[Session] = for {
+  def apply(authToken: String): IO[SessionMod] = for {
     // Prepare the query
     nowTimestamp             <- Clock[IO].realTime.map(x => new Timestamp(x.toMillis))
     authTokenSha1: String     = authToken.toSha1Hex // Hash with SHA1 the authorization token
@@ -86,7 +87,7 @@ object Session {
 
     // Run & Get the auto-incremented session ID
     id                       <- mysqlDriver.use(query.transact(_))
-  } yield Session(id, authTokenSha1, nowTimestamp, nowTimestamp, None)
+  } yield SessionMod(id, authTokenSha1, nowTimestamp, nowTimestamp, None)
 
   /**
    * Retrieve the session from the database. (Must only be used by the application logic)
@@ -95,13 +96,13 @@ object Session {
    * @return
    *   The corresponding Session
    */
-  def getWithId(id: Long): IO[Session] = {
+  def getWithId(id: Long): IO[SessionMod] = {
     // Build the query
-    val query: ConnectionIO[Session] =
+    val query: ConnectionIO[SessionMod] =
       sql"""|SELECT id, bearer_auth_token_sha1, created_at, updated_at, terminated_at
             |FROM session
             |WHERE id=$id
-            |""".stripMargin.query[Session].unique // Will raise exception if not exactly one value
+            |""".stripMargin.query[SessionMod].unique // Will raise exception if not exactly one value
 
     // Run the query
     for {
@@ -116,16 +117,16 @@ object Session {
    * @return
    *   The corresponding Session
    */
-  def getWithAuthToken(authToken: String): IO[Session] = {
+  def getWithAuthToken(authToken: String): IO[SessionMod] = {
     // Hash with SHA1 the authorization token
     val authTokenSha1: String = authToken.toSha1Hex
 
     // Build the query
-    val query: ConnectionIO[Session] =
+    val query: ConnectionIO[SessionMod] =
       sql"""|SELECT id, bearer_auth_token_sha1, created_at, updated_at, terminated_at
             |FROM session
             |WHERE bearer_auth_token_sha1=$authTokenSha1
-            |""".stripMargin.query[Session].unique // Will raise exception if not exactly one value
+            |""".stripMargin.query[SessionMod].unique // Will raise exception if not exactly one value
 
     // Run the query
     for {
@@ -196,13 +197,13 @@ object Session {
    * @return
    *   Array of all non terminated sessions
    */
-  def listActiveSessions: IO[Array[Session]] = {
+  def listActiveSessions: IO[Array[SessionMod]] = {
     // Build the query
-    val query: ConnectionIO[Array[Session]] =
+    val query: ConnectionIO[Array[SessionMod]] =
       sql"""|SELECT id, bearer_auth_token_sha1, created_at, updated_at, terminated_at
             |FROM session
             |WHERE terminated_at IS NULL
-            |""".stripMargin.query[Session].to[Array]
+            |""".stripMargin.query[SessionMod].to[Array]
 
     // Run the query
     for {

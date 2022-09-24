@@ -1,14 +1,14 @@
 package com.ilovedatajjia
 package services
 
+import api.routes.JobRts
+import api.routes.SessionRts
 import cats.effect._
 import com.comcast.ip4s._
 import org.http4s._
 import org.http4s.ember.server._
 import org.http4s.implicits._
 import org.http4s.server.Router
-import routes.job.JobRoutes
-import routes.session.SessionRoutes
 
 /**
  * Application server.
@@ -16,7 +16,7 @@ import routes.session.SessionRoutes
 object AppServer {
 
   // Retrieve all route(s)
-  val combinedRoutes: HttpApp[IO] = Router("/session" -> SessionRoutes.routes, "/job" -> JobRoutes.routes).orNotFound
+  val combinedRoutes: HttpApp[IO] = Router("/session" -> SessionRts.routes, "/job" -> JobRts.routes).orNotFound
 
   // Build the server
   val serverBuilder: EmberServerBuilder[IO] = EmberServerBuilder

@@ -1,6 +1,7 @@
 package com.ilovedatajjia
-package routes.utils
+package api.routes.utils
 
+import api.helpers.CirceExtension._
 import cats.effect.IO
 import cats.implicits._
 import fs2.Stream
@@ -10,7 +11,6 @@ import org.http4s._
 import org.http4s.dsl.io._
 import org.http4s.multipart.Multipart
 import org.http4s.multipart.Part
-import utils.CirceExtension._
 
 /**
  * Containing rich class related to requests.

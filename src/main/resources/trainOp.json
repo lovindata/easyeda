@@ -8,5 +8,8 @@
     "inferSchema": true,
     "dateFormat": "yyyy-MM-dd",
     "timestampFormat": "yyyy-MM-dd HH:mm:ss.SSSSSS"
+  },
+  {
+    "coucou": "CsvArg"
   }
 ]

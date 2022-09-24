@@ -1,5 +1,5 @@
 package com.ilovedatajjia
-package utils
+package api.helpers
 
 import io.circe.Json
 import io.circe.parser.parse
