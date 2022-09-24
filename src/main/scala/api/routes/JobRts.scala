@@ -12,7 +12,6 @@ import org.http4s._
 import org.http4s.circe.CirceEntityCodec.circeEntityEncoder
 import org.http4s.dsl.io._
 
-
 /**
  * Routes related to CSV files management.
  */
@@ -23,11 +22,6 @@ object JobRts {
     case req @ POST -> Root / "preview" as session =>
       // Request with file upload and its parameters
       req.req.withJSONAndFileBytesMultipart("sparkArgs", "fileBytes") { (sparkArgs: Json, fileStr: String) =>
-        // println("############## sparkArgsDrained")
-        // println(sparkArgsDrained.unsafeRunSync())
-        // println("############## fileStrDrained")
-        // println(fileStrDrained.unsafeRunSync())
-
         JobCtrl.computePreview(session, sparkArgs, fileStr).toResponse
       }
   }
