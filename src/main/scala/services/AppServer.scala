@@ -29,8 +29,6 @@ object AppServer {
   /**
    * Run the HTTP4s server.
    */
-  def run: IO[ExitCode] = serverBuilder.build
-    .use(_ => IO.never)
-    .as(ExitCode.Success)
+  def run: IO[Unit] = serverBuilder.build.use(_ => IO.never).void
 
 }

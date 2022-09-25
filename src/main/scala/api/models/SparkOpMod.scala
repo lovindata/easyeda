@@ -77,11 +77,9 @@ object SparkOpMod {
     // Prepare the Spark DAG for sampling values
     val inputColsToAllString: Array[Column] =
       input.columns.slice(0, nbCols).map(colName => col(colName).cast(StringType).as(colName))
-    val inputAllString: DataFrame           =
-      input.select(inputColsToAllString: _*).na.fill("") // To handle "null" values
-    val inputColForValues: Column =
-      array(inputAllString.columns.map(col): _*) as "_$VALUES_"
-    val inputValues: DataFrame    = inputAllString.select(
+    val inputAllString: DataFrame           = input.select(inputColsToAllString: _*).na.fill("") // To handle "null" values
+    val inputColForValues: Column           = array(inputAllString.columns.map(col): _*) as "_$VALUES_"
+    val inputValues: DataFrame              = inputAllString.select(
       inputColForValues
     ) // 1 Column where each row "i" is in format "[<_c0_vi>, ..., <_cj_vi>, ..., <_cn_vi>]"
 
