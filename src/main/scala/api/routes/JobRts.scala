@@ -13,7 +13,7 @@ import org.http4s.circe.CirceEntityCodec.circeEntityEncoder
 import org.http4s.dsl.io._
 
 /**
- * Routes related to CSV files management.
+ * Routes related to jobs management.
  */
 object JobRts {
 

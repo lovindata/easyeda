@@ -1,0 +1,16 @@
+version: "3.9"
+services:
+  postgresql:
+    image: postgres:14.5
+    restart: always
+    volumes:
+      - "./initdb:/docker-entrypoint-initdb.d" # For .sql script(s) launched just after startup
+    ports:
+      - "5432:5432"
+    environment:
+      # Root env variables
+      MYSQL_ROOT_PASSWORD: root-pwd
+      # RestAPI env variables
+      MYSQL_DATABASE: restapi
+      MYSQL_USER: restapi-user
+      MYSQL_PASSWORD : restapi-pwd

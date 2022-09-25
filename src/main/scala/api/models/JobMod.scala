@@ -109,7 +109,6 @@ object JobMod {
 
   /**
    * Constructor of [[JobMod]].
- *
    * @param sessionId
    *   Corresponding session ID the job is running on
    * @param jobType

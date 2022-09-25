@@ -55,7 +55,7 @@ object SessionCtrl {
    *   Session updated status
    */
   def terminateSession(validatedSession: SessionMod): IO[SessionStatusEnt] = for {
-    _ <- SessionMod.terminateWithId(validatedSession.id)
+    _              <- SessionMod.terminateWithId(validatedSession.id)
     updatedSession <- SessionMod.getWithId(validatedSession.id)
   } yield SessionStatusEnt(updatedSession.id,
                            updatedSession.createdAt.toString,
@@ -70,7 +70,7 @@ object SessionCtrl {
    *   Listing of all non terminated sessions
    */
   def listSessions(validatedSession: SessionMod): IO[Array[SessionStatusEnt]] = for {
-    sessions <- SessionMod.listActiveSessions
+    sessions      <- SessionMod.listActiveSessions
     sessionsStatus = sessions.map(session =>
                        SessionStatusEnt(session.id,
                                         session.createdAt.toString,

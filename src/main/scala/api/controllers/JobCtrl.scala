@@ -44,11 +44,10 @@ object JobCtrl {
                                     throw new UnsupportedOperationException("Please make sure your operations start with a read only")
                                 }
       inputFittedDf          <- sparkArgsParsed.tail.foldLeftM(inputDf) {
-                                  case (output, sparkArgC: SparkArgC) =>
-                                    sparkArgC.fitArg(output)
+                                  case (output, sparkArgC: SparkArgC) => sparkArgC.fitArg(output)
                                   case _                              =>
                                     throw new UnsupportedOperationException(
-                                      "Please make sure your operations followed with computes only")
+                                      "Please make sure your operations follow with computes only")
                                 }
       dataPreview            <- SparkOpMod.preview(inputFittedDf, 100, 20)
       (dataSchema, dataValue) = dataPreview
