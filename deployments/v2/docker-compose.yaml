@@ -5,12 +5,11 @@ services:
     restart: always
     volumes:
       - "./initdb:/docker-entrypoint-initdb.d" # For .sql script(s) launched just after startup
+      # - "./data:/var/lib/postgresql/data" # For keeping actual data
     ports:
       - "5432:5432"
     environment:
-      # Root env variables
-      MYSQL_ROOT_PASSWORD: root-pwd
       # RestAPI env variables
-      MYSQL_DATABASE: restapi
-      MYSQL_USER: restapi-user
-      MYSQL_PASSWORD : restapi-pwd
+      POSTGRES_DB: restapi
+      POSTGRES_USER: restapi-user
+      POSTGRES_PASSWORD : restapi-pwd

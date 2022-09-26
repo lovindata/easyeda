@@ -32,7 +32,8 @@ object JobRts {
             .mapN((_, _))
             .fold(
               parseFailures => BadRequest(parseFailures.foldLeft("")(_ + "\n" + _)),
-              { case (nbRowsParsed, nbColsParsed) => // Request with file upload and its parameters
+              { case (nbRowsParsed, nbColsParsed) =>
+                // Request with file upload and its parameters
                 req.req.withJSONAndFileBytesMultipart("sparkArgs", "fileBytes") { (sparkArgs: Json, fileStr: String) =>
                   JobCtrl.computePreview(session, sparkArgs, fileStr, nbRowsParsed, nbColsParsed).toResponse
                 }
