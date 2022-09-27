@@ -2,7 +2,7 @@ package com.ilovedatajjia
 package api.routes.entities
 
 import api.helpers.NormType.NormType
-import api.routes.entities.DataPreviewEnt.DataSchema
+import api.routes.entities.DataPreviewEnt._
 import cats.effect.IO
 import io.circe.Decoder
 import io.circe.Encoder
@@ -17,12 +17,21 @@ import org.http4s.circe.jsonEncoderOf
  * @param dataValues
  *   Values
  */
-case class DataPreviewEnt(dataSchema: Array[DataSchema], dataValues: Array[Array[String]])
+case class DataPreviewEnt(dataConf: DataConf, dataSchema: Array[DataSchema], dataValues: Array[Array[String]])
 
 /**
  * [[DataPreviewEnt]] companion object with encoders & decoders.
  */
 object DataPreviewEnt {
+
+  /**
+   * For preview configurations.
+   * @param nbRows
+   *   Number of rows
+   * @param nbCols
+   *   Number of columns
+   */
+  case class DataConf(nbRows: Int, nbCols: Int)
 
   /**
    * For schema representation.
@@ -34,13 +43,16 @@ object DataPreviewEnt {
   case class DataSchema(colName: String, colType: NormType)
 
   // JSON encoders & decoders
-  implicit val dataSchEncoder: Encoder[DataSchema]  = deriveEncoder
-  implicit val dataSchDecoder: Decoder[DataSchema]  = deriveDecoder
-  implicit val jsonEncoder: Encoder[DataPreviewEnt] = deriveEncoder
-  implicit val jsonDecoder: Decoder[DataPreviewEnt] = deriveDecoder
+  implicit val dataConfEnc: Encoder[DataConf]       = deriveEncoder
+  implicit val dataConfDec: Decoder[DataConf]       = deriveDecoder
+  implicit val dataSchEnc: Encoder[DataSchema]      = deriveEncoder
+  implicit val dataSchDec: Decoder[DataSchema]      = deriveDecoder
+  implicit val dataPrevEnc: Encoder[DataPreviewEnt] = deriveEncoder
+  implicit val dataPrevDec: Decoder[DataPreviewEnt] = deriveDecoder
 
   // Entity encoder
-  implicit val dataSchEntityEncoder: EntityEncoder[IO, DataSchema]      = jsonEncoderOf[IO, DataSchema]
-  implicit val dataPrevEntityEncoder: EntityEncoder[IO, DataPreviewEnt] = jsonEncoderOf[IO, DataPreviewEnt]
+  implicit val dataConfEntEnc: EntityEncoder[IO, DataConf]       = jsonEncoderOf[IO, DataConf]
+  implicit val dataSchEntEnc: EntityEncoder[IO, DataSchema]      = jsonEncoderOf[IO, DataSchema]
+  implicit val dataPrevEntEnc: EntityEncoder[IO, DataPreviewEnt] = jsonEncoderOf[IO, DataPreviewEnt]
 
 }

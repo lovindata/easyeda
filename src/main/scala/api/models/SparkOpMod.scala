@@ -3,15 +3,14 @@ package api.models
 
 import api.helpers.NormType._
 import cats.effect.IO
+import config.DBDriver._
 import doobie._
 import doobie.implicits._
-import io.circe.Json
 import io.circe.syntax.EncoderOps
 import org.apache.spark.sql._
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types._
 import scala.collection.mutable
-import services.DBDriver._
 
 /**
  * DB representation of an operation.
@@ -53,7 +52,7 @@ object SparkOpMod {
 
     // Run & Get the auto-incremented ID
     for {
-      id <- mysqlDriver.use(query.transact(_))
+      id <- postgresDriver.use(query.transact(_))
     } yield SparkOpMod(id, jobId, opIdx, sparkArg)
   }
 

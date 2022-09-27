@@ -2,8 +2,8 @@ package com.ilovedatajjia
 
 import cats.effect.IO
 import cats.effect.IOApp
-import services.AppServer
-import services.SparkServer
+import config.AppServer
+import config.SparkServer
 
 /**
  * Application entrypoint.

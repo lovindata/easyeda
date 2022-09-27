@@ -1,5 +1,5 @@
 package com.ilovedatajjia
-package services
+package config
 
 import api.helpers.CirceExtension._
 import cats.effect._
@@ -7,7 +7,6 @@ import cats.effect.unsafe.implicits.global.compute
 import doobie._
 import doobie.hikari.HikariTransactor
 import io.circe.Json
-import java.sql.Timestamp
 
 /**
  * Utils for models.
@@ -15,10 +14,10 @@ import java.sql.Timestamp
 object DBDriver {
 
   // Initialize database driver
-  val mysqlDriver: Resource[IO, HikariTransactor[IO]] = for {
+  val postgresDriver: Resource[IO, HikariTransactor[IO]] = for {
     transactor <- HikariTransactor.newHikariTransactor[IO](
-                    "com.mysql.cj.jdbc.Driver",
-                    "jdbc:mysql://localhost:3306/restapi",
+                    "org.postgresql.Driver",
+                    "jdbc:postgresql://localhost:5432/restapi",
                     "restapi-user",
                     "restapi-pwd",
                     compute
@@ -26,7 +25,6 @@ object DBDriver {
   } yield transactor
 
   // Custom doobie converters when writing into DB sql"""<X>"""
-  implicit val timestampMeta: Meta[Timestamp] = Meta[String].timap[Timestamp](Timestamp.valueOf)(_.toString)
-  implicit val jsonMeta: Meta[Json]           = Meta[String].timap[Json](_.toJson)(_.noSpaces)
+  implicit val jsonMeta: Meta[Json] = Meta[String].timap[Json](_.toJson)(_.noSpaces)
 
 }

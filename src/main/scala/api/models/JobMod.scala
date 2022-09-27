@@ -5,10 +5,13 @@ import api.models.JobMod.JobStatus.JobStatus
 import api.models.JobMod.JobType.JobType
 import cats.effect.Clock
 import cats.effect.IO
-import doobie._
-import doobie.implicits._
+import config.DBDriver._
+import doobie._                        // Always needed import
+import doobie.implicits._              // Always needed import
+import doobie.implicits.javasql._      // Always needed import
+import doobie.postgres._               // Always needed import
+import doobie.postgres.implicits._     // Always needed import
 import java.sql.Timestamp
-import services.DBDriver._
 
 /**
  * DB representation of a job.
@@ -45,7 +48,7 @@ case class JobMod(id: Long,
 
     // Run the query
     for {
-      nbAffectedRows <- mysqlDriver.use(query.transact(_))
+      nbAffectedRows <- postgresDriver.use(query.transact(_))
       _              <- IO.raiseWhen(nbAffectedRows == 0)(
                           throw new RuntimeException(
                             s"Trying to update a non-existing job " +
@@ -71,7 +74,7 @@ case class JobMod(id: Long,
 
     // Run the query
     for {
-      nbAffectedRows <- mysqlDriver.use(query.transact(_))
+      nbAffectedRows <- postgresDriver.use(query.transact(_))
       _              <- IO.raiseWhen(nbAffectedRows == 0)(
                           throw new RuntimeException(
                             s"Trying to update a non-existing job " +
@@ -126,7 +129,7 @@ object JobMod {
             |""".stripMargin.update.withUniqueGeneratedKeys[Long]("id")
 
     // Run & Get the auto-incremented ID
-    jobId                       <- mysqlDriver.use(jobQuery.transact(_))
+    jobId                       <- postgresDriver.use(jobQuery.transact(_))
   } yield JobMod(jobId, sessionId, jobType, jobStatus, nowTimestamp, None)
 
 }

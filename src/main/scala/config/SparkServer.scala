@@ -1,5 +1,5 @@
 package com.ilovedatajjia
-package services
+package config
 
 import cats.effect.IO
 import org.apache.spark.sql.SparkSession
@@ -22,6 +22,8 @@ object SparkServer {
       .appName("OpenEDA")
       .master("local[*]")
       .config("spark.scheduler.mode", "FAIR")
+      .config("spark.scheduler.allocation.file", getClass.getResource("/spark/fairscheduler.xml").getPath)
+      .config("spark.scheduler.pool", "fairPool")        // Pool name defined in the XML file
       .getOrCreate()
     sparkInitialization.sparkContext.setLogLevel("WARN") // Remove all INFO & DEBUG logs
   }

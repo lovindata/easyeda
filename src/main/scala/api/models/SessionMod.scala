@@ -4,12 +4,15 @@ package api.models
 import api.helpers.Codec._
 import cats.effect.Clock
 import cats.effect.IO
-import doobie._
-import doobie.implicits._
+import config.DBDriver._
+import doobie._                    // Always needed import
+import doobie.implicits._          // Always needed import
+import doobie.implicits.javasql._  // Always needed import
+import doobie.postgres._           // Always needed import
+import doobie.postgres.implicits._ // Always needed import
 import java.sql.Timestamp
 import scala.concurrent.duration.DurationInt
 import scala.concurrent.duration.FiniteDuration
-import services.DBDriver._
 
 /**
  * DB representation of a session.
@@ -86,7 +89,7 @@ object SessionMod {
             |""".stripMargin.update.withUniqueGeneratedKeys[Long]("id")
 
     // Run & Get the auto-incremented session ID
-    id                       <- mysqlDriver.use(query.transact(_))
+    id                       <- postgresDriver.use(query.transact(_))
   } yield SessionMod(id, authTokenSha1, nowTimestamp, nowTimestamp, None)
 
   /**
@@ -106,7 +109,7 @@ object SessionMod {
 
     // Run the query
     for {
-      session <- mysqlDriver.use(query.transact(_))
+      session <- postgresDriver.use(query.transact(_))
     } yield session
   }
 
@@ -130,7 +133,7 @@ object SessionMod {
 
     // Run the query
     for {
-      session <- mysqlDriver.use(query.transact(_))
+      session <- postgresDriver.use(query.transact(_))
       _       <-
         IO.raiseWhen(session.terminatedAt.isDefined)(
           throw new RuntimeException(s"Session with id == `${session.id}` already terminated impossible to retrieve"))
@@ -153,7 +156,7 @@ object SessionMod {
             |""".stripMargin.update.run
 
     // Run the query (Raise exception if not exactly one value updated)
-    nbAffectedRows          <- mysqlDriver.use(query.transact(_))
+    nbAffectedRows          <- postgresDriver.use(query.transact(_))
     _                       <- IO.raiseWhen(nbAffectedRows == 0)(
                                  throw new RuntimeException(
                                    s"Trying to update a non-existing session " +
@@ -180,7 +183,7 @@ object SessionMod {
             |""".stripMargin.update.run
 
     // Run the query
-    nbAffectedRows          <- mysqlDriver.use(query.transact(_))
+    nbAffectedRows          <- postgresDriver.use(query.transact(_))
     _                       <- IO.raiseWhen(nbAffectedRows == 0)(
                                  throw new RuntimeException(
                                    s"Trying to update a non-existing session " +
@@ -207,7 +210,7 @@ object SessionMod {
 
     // Run the query
     for {
-      sessions <- mysqlDriver.use(query.transact(_))
+      sessions <- postgresDriver.use(query.transact(_))
     } yield sessions
   }
 

@@ -1,5 +1,5 @@
 package com.ilovedatajjia
-package services
+package config
 
 import api.routes.JobRts
 import api.routes.SessionRts

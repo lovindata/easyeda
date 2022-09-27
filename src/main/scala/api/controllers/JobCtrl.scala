@@ -7,7 +7,7 @@ import api.models.SparkArg
 import api.models.SparkArg._
 import api.models.SparkOpMod
 import api.routes.entities.DataPreviewEnt
-import api.routes.entities.DataPreviewEnt.DataSchema
+import api.routes.entities.DataPreviewEnt._
 import cats.effect.IO
 import io.circe.Json
 
@@ -62,7 +62,9 @@ object JobCtrl {
 
       // Terminate job
       // _ <- job.toTerminated
-    } yield DataPreviewEnt(prevSch.map { case (colName, colType) => DataSchema(colName, colType) }, prevValues)
+    } yield DataPreviewEnt(DataConf(nbRows, nbCols),
+      prevSch.map { case (colName, colType) => DataSchema(colName, colType) },
+                           prevValues)
   }
 
 }

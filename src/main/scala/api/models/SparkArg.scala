@@ -15,7 +15,7 @@ import org.apache.spark.sql.Column
 import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.Dataset
 import org.apache.spark.sql.functions._
-import services.SparkServer._
+import config.SparkServer._
 
 /**
  * Operation arguments.

@@ -31,11 +31,15 @@ libraryDependencies += "io.circe" %% "circe-generic-extras" % "0.14.2"
 
 // Doobie
 // https://mvnrepository.com/artifact/org.tpolecat/doobie-core
-libraryDependencies += "org.tpolecat" %% "doobie-core"          % "1.0.0-RC2"
+libraryDependencies += "org.tpolecat"  %% "doobie-core"           % "1.0.0-RC2"
 // https://mvnrepository.com/artifact/org.tpolecat/doobie-hikari
-libraryDependencies += "org.tpolecat" %% "doobie-hikari"        % "1.0.0-RC2"
-// https://mvnrepository.com/artifact/mysql/mysql-connector-java
-libraryDependencies += "mysql"         % "mysql-connector-java" % "8.0.30"
+libraryDependencies += "org.tpolecat"  %% "doobie-hikari"         % "1.0.0-RC2"
+// https://mvnrepository.com/artifact/org.tpolecat/doobie-postgres
+libraryDependencies += "org.tpolecat"  %% "doobie-postgres"       % "1.0.0-RC2"
+// https://mvnrepository.com/artifact/org.tpolecat/doobie-postgres-circe
+libraryDependencies += "org.tpolecat"  %% "doobie-postgres-circe" % "1.0.0-RC2"
+// https://mvnrepository.com/artifact/org.postgresql/postgresql
+libraryDependencies += "org.postgresql" % "postgresql"            % "42.5.0"
 
 // Spark
 // https://mvnrepository.com/artifact/org.apache.spark/spark-core
