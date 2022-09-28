@@ -8,7 +8,12 @@
 [![Generic badge](https://img.shields.io/badge/SBT-1.7-blue.svg?style=plastic)](https://www.scala-sbt.org/)
 [![Generic badge](https://img.shields.io/badge/OpenJDK-11-white.svg?style=plastic)](https://adoptium.net/)
 
+<p align="center">
+
 ![stackUsed](docs/stackUsed.png)
+_([Stack used image](docs/stackUsed.png) can be directly modified via [draw.io](https://app.diagrams.net/))_
+
+</p>
 
 📊😌 **EasyEDA** is a REST API for doing common exploratory data analysis.
 It is powered by Typelevel microservice stack **[http4s](https://http4s.org/v0.23/docs/quickstart.html)**
@@ -16,6 +21,11 @@ and **[Doobie](https://tpolecat.github.io/doobie/)** (with **[Cats IO](https://t
 plus **[Spark](https://spark.apache.org/docs/3.3.3/)**
 providing fast asynchronous parallel request processing and **in-memory** data computation.
 It means none of your source data are saved somewhere plus everything are done on the fly 🚀🤩!
+
+
+# Want to contribute ? 😉
+
+
 
 
 # Logbook (🙏😣 Work still in progress...)
