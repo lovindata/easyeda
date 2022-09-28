@@ -1,4 +1,4 @@
-# EasyEDA
+# EasyEDA - Easy exploratory data analysis
 
 [![Generic badge](https://img.shields.io/badge/Scala-2.13-darkred.svg?style=plastic)](https://www.scala-lang.org/)
 [![Generic badge](https://img.shields.io/badge/http4s-0.23-red.svg?style=plastic)](https://http4s.org/#)
@@ -8,12 +8,7 @@
 [![Generic badge](https://img.shields.io/badge/SBT-1.7-blue.svg?style=plastic)](https://www.scala-sbt.org/)
 [![Generic badge](https://img.shields.io/badge/OpenJDK-11-white.svg?style=plastic)](https://adoptium.net/)
 
-<p align="center">
-
 ![stackUsed](docs/stackUsed.png)
-_([Stack used image](docs/stackUsed.png) can be directly modified via [draw.io](https://app.diagrams.net/))_
-
-</p>
 
 📊😌 **EasyEDA** is a REST API for doing common exploratory data analysis.
 It is powered by Typelevel microservice stack **[http4s](https://http4s.org/v0.23/docs/quickstart.html)**
@@ -25,11 +20,13 @@ It means none of your source data are saved somewhere plus everything are done o
 
 # Want to contribute ? 😉
 
-
+- [Stack used image](docs/stackUsed.png) can be directly modified via [draw.io](https://app.diagrams.net/)
+- [IntelliJ IDEA CE](https://www.jetbrains.com/idea/) was used to build the source code part
 
 
 # Logbook (🙏😣 Work still in progress...)
 
+- Need to continue prettify README.md
 - Building whole execution of preview
   - Job will be launched without saving to DBs for the moment
 - Think about cron jobs not terminated but still here sessions ?
