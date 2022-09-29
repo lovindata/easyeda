@@ -22,6 +22,7 @@ It means none of your source data are saved somewhere plus everything are done o
 
 - [Stack used image](docs/stackUsed.png) can be directly modified via [draw.io](https://app.diagrams.net/)
 - [IntelliJ IDEA CE](https://www.jetbrains.com/idea/) was used to build the source code part
+- [Postman](https://www.postman.com/) was used to edit the [OpenAPI documentation](src/main/resources/swagger/openapi.yaml) part
 
 
 # Logbook (🙏😣 Work still in progress...)
