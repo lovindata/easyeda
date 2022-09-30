@@ -4,7 +4,7 @@
 ThisBuild / version      := "0.1.0-SNAPSHOT"
 ThisBuild / scalaVersion := "2.13.9"
 lazy val root = (project in file("."))
-  .settings(name := "learning-http4s", idePackagePrefix := Some("com.ilovedatajjia"))
+  .settings(name := "easyeda", idePackagePrefix := Some("com.ilovedatajjia"))
 
 /**
  * Dev dependencies
@@ -40,6 +40,12 @@ libraryDependencies += "org.tpolecat"  %% "doobie-postgres"       % "1.0.0-RC2"
 libraryDependencies += "org.tpolecat"  %% "doobie-postgres-circe" % "1.0.0-RC2"
 // https://mvnrepository.com/artifact/org.postgresql/postgresql
 libraryDependencies += "org.postgresql" % "postgresql"            % "42.5.0"
+
+// Serving SwaggerUI
+// https://mvnrepository.com/artifact/org.webjars/webjars-locator
+libraryDependencies += "org.webjars" % "webjars-locator" % "0.45"
+// https://mvnrepository.com/artifact/org.webjars/swagger-ui
+libraryDependencies += "org.webjars" % "swagger-ui"      % "4.14.0"
 
 // Spark
 // https://mvnrepository.com/artifact/org.apache.spark/spark-core
