@@ -1,5 +1,5 @@
 package com.ilovedatajjia
-package api.routes.entities
+package api.controllers.entities
 
 import cats.effect.IO
 import io.circe.Decoder

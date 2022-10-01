@@ -1,13 +1,14 @@
 package com.ilovedatajjia
 package api.controllers
 
+import api.controllers.entities.DataPreviewEnt
+import api.controllers.entities.DataPreviewEnt.DataConf
+import api.controllers.entities.DataPreviewEnt.DataSchema
 import api.helpers.CatsEffectExtension.RichArray
 import api.models.SessionMod
 import api.models.SparkArg
 import api.models.SparkArg._
 import api.models.SparkOpMod
-import api.routes.entities.DataPreviewEnt
-import api.routes.entities.DataPreviewEnt._
 import cats.effect.IO
 import io.circe.Json
 
@@ -63,7 +64,7 @@ object JobCtrl {
       // Terminate job
       // _ <- job.toTerminated
     } yield DataPreviewEnt(DataConf(nbRows, nbCols),
-      prevSch.map { case (colName, colType) => DataSchema(colName, colType) },
+                           prevSch.map { case (colName, colType) => DataSchema(colName, colType) },
                            prevValues)
   }
 

@@ -19,42 +19,55 @@ import org.http4s.server.AuthMiddleware
  */
 object Auth {
 
-  // Runnable retrieve session with authorization token
-  private val retrieveSession: Kleisli[IO, String, Either[String, SessionMod]] = Kleisli({ authToken =>
-    SessionCtrl
-      .verifyAuthorization(authToken)
-      .redeem(
-        (e: Throwable) => Left(e.toString),
-        (session: SessionMod) => Right(session)
-      )
-  })
+  /**
+   * Validate bearer authorization from a request.
+   * @param request
+   *   Request with its bearer token to validate
+   * @return
+   *   [[Right]] with validated token or [[Left]] with error message
+   */
+  private def authBearerFmtValidator(request: Request[IO]): Either[String, String] = for {
+    authorizationHeader <-
+      request.headers
+        .get[Authorization]
+        .toRight("Please verify `Authorization` header and its value are correctly formatted & provided")
+    authToken           <- authorizationHeader.credentials match {
+                             case Credentials.Token(AuthScheme.Bearer, authToken) =>
+                               Right(authToken)
+                             case Credentials.Token(authSchemeNotValid, _)        =>
+                               Left(s"Expecting `Bearer` authorization prefix but got `$authSchemeNotValid`")
+                             case x                                               =>
+                               Left(s"Expecting `Token` credentials but got `${x.getClass}` credentials")
+                           }
+  } yield authToken
 
-  // Authorization verification policy
-  private val authPolicy: Kleisli[IO, Request[IO], Either[String, SessionMod]] = Kleisli({ request =>
-    // Check valid header `Authorization` & Prepare the `authToken` for session verification
-    val validatedAuthToken: Either[String, String] = for {
-      authorizationHeader <-
-        request.headers
-          .get[Authorization]
-          .toRight("Please verify `Authorization` header and its value are correctly formatted & provided")
-      authToken           <- authorizationHeader.credentials match {
-                               case Credentials.Token(AuthScheme.Bearer, authToken) =>
-                                 Right(authToken)
-                               case Credentials.Token(authSchema, _)                =>
-                                 Left(s"Expecting `Bearer` authorization prefix but got `$authSchema`")
-                               case x                                               =>
-                                 Left(s"Expecting `Token` credentials but got `${x.getClass}` credentials")
-                             }
-    } yield authToken
+  // Define the error if failure == Left (here Forbidden == 403)
+  private val onFailure: AuthedRoutes[String, IO] = Kleisli(req => OptionT.liftF(Forbidden(req.context)))
 
-    // Do session verification
-    val validatedSession: IO[Either[String, SessionMod]] = validatedAuthToken.flatTraverse(retrieveSession.run)
-    validatedSession // The two `Either` are merged by the `_.flatten` after the `_.traverse`
-  })
+  // Middleware for session auth
+  val withAuth: AuthMiddleware[IO, SessionMod] = {
+    // Lambda verify session
+    val verifySession: Kleisli[IO, String, Either[String, SessionMod]] = Kleisli({ authToken =>
+      SessionCtrl
+        .verifyAuthorization(authToken)
+        .redeem(
+          (e: Throwable) => Left(e.toString),
+          (session: SessionMod) => Right(session)
+        )
+    })
 
-  // Middleware to actual routes
-  private val onFailure: AuthedRoutes[String, IO] =
-    Kleisli(req => OptionT.liftF(Forbidden(req.context))) // Define the error if failure == Left (here Forbidden == 403)
-  val withAuth: AuthMiddleware[IO, SessionMod] = AuthMiddleware(authPolicy, onFailure)
+    // Lambda verify bearer token & session
+    val sessionAuthPolicy: Kleisli[IO, Request[IO], Either[String, SessionMod]] = Kleisli({ request: Request[IO] =>
+      // Check valid header `Authorization` & Prepare the `authToken` for session verification
+      val validatedAuthToken: Either[String, String] = authBearerFmtValidator(request)
+
+      // Do session verification
+      val validatedSession: IO[Either[String, SessionMod]] = validatedAuthToken.flatTraverse(verifySession.run)
+      validatedSession // The two `Either` are merged by the `_.flatten` after the `_.traverse`
+    })
+
+    // Return
+    AuthMiddleware(sessionAuthPolicy, onFailure)
+  }
 
 }

@@ -1,13 +1,14 @@
 package com.ilovedatajjia
 package api.controllers
 
+import api.controllers.entities._
+import api.helpers.CatsEffectExtension.RichArray
+import api.helpers.SessionStateEnum._
 import api.models.SessionMod
-import api.routes.entities.SessionAuthEnt
-import api.routes.entities.SessionStatusEnt
-import cats.effect.Clock
-import cats.effect.IO
+import cats.effect._
 import cats.effect.std.UUIDGen
 import cats.implicits._
+import config.ConfigLoader.continueExistingSessions
 import java.nio.charset.StandardCharsets
 import java.util.Base64
 
@@ -17,21 +18,34 @@ import java.util.Base64
 object SessionCtrl {
 
   /**
-   * Verify if existing [[SessionMod]] & Report its activity. (Exception thrown if no session can be retrieved)
-   *
+   * Restart inactivity checks of existing sessions or terminate them.
+   */
+  def initProcessExistingSessions: IO[Unit] = for {
+    sessions <- SessionMod.listSessions(Some(Active))
+    _        <- if (continueExistingSessions) {
+                  sessions.traverse(_.startCronJobInactivityCheck())
+                } else {
+                  sessions.traverse(_.terminate)
+                }
+  } yield ()
+
+  /**
+   * Verify if existing [[SessionMod]] and refresh its activity. (Exception thrown if no session can be retrieved)
    * @param authTokenToVerify
    *   The brut authorization token
    * @return
    *   The identified session
    */
   def verifyAuthorization(authTokenToVerify: String): IO[SessionMod] = for {
-    _       <- SessionMod.refreshWithAuthToken(authTokenToVerify)
-    session <- SessionMod.getWithAuthToken(authTokenToVerify)
-  } yield session
+    session         <- SessionMod.getWithAuthToken(authTokenToVerify)
+    upToDateSession <- session.terminatedAt match {
+                         case Some(_) => IO(session)
+                         case None    => session.refreshStatus // Refresh only if not terminated
+                       }
+  } yield upToDateSession
 
   /**
    * Create a new [[SessionMod]].
-   *
    * @return
    *   Session UUID & Authorization token
    */
@@ -48,6 +62,19 @@ object SessionCtrl {
   } yield SessionAuthEnt(createdSession.id, authToken)
 
   /**
+   * Render [[SessionMod]] to [[SessionStatusEnt]].
+   * @param validatedSession
+   *   Validated session
+   * @return
+   *   Rendered [[SessionMod]]
+   */
+  def renderSession(validatedSession: SessionMod): SessionStatusEnt = SessionStatusEnt(
+    validatedSession.id,
+    validatedSession.createdAt.toString,
+    validatedSession.updatedAt.toString,
+    validatedSession.terminatedAt.map(_.toString))
+
+  /**
    * Terminate the provided session.
    * @param validatedSession
    *   A validated session
@@ -55,8 +82,10 @@ object SessionCtrl {
    *   Session updated status
    */
   def terminateSession(validatedSession: SessionMod): IO[SessionStatusEnt] = for {
-    _              <- SessionMod.terminateWithId(validatedSession.id)
-    updatedSession <- SessionMod.getWithId(validatedSession.id)
+    updatedSession <- validatedSession.terminatedAt match {
+                        case Some(_) => IO(validatedSession)
+                        case None    => validatedSession.terminate // Terminate only if not terminated
+                      }
   } yield SessionStatusEnt(updatedSession.id,
                            updatedSession.createdAt.toString,
                            updatedSession.updatedAt.toString,
@@ -66,11 +95,21 @@ object SessionCtrl {
    * List all non terminated sessions.
    * @param validatedSession
    *   A validated session
+   * @param state
+   *   Filtering sessions according a certain state
    * @return
    *   Listing of all non terminated sessions
    */
-  def listSessions(validatedSession: SessionMod): IO[Array[SessionStatusEnt]] = for {
-    sessions      <- SessionMod.listActiveSessions
+  def listSessions(validatedSession: SessionMod, state: String): IO[Array[SessionStatusEnt]] = for {
+    // Validate the parameter
+    filterState   <- IO(state match {
+                       case "ALL"             => None
+                       case "ACTIVE_ONLY"     => Some(Active)
+                       case "TERMINATED_ONLY" => Some(Terminated)
+                     })
+
+    // Starting listing
+    sessions      <- SessionMod.listSessions(filterState)
     sessionsStatus = sessions.map(session =>
                        SessionStatusEnt(session.id,
                                         session.createdAt.toString,

@@ -1,7 +1,7 @@
 package com.ilovedatajjia
 package api.models
 
-import api.helpers.NormType._
+import api.helpers.NormTypeEnum._
 import cats.effect.IO
 import config.DBDriver._
 import doobie._

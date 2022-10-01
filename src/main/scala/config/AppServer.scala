@@ -1,6 +1,7 @@
 package com.ilovedatajjia
 package config
 
+import ConfigLoader.appPort
 import api.routes.JobRts
 import api.routes.SessionRts
 import cats.effect.IO
@@ -26,17 +27,16 @@ object AppServer {
   val combinedRts: HttpApp[IO] =
     Router("/swagger" -> swaggerIURts, "/api" -> apiRts).orNotFound
 
-  // Build the server
-  val serverBuilder: EmberServerBuilder[IO] = EmberServerBuilder
-    .default[IO]
-    .withHost(ipv4"127.0.0.1")         // localhost equivalent
-    .withPort(port"8080")
-    .withHttpApp(combinedRts)
-    .withReceiveBufferSize(256 * 1024) // Default value is 256 * 1024
-
   /**
-   * Run the HTTP4s server.
+   * Build & Run the HTTP4s server.
    */
-  def run: IO[Unit] = serverBuilder.build.use(_ => IO.never).void
+  def run: IO[Unit] = EmberServerBuilder
+    .default[IO]
+    .withHost(ipv4"127.0.0.1") // localhost equivalent
+    .withPort(appPort)
+    .withHttpApp(combinedRts)
+    .build
+    .use(_ => IO.never)
+    .void
 
 }

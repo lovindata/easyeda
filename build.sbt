@@ -11,15 +11,15 @@ lazy val root = (project in file("."))
  */
 // Http4s
 // https://mvnrepository.com/artifact/org.http4s/http4s-ember-server
-libraryDependencies += "org.http4s" %% "http4s-ember-server" % "0.23.16"
+libraryDependencies += "org.http4s"    %% "http4s-ember-server" % "0.23.16"
 // https://mvnrepository.com/artifact/org.http4s/http4s-ember-client
-libraryDependencies += "org.http4s" %% "http4s-ember-client" % "0.23.16"
+libraryDependencies += "org.http4s"    %% "http4s-ember-client" % "0.23.16"
 // https://mvnrepository.com/artifact/org.http4s/http4s-circe
-libraryDependencies += "org.http4s" %% "http4s-circe"        % "0.23.16"
+libraryDependencies += "org.http4s"    %% "http4s-circe"        % "0.23.16"
 // https://mvnrepository.com/artifact/org.http4s/http4s-dsl
-libraryDependencies += "org.http4s" %% "http4s-dsl"          % "0.23.16"
+libraryDependencies += "org.http4s"    %% "http4s-dsl"          % "0.23.16"
 // https://mvnrepository.com/artifact/ch.qos.logback/logback-classic
-//libraryDependencies += "ch.qos.logback" % "logback-classic"     % "1.4.1" % Runtime // Needed otherwise SLF4J will failed
+libraryDependencies += "ch.qos.logback" % "logback-classic"     % "1.4.1" % Runtime // Needed otherwise SLF4J will failed
 
 // Circe
 // https://mvnrepository.com/artifact/io.circe/circe-parser

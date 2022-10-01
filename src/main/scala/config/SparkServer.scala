@@ -2,6 +2,7 @@ package com.ilovedatajjia
 package config
 
 import cats.effect.IO
+import config.ConfigLoader.sparkUIPort
 import org.apache.spark.sql.SparkSession
 
 /**
@@ -19,8 +20,9 @@ object SparkServer {
   def run: IO[Unit] = IO {
     sparkInitialization = SparkSession
       .builder()
-      .appName("OpenEDA")
+      .appName("EasyEDA")
       .master("local[*]")
+      .config("spark.ui.port", sparkUIPort)
       .config("spark.scheduler.mode", "FAIR")
       .config("spark.scheduler.allocation.file", getClass.getResource("/spark/fairscheduler.xml").getPath)
       .config("spark.scheduler.pool", "fairPool")        // Pool name defined in the XML file

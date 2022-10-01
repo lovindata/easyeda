@@ -11,7 +11,7 @@ import org.apache.spark.sql.types._
 /**
  * Extension for data types.
  */
-object NormType extends Enumeration {
+object NormTypeEnum extends Enumeration {
 
   // Possible normalized types
   type NormType = Value
@@ -33,10 +33,10 @@ object NormType extends Enumeration {
      *   Normalized type
      */
     def toNormType: NormType = x match {
-      case _: DoubleType    => NormType.Numerical
-      case _: StringType    => NormType.Categorical
-      case _: DateType      => NormType.Date
-      case _: TimestampType => NormType.Timestamp
+      case _: DoubleType    => NormTypeEnum.Numerical
+      case _: StringType    => NormTypeEnum.Categorical
+      case _: DateType      => NormTypeEnum.Date
+      case _: TimestampType => NormTypeEnum.Timestamp
       case _                => throw new UnsupportedOperationException(s"$x not Spark normalize type")
     }
 

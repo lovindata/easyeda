@@ -24,6 +24,7 @@ externalDocs:
   url: http://swagger.io
 servers:
   - url: http://localhost:8080/api
+    description: Local development or integration
   - url: https://<deploymentDomain>/api
 tags:
   - name: session
@@ -36,7 +37,7 @@ paths:
       tags:
         - session
       summary: Create a new session
-      description: Will give back an unique identifier Session Barear Authorization token and your session ID
+      description: Will generate an unique identifier session ID and corresponding bearer token
       responses:
         "200":
           description: Successful operation
@@ -72,6 +73,32 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/SessionStatusEnt"
+              example:
+                id: 1
+                createdAt: 2022-08-27 18:31:04.696
+                updatedAt: 2022-08-27 18:31:04.697
+                terminatedAt: 2022-08-27 18:31:04.698
+        "500":
+          description: Internal server error please re-try in a few minutes
+  /session/listing:
+    get:
+      tags:
+        - session
+      summary: Get all active sessions according their status
+      parameters:
+        - name: state
+          in: query
+          description: Filtering according the state
+          required: true
+          schema:
+            $ref: "#/components/schemas/SessionState"
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SessionStatusEnts"
         "500":
           description: Internal server error please re-try in a few minutes
 components:
@@ -110,6 +137,14 @@ components:
         terminatedAt:
           type: string
           example: null
+    SessionStatusEnts:
+      type: array
+      items:
+        $ref: "#/components/schemas/SessionStatusEnt"
+    SessionState:
+      type: string
+      default: ALL
+      enum: [ALL, ACTIVE_ONLY, TERMINATED_ONLY]
     DataPreviewEnt:
       type: object
       required:
@@ -146,12 +181,9 @@ components:
               type: string
               example: <cellVal>
   securitySchemes:
-    apiBearerAuth:
-      description: Always bearer token needed to use the API
-      type: http
-      scheme: bearer
     sessionBearerAuth:
+      description: Bearer token to session
       type: http
       scheme: bearer
 security:
-  - apiBearerAuth: []
+  - sessionBearerAuth: []

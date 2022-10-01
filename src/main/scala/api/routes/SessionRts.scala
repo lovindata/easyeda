@@ -3,7 +3,6 @@ package api.routes
 
 import api.controllers.SessionCtrl
 import api.models.SessionMod
-import api.routes.entities.SessionStatusEnt
 import api.routes.utils.Auth._
 import api.routes.utils.Response._
 import cats.effect.IO
@@ -17,6 +16,9 @@ import org.http4s.dsl.io._
  */
 object SessionRts {
 
+  // Query parameter(s)
+  object StateQueryParamMatcher extends QueryParamDecoderMatcher[String]("state")
+
   // Define session creation route
   private val sessionCreationRoute: HttpRoutes[IO] = HttpRoutes.of[IO] { case POST -> Root / "create" =>
     SessionCtrl.createSession.toResponse
@@ -24,15 +26,10 @@ object SessionRts {
 
   // Define retrieve session status, terminate session & list all active sessions routes
   private val otherRoutes: AuthedRoutes[SessionMod, IO] = AuthedRoutes.of {
-    case GET -> Root / "status" as session     =>
-      Ok(
-        SessionStatusEnt(session.id,
-                         session.createdAt.toString,
-                         session.updatedAt.toString,
-                         session.terminatedAt.map(_.toString)))
-    case POST -> Root / "terminate" as session =>
-      SessionCtrl.terminateSession(session).toResponse
-    case GET -> Root / "listing" as session    => SessionCtrl.listSessions(session).toResponse
+    case GET -> Root / "status" as session                                   => Ok(SessionCtrl.renderSession(session))
+    case POST -> Root / "terminate" as session                               => SessionCtrl.terminateSession(session).toResponse
+    case GET -> Root / "listing" :? StateQueryParamMatcher(state) as session =>
+      SessionCtrl.listSessions(session, state).toResponse
   }
 
   // Merge all routes

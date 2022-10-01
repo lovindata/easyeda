@@ -54,8 +54,9 @@ object Request {
               "fileBytesPart" -> fileBytesBody
           }
           // If duplicated `jsonPartName` or `fileBytesPartName` than first one defined only
+          // (= will take only the latest tuple if duplicated keys)
           .reverse
-          .toMap // Will take only the latest tuple if duplicated keys
+          .toMap
 
         // Return according if successful retrieve
         if (!(streams.contains("jsonPart") && streams.contains("fileBytesPart"))) {

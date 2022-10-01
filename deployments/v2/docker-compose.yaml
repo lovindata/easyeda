@@ -10,6 +10,6 @@ services:
       - "5432:5432"
     environment:
       # RestAPI env variables
-      POSTGRES_DB: restapi
-      POSTGRES_USER: restapi-user
-      POSTGRES_PASSWORD : restapi-pwd
+      POSTGRES_DB: easyeda
+      POSTGRES_USER: easyeda-user
+      POSTGRES_PASSWORD : easyeda-pwd

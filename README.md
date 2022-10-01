@@ -27,7 +27,7 @@ It means none of your source data are saved somewhere plus everything are done o
 
 # Logbook (🙏😣 Work still in progress...)
 
-- Continue on swaggerUI documentation
+- Continue on swaggerUI documentation for preview
 - Building whole execution of preview
   - Job will be launched without saving to DBs for the moment
 - Think about cron jobs not terminated but still here sessions ?

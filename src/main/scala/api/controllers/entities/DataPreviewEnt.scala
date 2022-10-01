@@ -1,8 +1,8 @@
 package com.ilovedatajjia
-package api.routes.entities
+package api.controllers.entities
 
-import api.helpers.NormType.NormType
-import api.routes.entities.DataPreviewEnt._
+import api.helpers.NormTypeEnum.NormType
+import DataPreviewEnt._
 import cats.effect.IO
 import io.circe.Decoder
 import io.circe.Encoder
