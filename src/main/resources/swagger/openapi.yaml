@@ -30,7 +30,7 @@ tags:
   - name: session
     description: Everything about your API Session
   - name: job
-    description: Kind of job you can launch via the API and your Session
+    description: Job you can launch via your API Session
 paths:
   /session/create:
     post:
@@ -99,6 +99,44 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/SessionStatusEnts"
+        "500":
+          description: Internal server error please re-try in a few minutes
+  /job/preview:
+    post:
+      tags: [job]
+      summary: Submit partial preview job
+      parameters:
+        - name: nbRows
+          in: query
+          description: Number of rows in the preview (`-1` for all rows)
+          required: true
+          schema:
+            $ref: "#/components/schemas/Int32MinusOneToMax"
+        - name: minColIdx
+          in: query
+          description: Included starting index column (an int64 starting from `1` or equal `-1`)
+          required: true
+          schema:
+            $ref : "#/components/schemas/Int32MinusOneToMaxZeroExcluded"
+        - name: maxColIdx
+          in: query
+          description: Included ending index column (Higher than `minColIdx` or `-1`)
+          required: true
+          schema:
+            $ref : "#/components/schemas/Int32MinusOneToMaxZeroExcluded"
+      requestBody:
+        description: Custom column names and types
+        content:
+          application/json:
+            schema:
+              $ref : "#/components/schemas/CustomColNamesTypes"
+      responses:
+        "200":
+          description: Successful submitted preview job
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DataPreviewEnt"
         "500":
           description: Internal server error please re-try in a few minutes
 components:
@@ -171,8 +209,7 @@ components:
               colName:
                 type: string
               colType:
-                type: string
-                example: "Numerical"
+                $ref: "#/components/schemas/ColType"
         dataValues:
           type: array
           items:
@@ -180,6 +217,35 @@ components:
             items:
               type: string
               example: <cellVal>
+    ColType:
+      type: string
+      enum: [Numerical, Categorical, Date, Timestamp]
+      example: Numerical
+    Int32OneToMax:
+      description: "`1` to `IntMaxValue`"
+      type: integer
+      format: int32
+    Int32MinusOneToMax:
+      description: "`-1` to `IntMaxValue`"
+      type: integer
+      format: int32
+    Int32MinusOneToMaxZeroExcluded:
+      description: "`-1` to `IntMaxValue` without `0`"
+      type: integer
+      format: int32
+    CustomColNamesTypes:
+      type: array
+      items:
+        type: object
+        required: [natColIdx, colType]
+        properties:
+          natColIdx:
+            $ref: "#/components/schemas/Int32OneToMax"
+          colType:
+            $ref: "#/components/schemas/ColType"
+          newColName:
+            description: Optional new column name
+            type: string
   securitySchemes:
     sessionBearerAuth:
       description: Bearer token to session
