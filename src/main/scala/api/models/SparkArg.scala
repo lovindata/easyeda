@@ -3,6 +3,7 @@ package api.models
 
 import api.helpers.NormTypeEnum._
 import cats.effect.IO
+import config.SparkServer._
 import io.circe.Decoder
 import io.circe.Encoder
 import io.circe.Json
@@ -15,7 +16,6 @@ import org.apache.spark.sql.Column
 import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.Dataset
 import org.apache.spark.sql.functions._
-import config.SparkServer._
 
 /**
  * Operation arguments.
@@ -132,13 +132,7 @@ object SparkArg {
    * @param timestampFormat
    *   Timestamp format to consider when inferring the schema
    */
-  case class JsonArg(sep: String,
-                     quote: String,
-                     escape: String,
-                     header: Boolean,
-                     inferSchema: Boolean,
-                     dateFormat: Option[String],
-                     timestampFormat: Option[String])
+  case class JsonArg(inferSchema: Boolean, dateFormat: Option[String], timestampFormat: Option[String])
       extends SparkArgR {
 
     /**

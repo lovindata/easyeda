@@ -114,22 +114,27 @@ paths:
             $ref: "#/components/schemas/Int32MinusOneToMax"
         - name: minColIdx
           in: query
-          description: Included starting index column (an int64 starting from `1` or equal `-1`)
+          description: Included starting index column (an int32 starting from `1` or equal `-1`)
           required: true
           schema:
-            $ref : "#/components/schemas/Int32MinusOneToMaxZeroExcluded"
+            $ref: "#/components/schemas/Int32MinusOneToMaxZeroExcluded"
         - name: maxColIdx
           in: query
           description: Included ending index column (Higher than `minColIdx` or `-1`)
           required: true
           schema:
-            $ref : "#/components/schemas/Int32MinusOneToMaxZeroExcluded"
+            $ref: "#/components/schemas/Int32MinusOneToMaxZeroExcluded"
       requestBody:
-        description: Custom column names and types
+        description: Importing file with options
         content:
-          application/json:
+          multipart/form-data:
             schema:
-              $ref : "#/components/schemas/CustomColNamesTypes"
+              $ref: "#/components/schemas/FileImportWithOpt"
+            encoding:
+              fileImportOpt:
+                contentType: application/json
+              fileName:
+                contentType: application/octet-stream
       responses:
         "200":
           description: Successful submitted preview job
@@ -233,19 +238,99 @@ components:
       description: "`-1` to `IntMaxValue` without `0`"
       type: integer
       format: int32
-    CustomColNamesTypes:
+    CustomColType:
+      oneOf:
+        - type: object
+          required: [nameType]
+          properties:
+            nameType:
+              type: string
+              enum: [Numerical, Categorical]
+              example: Numerical
+        - type: object
+          required: [nameType, dateFormat]
+          properties:
+            nameType:
+              type: string
+              enum: [Date]
+            dateFormat:
+              description: In case of `Date`, mask to use for infering the column as `Date` (please all tags possible [here](https://spark.apache.org/docs/latest/sql-ref-datetime-pattern.html))
+              type: string
+              default: yyyy-MM-dd
+        - type: object
+          required: [nameType, timestampFormat]
+          properties:
+            nameType:
+              type: string
+              enum: [Timestamp]
+            timestampFormat:
+              description: In case of `Timestamp`, mask to use for infering the column as `Timestamp` (please all tags possible [here](https://spark.apache.org/docs/latest/sql-ref-datetime-pattern.html))
+              type: string
+              default: yyyy-MM-dd HH:mm:ss.SSSSSS
+    CustomSchema:
       type: array
       items:
         type: object
-        required: [natColIdx, colType]
+        required: [natColIdx, newColType]
         properties:
           natColIdx:
             $ref: "#/components/schemas/Int32OneToMax"
-          colType:
-            $ref: "#/components/schemas/ColType"
+          newColType:
+            $ref: "#/components/schemas/CustomColType"
           newColName:
             description: Optional new column name
             type: string
+    CsvImportOpt:
+      required: [sep, quote, escape, header, inferSchema]
+      properties:
+        sep:
+          description: Character for CSV column separation
+          type: string
+          minLength: 1
+          maxLength: 1
+          default: ","
+        quote:
+          description: Character for CSV cell bordering
+          type: string
+          minLength: 1
+          maxLength: 1
+          default: '"'
+        escape:
+          description: Character prefix to consider the next character as string
+          type: string
+          minLength: 1
+          maxLength: 1
+          default: \
+        header:
+          type: boolean
+          default: true
+        inferSchema:
+          type: boolean
+          default: true
+        customSchema:
+          $ref: "#/components/schemas/CustomSchema"
+    JsonImportOpt:
+      required: [inferSchema]
+      properties:
+        inferSchema:
+          type: boolean
+          default: true
+        customSchema:
+          $ref: "#/components/schemas/CustomSchema"
+    FileImportWithOpt:
+      type: object
+      required: [fileImportOpt, fileName]
+      properties:
+        fileImportOpt:
+          description: File import options (please directly see `CsvImportOpt` or `JsonImportOpt` all down below 👇 in `Schemas` section)
+          type: object
+          oneOf:
+            - $ref: "#/components/schemas/CsvImportOpt"
+            - $ref: "#/components/schemas/JsonImportOpt"
+        fileName:
+          description: File binaries
+          type: string
+          format: binary
   securitySchemes:
     sessionBearerAuth:
       description: Bearer token to session

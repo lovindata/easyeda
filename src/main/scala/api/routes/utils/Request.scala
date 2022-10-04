@@ -28,14 +28,14 @@ object Request {
      * Process CSV or JSON file upload with its corresponding json parameters directly in-memory.
      * @param jsonPartName
      *   JSON parameters part name (the part is supposed in utf8 json)
-     * @param fileBytesPartName
+     * @param fileBinariesPartName
      *   File uploaded part name (the part is supposed in utf8 text)
      * @param f
      *   Execution from the correctly drained parts to the final HTTP response
      * @return
      *   HTTP response from the execution `f` OR un-processable entity response
      */
-    def withJSONAndFileBytesMultipart(jsonPartName: String, fileBytesPartName: String)(
+    def withJSONAndFileBytesMultipart(jsonPartName: String, fileBinariesPartName: String)(
         f: (Json, String) => IO[Response[IO]]): IO[Response[IO]] =
       req.decode[Multipart[IO]] { multiPart: Multipart[IO] =>
         // Retrieve parts from the Multipart[IO]
@@ -48,7 +48,7 @@ object Request {
             case (`jsonPartName`, contentType, jsonPartBody)
                 if contentType.mediaType.satisfies(MediaType.application.json) =>
               "jsonPart" -> jsonPartBody
-            case (`fileBytesPartName`, contentType, fileBytesBody)
+            case (`fileBinariesPartName`, contentType, fileBytesBody)
                 if contentType.mediaType.satisfies(MediaType.text.csv) || contentType.mediaType.satisfies(
                   MediaType.application.json) =>
               "fileBytesPart" -> fileBytesBody
@@ -63,7 +63,7 @@ object Request {
           // `f` ignored
           UnprocessableEntity(
             s"Please make sure there are two parts `$jsonPartName` (in `application/json`) " +
-              s"and `$fileBytesPartName` (in `text/csv` or `application/json`)")
+              s"and `$fileBinariesPartName` (in `text/csv` or `application/json`)")
         } else {
           // Drain byte from streams
           val jsonDrained: IO[Json]      =
@@ -78,7 +78,7 @@ object Request {
               (e: Throwable) =>
                 UnprocessableEntity(
                   s"Please make sure the two parts are parsable `$jsonPartName` in json " +
-                    s"and `$fileBytesPartName` in string (${e.toString})"),
+                    s"and `$fileBinariesPartName` in string (${e.toString})"),
               { case (json, fileStr) => f(json, fileStr) }
             )
         }
