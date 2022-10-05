@@ -5,6 +5,7 @@ import api.controllers.JobCtrl
 import api.models.SessionMod
 import api.routes.utils.Auth._
 import api.routes.utils.Request._
+import api.routes.utils.Response._
 import cats.effect.IO
 import cats.implicits._
 import fs2.Stream

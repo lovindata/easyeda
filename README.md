@@ -28,8 +28,7 @@ It means none of your source data are saved somewhere plus everything are done o
 # Logbook (🙏😣 Work still in progress...)
 
 - Continue with dev on preview
-  - File stream drain only on service layer
-  - JSON body validate on controller layer
+  - JSON body validate on controller layer (😼 TODO currently HERE 😼)
   - Think about if the validator layer is worth doing
 - Building whole execution of preview
   - Job will be launched without saving to DBs for the moment

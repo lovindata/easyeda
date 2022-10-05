@@ -114,13 +114,13 @@ paths:
             $ref: "#/components/schemas/Int32MinusOneToMax"
         - name: minColIdx
           in: query
-          description: Included starting index column (an int32 starting from `1` or equal `-1`)
+          description: Included starting index column (an int32 starting from `1`)
           required: true
           schema:
-            $ref: "#/components/schemas/Int32MinusOneToMaxZeroExcluded"
+            $ref: "#/components/schemas/Int32OneToMax"
         - name: maxColIdx
           in: query
-          description: Included ending index column (Higher than `minColIdx` or `-1`)
+          description: Included ending index column (Higher or equal than `minColIdx` or `-1`)
           required: true
           schema:
             $ref: "#/components/schemas/Int32MinusOneToMaxZeroExcluded"
@@ -134,7 +134,7 @@ paths:
               fileImportOpt:
                 contentType: application/json
               fileName:
-                contentType: application/octet-stream
+                contentType: text/csv, application/json
       responses:
         "200":
           description: Successful submitted preview job
@@ -319,7 +319,7 @@ components:
           $ref: "#/components/schemas/CustomSchema"
     FileImportWithOpt:
       type: object
-      required: [fileImportOpt, fileName]
+      required: [fileImportOpt, fileImport]
       properties:
         fileImportOpt:
           description: File import options (please directly see `CsvImportOpt` or `JsonImportOpt` all down below 👇 in `Schemas` section)
@@ -327,7 +327,7 @@ components:
           oneOf:
             - $ref: "#/components/schemas/CsvImportOpt"
             - $ref: "#/components/schemas/JsonImportOpt"
-        fileName:
+        fileImport:
           description: File binaries
           type: string
           format: binary

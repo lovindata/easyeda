@@ -10,12 +10,36 @@ import api.models.SparkArg
 import api.models.SparkArg._
 import api.models.SparkOpMod
 import cats.effect.IO
+import fs2.Stream
 import io.circe.Json
 
 /**
  * Controller for jobs logic.
  */
 object JobCtrl {
+
+  /**
+   * Validated the parameters and compute the preview.
+   * @param validatedSession
+   *   Validated session
+   * @param fileImportOpt
+   *   File options to validate
+   * @param fileImport
+   *   Ready to be drained stream corresponding the file data
+   * @param nbRows
+   *   Number of rows of the preview
+   * @param minColIdx
+   *   Included border minimum index column (Starts from 1)
+   * @param maxColIdx
+   *   Included border maximum index column (`-1` for all on the right)
+   * @return
+   */
+  def computePreview(validatedSession: SessionMod,
+                     fileImportOpt: Json,
+                     fileImport: Stream[IO, Byte],
+                     nbRows: Int,
+                     minColIdx: Int,
+                     maxColIdx: Int): IO[DataPreviewEnt] = ???
 
   /**
    * Compute the DataFrame preview of the file using the json operations.
@@ -32,11 +56,11 @@ object JobCtrl {
    * @return
    *   DataFrame preview
    */
-  def computePreview(validatedSession: SessionMod,
-                     sparkArgs: Json,
-                     fileStr: String,
-                     nbRows: Int,
-                     nbCols: Int): IO[DataPreviewEnt] = {
+  def computePreviewDeprecated(validatedSession: SessionMod,
+                               sparkArgs: Json,
+                               fileStr: String,
+                               nbRows: Int,
+                               nbCols: Int): IO[DataPreviewEnt] = {
     // Parse operations
     val sparkArgsParsed: Array[SparkArg] = sparkArgs.toSparkArgs
 
