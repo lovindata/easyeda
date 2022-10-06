@@ -1,7 +1,7 @@
 package com.ilovedatajjia
 package api.controllers
 
-import api.controllers.entities._
+import api.dto.output._
 import api.helpers.CatsEffectExtension.RichArray
 import api.helpers.SessionStateEnum._
 import api.models.SessionMod
@@ -49,7 +49,7 @@ object SessionCtrl {
    * @return
    *   Session UUID & Authorization token
    */
-  def createSession: IO[SessionAuthEnt] = for {
+  def createSession: IO[SessionAuthDtoOut] = for {
     // Generate authorization token
     authToken      <-
       (UUIDGen[IO].randomUUID, Clock[IO].monotonic) // `Clock[IO].monotonic` == now unix timestamp in nanoseconds
@@ -59,20 +59,7 @@ object SessionCtrl {
     // Create & Persist the new session
     createdSession <- SessionMod(authToken)
     _              <- createdSession.startCronJobInactivityCheck() // Start also the inactivity checker
-  } yield SessionAuthEnt(createdSession.id, authToken)
-
-  /**
-   * Render [[SessionMod]] to [[SessionStatusEnt]].
-   * @param validatedSession
-   *   Validated session
-   * @return
-   *   Rendered [[SessionMod]]
-   */
-  def renderSession(validatedSession: SessionMod): SessionStatusEnt = SessionStatusEnt(
-    validatedSession.id,
-    validatedSession.createdAt.toString,
-    validatedSession.updatedAt.toString,
-    validatedSession.terminatedAt.map(_.toString))
+  } yield SessionAuthDtoOut(createdSession.id, authToken)
 
   /**
    * Terminate the provided session.
@@ -81,15 +68,15 @@ object SessionCtrl {
    * @return
    *   Session updated status
    */
-  def terminateSession(validatedSession: SessionMod): IO[SessionStatusEnt] = for {
+  def terminateSession(validatedSession: SessionMod): IO[SessionStatusDtoOut] = for {
     updatedSession <- validatedSession.terminatedAt match {
                         case Some(_) => IO(validatedSession)
                         case None    => validatedSession.terminate // Terminate only if not terminated
                       }
-  } yield SessionStatusEnt(updatedSession.id,
-                           updatedSession.createdAt.toString,
-                           updatedSession.updatedAt.toString,
-                           updatedSession.terminatedAt.map(_.toString))
+  } yield SessionStatusDtoOut(updatedSession.id,
+                              updatedSession.createdAt.toString,
+                              updatedSession.updatedAt.toString,
+                              updatedSession.terminatedAt.map(_.toString))
 
   /**
    * List all non terminated sessions.
@@ -100,7 +87,7 @@ object SessionCtrl {
    * @return
    *   Listing of all non terminated sessions
    */
-  def listSessions(validatedSession: SessionMod, state: String): IO[Array[SessionStatusEnt]] = for {
+  def listSessions(validatedSession: SessionMod, state: String): IO[Array[SessionStatusDtoOut]] = for {
     // Validate the parameter
     filterState   <- IO(state match {
                        case "ALL"             => None
@@ -111,10 +98,10 @@ object SessionCtrl {
     // Starting listing
     sessions      <- SessionMod.listSessions(filterState)
     sessionsStatus = sessions.map(session =>
-                       SessionStatusEnt(session.id,
-                                        session.createdAt.toString,
-                                        session.updatedAt.toString,
-                                        session.terminatedAt.map(_.toString)))
+                       SessionStatusDtoOut(session.id,
+                                           session.createdAt.toString,
+                                           session.updatedAt.toString,
+                                           session.terminatedAt.map(_.toString)))
   } yield sessionsStatus
 
 }

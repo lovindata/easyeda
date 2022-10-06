@@ -1,14 +1,11 @@
 package com.ilovedatajjia
 package api.controllers
 
-import api.controllers.entities.DataPreviewEnt
-import api.controllers.entities.DataPreviewEnt.DataConf
-import api.controllers.entities.DataPreviewEnt.DataSchema
-import api.helpers.CatsEffectExtension.RichArray
+import api.dto.input.FileImportOptDtoIn
+import api.dto.output.DataPreviewDtoOut
 import api.models.SessionMod
-import api.models.SparkArg
-import api.models.SparkArg._
-import api.models.SparkOpMod
+import api.services.JobSvc
+import cats.data.EitherT
 import cats.effect.IO
 import fs2.Stream
 import io.circe.Json
@@ -33,14 +30,26 @@ object JobCtrl {
    * @param maxColIdx
    *   Included border maximum index column (`-1` for all on the right)
    * @return
+   *   Data preview OR error
    */
   def computePreview(validatedSession: SessionMod,
                      fileImportOpt: Json,
                      fileImport: Stream[IO, Byte],
                      nbRows: Int,
                      minColIdx: Int,
-                     maxColIdx: Int): IO[DataPreviewEnt] = ???
+                     maxColIdx: Int): EitherT[IO, Throwable, DataPreviewDtoOut] = for {
+    fileImportOpt <- IO(fileImportOpt.as[FileImportOptDtoIn].left.map(throw _))
+    _             <- IO {
+                       case _ if (-1 <= nbRows) && (minColIdx == 0)                             => Right()
+                       case _ if (-1 <= nbRows) && (1 <= minColIdx) && (minColIdx <= maxColIdx) => Right()
+                       case _ if (-1 <= nbRows) && (1 <= minColIdx) && (maxColIdx == -1)        => Right()
+                       case _                                                                   =>
+                         Left(throw new UnsupportedOperationException("Please make sure query parameters are coherent"))
+                     }
+    _             <- JobSvc.computePreview()
+  } yield ???
 
+  /*
   /**
    * Compute the DataFrame preview of the file using the json operations.
    * @param validatedSession
@@ -60,7 +69,7 @@ object JobCtrl {
                                sparkArgs: Json,
                                fileStr: String,
                                nbRows: Int,
-                               nbCols: Int): IO[DataPreviewEnt] = {
+                               nbCols: Int): IO[DataPreviewDtoOut] = {
     // Parse operations
     val sparkArgsParsed: Array[SparkArg] = sparkArgs.toSparkArgs
 
@@ -87,9 +96,10 @@ object JobCtrl {
 
       // Terminate job
       // _ <- job.toTerminated
-    } yield DataPreviewEnt(DataConf(nbRows, nbCols),
-                           prevSch.map { case (colName, colType) => DataSchema(colName, colType) },
-                           prevValues)
+    } yield DataPreviewDtoOut(DataConf(nbRows, nbCols),
+                              prevSch.map { case (colName, colType) => DataSchema(colName, colType) },
+                              prevValues)
   }
+   */
 
 }

@@ -17,6 +17,7 @@ object NormTypeEnum extends Enumeration {
   type NormType = Value
   val Numerical, Categorical, Date, Timestamp: NormType = Value
 
+  // JSON Encoder & Decoder
   implicit val normTypeDec: Decoder[NormType] = _.value.as[String].map(_.toNormType)
   implicit val normTypeEnc: Encoder[NormType] = x => Json.fromString(x.toString)
 

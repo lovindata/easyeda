@@ -44,7 +44,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/SessionAuthEnt"
+                $ref: "#/components/schemas/SessionAuthDtoOut"
         "500":
           description: Internal server error please re-try in a few minutes
   /session/status:
@@ -58,7 +58,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/SessionStatusEnt"
+                $ref: "#/components/schemas/SessionStatusDtoOut"
         "500":
           description: Internal server error please re-try in a few minutes
   /session/terminate:
@@ -72,7 +72,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/SessionStatusEnt"
+                $ref: "#/components/schemas/SessionStatusDtoOut"
               example:
                 id: 1
                 createdAt: 2022-08-27 18:31:04.696
@@ -98,7 +98,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/SessionStatusEnts"
+                $ref: "#/components/schemas/SessionsStatusDtoOut"
         "500":
           description: Internal server error please re-try in a few minutes
   /job/preview:
@@ -141,12 +141,12 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/DataPreviewEnt"
+                $ref: "#/components/schemas/DataPreviewDtoOut"
         "500":
           description: Internal server error please re-try in a few minutes
 components:
   schemas:
-    SessionAuthEnt:
+    SessionAuthDtoOut:
       type: object
       required:
         - id
@@ -159,7 +159,7 @@ components:
         authToken:
           type: string
           example: OTgwZDMzOGYtZmNhMi00YzIwLTk3MWUtMTdkNTMzZGU0ODE2OjI2NjI5NDk0ODg1MjUwMCBuYW5vc2Vjb25kcw==
-    SessionStatusEnt:
+    SessionStatusDtoOut:
       type: object
       required:
         - id
@@ -180,15 +180,15 @@ components:
         terminatedAt:
           type: string
           example: null
-    SessionStatusEnts:
+    SessionsStatusDtoOut:
       type: array
       items:
-        $ref: "#/components/schemas/SessionStatusEnt"
+        $ref: "#/components/schemas/SessionStatusDtoOut"
     SessionState:
       type: string
       default: ALL
       enum: [ALL, ACTIVE_ONLY, TERMINATED_ONLY]
-    DataPreviewEnt:
+    DataPreviewDtoOut:
       type: object
       required:
         - dataConf
@@ -280,7 +280,7 @@ components:
           newColName:
             description: Optional new column name
             type: string
-    CsvImportOpt:
+    CsvImportOptDtoIn:
       required: [sep, quote, escape, header, inferSchema]
       properties:
         sep:
@@ -296,7 +296,7 @@ components:
           maxLength: 1
           default: '"'
         escape:
-          description: Character prefix to consider the next character as string
+          description: Character prefix to consider the next character as character
           type: string
           minLength: 1
           maxLength: 1
@@ -309,7 +309,7 @@ components:
           default: true
         customSchema:
           $ref: "#/components/schemas/CustomSchema"
-    JsonImportOpt:
+    JsonImportOptDtoIn:
       required: [inferSchema]
       properties:
         inferSchema:
@@ -322,11 +322,11 @@ components:
       required: [fileImportOpt, fileImport]
       properties:
         fileImportOpt:
-          description: File import options (please directly see `CsvImportOpt` or `JsonImportOpt` all down below 👇 in `Schemas` section)
+          description: File import options (please directly see `CsvImportOptDtoIn` or `JsonImportOptDtoIn` all down below 👇 in `Schemas` section)
           type: object
           oneOf:
-            - $ref: "#/components/schemas/CsvImportOpt"
-            - $ref: "#/components/schemas/JsonImportOpt"
+            - $ref: "#/components/schemas/CsvImportOptDtoIn"
+            - $ref: "#/components/schemas/JsonImportOptDtoIn"
         fileImport:
           description: File binaries
           type: string
