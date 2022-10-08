@@ -1,11 +1,11 @@
 package com.ilovedatajjia
 package api.routes.utils
 
-import api.controllers.SessionCtrl
 import api.models.SessionMod
 import cats.data._
 import cats.effect.IO
 import cats.implicits._
+import com.ilovedatajjia.api.services.SessionSvc
 import org.http4s._
 import org.http4s.AuthScheme
 import org.http4s.Credentials
@@ -48,7 +48,7 @@ object Auth {
   val withAuth: AuthMiddleware[IO, SessionMod] = {
     // Lambda verify session
     val verifySession: Kleisli[IO, String, Either[String, SessionMod]] = Kleisli({ authToken =>
-      SessionCtrl
+      SessionSvc
         .verifyAuthorization(authToken)
         .redeem(
           (e: Throwable) => Left(e.toString),

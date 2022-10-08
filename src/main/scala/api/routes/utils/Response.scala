@@ -1,6 +1,7 @@
 package com.ilovedatajjia
 package api.routes.utils
 
+import cats.data.EitherT
 import cats.effect.IO
 import org.http4s._
 import org.http4s.circe.CirceEntityCodec.circeEntityEncoder
@@ -45,6 +46,29 @@ object Response {
       (e: Throwable) => InternalServerError(e.toString),
       (_: A) => Ok(entity)
     )
+
+  }
+
+  /**
+   * Rich functions for [[EitherT]] of [[IO]] result to route [[Response]].
+   * @param x
+   *   Applied on
+   * @tparam A
+   *   Result type
+   */
+  implicit class RichEitherT[A](x: EitherT[IO, Throwable, A]) {
+
+    /**
+     * Response 200 or 500 according the [[IO]] result.
+     * @param w
+     *   Make sure to have an existing [[EntityEncoder]] in scope
+     * @return
+     *   HTTP response with the result or Default [[InternalServerError]] with the caught exception message
+     */
+    def toResponse(implicit w: EntityEncoder[IO, A]): IO[Response[IO]] = x.value.flatMap {
+      case Left(e: Throwable) => InternalServerError(e.toString)
+      case Right(result)      => Ok(result)
+    }
 
   }
 

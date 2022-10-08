@@ -4,8 +4,9 @@ package api.routes.utils
 import cats.effect.IO
 import cats.implicits._
 import fs2.Stream
+import fs2.text
 import io.circe.Json
-import io.circe.fs2.byteStreamParser
+import io.circe.fs2.stringStreamParser
 import org.http4s._
 import org.http4s.dsl.io._
 import org.http4s.multipart.Multipart
@@ -40,14 +41,14 @@ object Request {
         // Retrieve parts from the Multipart[IO]
         val streams: Map[String, Stream[IO, Byte]] = multiPart.parts
           .collect {
-            case part: Part[IO] if part.name.isDefined && part.contentType.isDefined =>
-              (part.name.get, part.contentType.get, part.body)
+            case part: Part[IO] if part.name.isDefined /* && part.contentType.isDefined
+            (SwaggerUI issue cannot send with MediaType) */ =>
+              (part.name.get, part.contentType, part.body)
           }
           .collect {
-            case (`jsonPartName`, contentType, jsonPartBody)
-                if contentType.mediaType.satisfies(MediaType.application.json) =>
-              "jsonPart" -> jsonPartBody
-            case (`fileBytesPartName`, contentType, fileBytesBody)
+            case (`jsonPartName`, _, jsonPartBody) /* if contentType.mediaType.satisfies(MediaType.application.json)
+              (SwaggerUI issue cannot send with MediaType) */ => "jsonPart" -> jsonPartBody
+            case (`fileBytesPartName`, Some(contentType), fileBytesBody)
                 if contentType.mediaType.satisfies(MediaType.text.csv) || contentType.mediaType.satisfies(
                   MediaType.application.json) =>
               "fileBytesPart" -> fileBytesBody
@@ -61,19 +62,18 @@ object Request {
         if (!(streams.contains("jsonPart") && streams.contains("fileBytesPart"))) {
           // `f` ignored
           UnprocessableEntity(
-            s"Please make sure there are two parts `$jsonPartName` (in `application/json`) " +
+            s"Please ensure there are two parts `$jsonPartName` " +
               s"and `$fileBytesPartName` (in `text/csv` or `application/json`)")
         } else {
           // Drain byte from streams
-          val jsonDrained: IO[Json]             = streams("jsonPart").foldMonoid.through(byteStreamParser).compile.lastOrError
+          val jsonDrained: IO[Json]             =
+            streams("jsonPart").through(text.utf8.decode).foldMonoid.through(stringStreamParser).compile.lastOrError
           val fileBytesStream: Stream[IO, Byte] = streams("fileBytesPart")
 
           // Apply `f`
           jsonDrained.redeemWith(
             (e: Throwable) =>
-              UnprocessableEntity(
-                s"Please make sure the two parts are parsable `$jsonPartName` in json " +
-                  s"and `$fileBytesPartName` in string (${e.toString})"),
+              UnprocessableEntity(s"Please ensure the part `$jsonPartName` is parsable in json (${e.toString})"),
             { json => f(json, fileBytesStream) }
           )
         }

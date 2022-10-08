@@ -6,7 +6,7 @@ import io.circe._
 import io.circe.generic.semiauto._
 
 /**
- * For JSON automatic derivation.
+ * File import options.
  */
 sealed trait FileImportOptDtoIn
 
@@ -15,26 +15,24 @@ sealed trait FileImportOptDtoIn
  */
 object FileImportOptDtoIn {
 
-  // Encoder & Decoder
-  implicit val enc: Encoder[FileImportOptDtoIn] = deriveEncoder
-  implicit val dec: Decoder[FileImportOptDtoIn] = deriveDecoder
-
-  // Class definition for automatic JSON derivation
+  /**
+   * Custom column type.
+   */
   sealed trait CustomColType
-  object CustomColType {
-    implicit val enc: Encoder[CustomColType] = deriveEncoder
-    implicit val dec: Decoder[CustomColType] = deriveDecoder
-    case class CustomColBase(nameType: NormType)                               extends CustomColType
-    case class CustomColDate(nameType: NormType, dateFormat: String)           extends CustomColType
-    case class CustomColTimestamp(nameType: NormType, timestampFormat: String) extends CustomColType
-  }
+  case class CustomColBase(nameType: NormType)                               extends CustomColType
+  case class CustomColDate(nameType: NormType, dateFormat: String)           extends CustomColType
+  case class CustomColTimestamp(nameType: NormType, timestampFormat: String) extends CustomColType
 
-  // Class definition for automatic JSON derivation
+  /**
+   * Custom schema.
+   * @param natColIdx
+   *   Natural index of a column starting from `0`.
+   * @param newColType
+   *   Custom column type
+   * @param newColName
+   *   New column name
+   */
   case class CustomSchema(natColIdx: Int, newColType: CustomColType, newColName: String)
-  object CustomSchema {
-    implicit val enc: Encoder[CustomSchema] = deriveEncoder
-    implicit val dec: Decoder[CustomSchema] = deriveDecoder
-  }
 
   /**
    * CSV file options.
@@ -67,5 +65,13 @@ object FileImportOptDtoIn {
    *   Custom schema to apply (cannot be used with [[inferSchema]])
    */
   case class JsonImportOptDtoIn(inferSchema: Boolean, customSchema: Option[CustomSchema]) extends FileImportOptDtoIn
+
+  // JSON encoders & decoders
+  implicit val encCustomColType: Encoder[CustomColType] = deriveEncoder
+  implicit val decCustomColType: Decoder[CustomColType] = deriveDecoder
+  implicit val encCustomSchema: Encoder[CustomSchema]   = deriveEncoder
+  implicit val decCustomSchema: Decoder[CustomSchema]   = deriveDecoder
+  implicit val enc: Encoder[FileImportOptDtoIn]         = deriveEncoder
+  implicit val dec: Decoder[FileImportOptDtoIn]         = deriveDecoder
 
 }

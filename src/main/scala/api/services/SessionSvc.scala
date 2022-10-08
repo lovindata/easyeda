@@ -1,8 +1,8 @@
 package com.ilovedatajjia
-package api.controllers
+package api.services
 
 import api.dto.output._
-import api.helpers.CatsEffectExtension.RichArray
+import api.helpers.CatsEffectExtension._
 import api.helpers.SessionStateEnum._
 import api.models.SessionMod
 import cats.effect._
@@ -13,9 +13,9 @@ import java.nio.charset.StandardCharsets
 import java.util.Base64
 
 /**
- * Controller for sessions logic.
+ * Service layer for sessions.
  */
-object SessionCtrl {
+object SessionSvc {
 
   /**
    * Restart inactivity checks of existing sessions or terminate them.

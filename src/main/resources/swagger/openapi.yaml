@@ -21,7 +21,7 @@ info:
   version: 0.0.0
 externalDocs:
   description: Find out more about Swagger
-  url: http://swagger.io
+  url: https://swagger.io/
 servers:
   - url: http://localhost:8080/api
     description: Local development or integration
@@ -36,7 +36,7 @@ paths:
     post:
       tags:
         - session
-      summary: Create a new session
+      summary: Create a new sessiond
       description: Will generate an unique identifier session ID and corresponding bearer token
       responses:
         "200":
@@ -129,11 +129,23 @@ paths:
         content:
           multipart/form-data:
             schema:
-              $ref: "#/components/schemas/FileImportWithOpt"
+              type: object
+              required: [fileImportOpt, fileImport]
+              properties:
+                fileImportOpt:
+                  description: File import options (please directly see `CsvImportOptDtoIn` or `JsonImportOptDtoIn` all down below 👇 in `Schemas` section)
+                  type: object
+                  oneOf:
+                    - $ref: "#/components/schemas/CsvImportOptDtoIn"
+                    - $ref: "#/components/schemas/JsonImportOptDtoIn"
+                fileImport:
+                  description: File binaries
+                  type: string
+                  format: binary
             encoding:
-              fileImportOpt:
-                contentType: application/json
-              fileName:
+              fileImportOpt: 
+               contentType: application/json
+              fileImport:
                 contentType: text/csv, application/json
       responses:
         "200":

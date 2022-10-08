@@ -15,7 +15,7 @@ object ConfigLoader {
     case class PortOutOfRangeException(msgException: String) extends Exception
     Port
       .fromInt(parsedPost)
-      .getOrElse(throw PortOutOfRangeException("Please make sure your provided port is in range"))
+      .getOrElse(throw PortOutOfRangeException("Please ensure your provided port is in range"))
   }
   val sparkUIPort: String = sys.env.getOrElse("EASYEDA_SPARK_UI_PORT", default = "4040")
 

@@ -2,13 +2,24 @@ package com.ilovedatajjia
 package api.controllers
 
 import api.dto.input.FileImportOptDtoIn
+import api.dto.input.FileImportOptDtoIn._
 import api.dto.output.DataPreviewDtoOut
+import api.helpers.CatsEffectExtension._
+import api.helpers.CirceExtension._
+import api.helpers.NormTypeEnum._
 import api.models.SessionMod
 import api.services.JobSvc
 import cats.data.EitherT
 import cats.effect.IO
+import cats.implicits._
+import config.SparkServer.spark
+import config.SparkServer.spark.implicits._
 import fs2.Stream
+import fs2.text
 import io.circe.Json
+import io.circe.fs2.byteArrayParser
+import org.apache.spark.sql.DataFrame
+import scala.io.Source
 
 /**
  * Controller for jobs logic.
@@ -26,28 +37,32 @@ object JobCtrl {
    * @param nbRows
    *   Number of rows of the preview
    * @param minColIdx
-   *   Included border minimum index column (Starts from 1)
+   *   Included border minimum index column (Starts from `1` or equal `-1` for no columns)
    * @param maxColIdx
    *   Included border maximum index column (`-1` for all on the right)
    * @return
-   *   Data preview OR error
+   *   Data preview
    */
   def computePreview(validatedSession: SessionMod,
                      fileImportOpt: Json,
                      fileImport: Stream[IO, Byte],
                      nbRows: Int,
                      minColIdx: Int,
-                     maxColIdx: Int): EitherT[IO, Throwable, DataPreviewDtoOut] = for {
-    fileImportOpt <- IO(fileImportOpt.as[FileImportOptDtoIn].left.map(throw _))
-    _             <- IO {
-                       case _ if (-1 <= nbRows) && (minColIdx == 0)                             => Right()
-                       case _ if (-1 <= nbRows) && (1 <= minColIdx) && (minColIdx <= maxColIdx) => Right()
-                       case _ if (-1 <= nbRows) && (1 <= minColIdx) && (maxColIdx == -1)        => Right()
-                       case _                                                                   =>
-                         Left(throw new UnsupportedOperationException("Please make sure query parameters are coherent"))
-                     }
-    _             <- JobSvc.computePreview()
-  } yield ???
+                     maxColIdx: Int): EitherT[IO, Throwable, DataPreviewDtoOut] =
+    for {
+      // Validations
+      _                   <- EitherT(
+                               IO(
+                                 if ((-1 <= nbRows) && (minColIdx == 0)) Right(())
+                                 else if ((-1 <= nbRows) && (1 <= minColIdx) && (minColIdx <= maxColIdx)) Right(())
+                                 else if ((-1 <= nbRows) && (1 <= minColIdx) && (maxColIdx == -1)) Right(())
+                                 else Left(new UnsupportedOperationException("Please ensure query parameters are coherent"))
+                               ))
+      fileImportOpt       <- EitherT(IO(fileImportOpt.as[FileImportOptDtoIn]))
+      // Computations
+      fileImportDataFrame <- JobSvc.readStream(fileImportOpt, fileImport, nbRows)
+      dataPreview         <- JobSvc.preview(fileImportDataFrame, nbRows, minColIdx, maxColIdx)
+    } yield dataPreview
 
   /*
   /**
@@ -83,13 +98,13 @@ object JobCtrl {
       inputDf              <- sparkArgsParsed.head match {
                                 case x: SparkArgR => x.fitArg(fileStr)
                                 case _            =>
-                                  throw new UnsupportedOperationException("Please make sure your operations start with a read only")
+                                  throw new UnsupportedOperationException("Please ensure your operations start with a read only")
                               }
       inputFittedDf        <- sparkArgsParsed.tail.foldLeftM(inputDf) {
                                 case (output, sparkArgC: SparkArgC) => sparkArgC.fitArg(output)
                                 case _                              =>
                                   throw new UnsupportedOperationException(
-                                    "Please make sure your operations follow with computes only")
+                                    "Please ensure your operations follow with computes only")
                               }
       prevData             <- SparkOpMod.preview(inputFittedDf, nbRows, nbCols)
       (prevSch, prevValues) = prevData

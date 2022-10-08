@@ -19,7 +19,7 @@ libraryDependencies += "org.http4s"    %% "http4s-circe"        % "0.23.16"
 // https://mvnrepository.com/artifact/org.http4s/http4s-dsl
 libraryDependencies += "org.http4s"    %% "http4s-dsl"          % "0.23.16"
 // https://mvnrepository.com/artifact/ch.qos.logback/logback-classic
-libraryDependencies += "ch.qos.logback" % "logback-classic"     % "1.4.1" % Runtime // Needed otherwise SLF4J will failed
+libraryDependencies += "ch.qos.logback" % "logback-classic"     % "1.4.3" % Runtime // Needed otherwise SLF4J will failed
 
 // Circe
 // https://mvnrepository.com/artifact/io.circe/circe-parser
@@ -43,12 +43,6 @@ libraryDependencies += "org.tpolecat"  %% "doobie-postgres-circe" % "1.0.0-RC2"
 // https://mvnrepository.com/artifact/org.postgresql/postgresql
 libraryDependencies += "org.postgresql" % "postgresql"            % "42.5.0"
 
-// Serving SwaggerUI
-// https://mvnrepository.com/artifact/org.webjars/webjars-locator
-libraryDependencies += "org.webjars" % "webjars-locator" % "0.45"
-// https://mvnrepository.com/artifact/org.webjars/swagger-ui
-libraryDependencies += "org.webjars" % "swagger-ui"      % "4.14.0"
-
 // Spark
 // https://mvnrepository.com/artifact/org.apache.spark/spark-core
 libraryDependencies += "org.apache.spark" %% "spark-core"  % "3.3.0"
@@ -61,6 +55,6 @@ libraryDependencies += "org.apache.spark" %% "spark-mllib" % "3.3.0" % "provided
  * Test dependencies
  */
 // https://mvnrepository.com/artifact/org.scalatest/scalatest
-libraryDependencies += "org.scalatest" %% "scalatest"           % "3.2.13" % Test
-// https://mvnrepository.com/artifact/org.typelevel/munit-cats-effect-2
-libraryDependencies += "org.typelevel" %% "munit-cats-effect-2" % "1.0.7"  % Test
+libraryDependencies += "org.scalatest" %% "scalatest"                     % "3.2.14" % Test
+// https://mvnrepository.com/artifact/org.typelevel/cats-effect-testing-scalatest
+libraryDependencies += "org.typelevel" %% "cats-effect-testing-scalatest" % "1.4.0"  % Test
