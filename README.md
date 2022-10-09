@@ -28,8 +28,10 @@ It means none of your source data are saved somewhere plus everything are done o
 # Logbook (🙏😣 Work still in progress...)
 
 - Continue with dev on preview
-  - JSON body validate on controller layer (😼 TODO currently HERE 😼)
-  - Think about if the validator layer is worth doing
+  - Array of CustomColSchema to correct everywhere!
+  - IO.async not IO.async_ to try on Spark action
+  - After testing all `1` (nbRows, minColIdx, ...) gives no data (😼 TODO currently HERE 😼)
+  - UTs for Preview computation & ReadStream
 - Building whole execution of preview
   - Job will be launched without saving to DBs for the moment
 - Think about cron jobs not terminated but still here sessions ?

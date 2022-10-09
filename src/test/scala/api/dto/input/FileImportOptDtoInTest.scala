@@ -54,16 +54,16 @@ class FileImportOptDtoInTest extends AsyncFreeSpec with AsyncIOSpec with Matcher
                  |    "nameType": "Numerical"
                  |  },
                  |  "newColName": "_c0"
-                 |}""".stripMargin).flatMap(_.as[CustomSchema]))
-        .asserting(_ shouldBe Right(CustomSchema(0, Some(CustomColBase(Numerical)), "_c0")))
+                 |}""".stripMargin).flatMap(_.as[CustomColSchema]))
+        .asserting(_ shouldBe Right(CustomColSchema(0, Some(CustomColBase(Numerical)), "_c0")))
     }
 
     "**UT2** - CustomSchema JSON can be decoded without \"newColType\"" in {
       IO(parse("""{
                  |  "natColIdx": 0,
                  |  "newColName": "_c0"
-                 |}""".stripMargin).flatMap(_.as[CustomSchema]))
-        .asserting(_ shouldBe Right(CustomSchema(0, None, "_c0")))
+                 |}""".stripMargin).flatMap(_.as[CustomColSchema]))
+        .asserting(_ shouldBe Right(CustomColSchema(0, None, "_c0")))
     }
   }
 
@@ -91,7 +91,7 @@ class FileImportOptDtoInTest extends AsyncFreeSpec with AsyncIOSpec with Matcher
                               "\\",
                               header = false,
                               inferSchema = false,
-                              Some(CustomSchema(0, Some(CustomColBase(Numerical)), "_c0")))))
+                              Some(CustomColSchema(0, Some(CustomColBase(Numerical)), "_c0")))))
     }
   }
 
@@ -109,7 +109,7 @@ class FileImportOptDtoInTest extends AsyncFreeSpec with AsyncIOSpec with Matcher
                  |  }
                  |}""".stripMargin).flatMap(_.as[FileImportOptDtoIn]))
         .asserting(_ shouldBe Right(
-          JsonImportOptDtoIn(inferSchema = false, Some(CustomSchema(0, Some(CustomColBase(Numerical)), "_c0")))))
+          JsonImportOptDtoIn(inferSchema = false, Some(CustomColSchema(0, Some(CustomColBase(Numerical)), "_c0")))))
     }
   }
 

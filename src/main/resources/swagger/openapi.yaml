@@ -36,7 +36,7 @@ paths:
     post:
       tags:
         - session
-      summary: Create a new sessiond
+      summary: Create a new session
       description: Will generate an unique identifier session ID and corresponding bearer token
       responses:
         "200":
@@ -98,7 +98,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/SessionsStatusDtoOut"
+                type: array
+                items:
+                  $ref: "#/components/schemas/SessionStatusDtoOut"
         "500":
           description: Internal server error please re-try in a few minutes
   /job/preview:
@@ -192,10 +194,6 @@ components:
         terminatedAt:
           type: string
           example: null
-    SessionsStatusDtoOut:
-      type: array
-      items:
-        $ref: "#/components/schemas/SessionStatusDtoOut"
     SessionState:
       type: string
       default: ALL
@@ -279,19 +277,17 @@ components:
               description: In case of `Timestamp`, mask to use for infering the column as `Timestamp` (please all tags possible [here](https://spark.apache.org/docs/latest/sql-ref-datetime-pattern.html))
               type: string
               default: yyyy-MM-dd HH:mm:ss.SSSSSS
-    CustomSchema:
-      type: array
-      items:
-        type: object
-        required: [natColIdx, newColType]
-        properties:
-          natColIdx:
-            $ref: "#/components/schemas/Int32OneToMax"
-          newColType:
-            $ref: "#/components/schemas/CustomColType"
-          newColName:
-            description: Optional new column name
-            type: string
+    CustomColSchema:
+      type: object
+      required: [natColIdx, newColType]
+      properties:
+        natColIdx:
+          $ref: "#/components/schemas/Int32OneToMax"
+        newColType:
+          $ref: "#/components/schemas/CustomColType"
+        newColName:
+          description: Optional new column name
+          type: string
     CsvImportOptDtoIn:
       required: [sep, quote, escape, header, inferSchema]
       properties:
@@ -320,7 +316,9 @@ components:
           type: boolean
           default: true
         customSchema:
-          $ref: "#/components/schemas/CustomSchema"
+          type: array
+          items:
+            $ref: "#/components/schemas/CustomColSchema"
     JsonImportOptDtoIn:
       required: [inferSchema]
       properties:
@@ -328,7 +326,9 @@ components:
           type: boolean
           default: true
         customSchema:
-          $ref: "#/components/schemas/CustomSchema"
+          type: array
+          items:
+            $ref: "#/components/schemas/CustomColSchema"
     FileImportWithOpt:
       type: object
       required: [fileImportOpt, fileImport]
