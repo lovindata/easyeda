@@ -14,7 +14,7 @@ object CirceExtension {
    * @param x
    *   Applied on
    */
-  implicit class RichString(x: String) {
+  implicit class CirceExtensionRichString(x: String) {
 
     /**
      * Convert string to [[Json]].

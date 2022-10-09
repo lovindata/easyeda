@@ -4,22 +4,12 @@ package api.controllers
 import api.dto.input.FileImportOptDtoIn
 import api.dto.input.FileImportOptDtoIn._
 import api.dto.output.DataPreviewDtoOut
-import api.helpers.CatsEffectExtension._
-import api.helpers.CirceExtension._
-import api.helpers.NormTypeEnum._
 import api.models.SessionMod
 import api.services.JobSvc
 import cats.data.EitherT
 import cats.effect.IO
-import cats.implicits._
-import config.SparkServer.spark
-import config.SparkServer.spark.implicits._
 import fs2.Stream
-import fs2.text
 import io.circe.Json
-import io.circe.fs2.byteArrayParser
-import org.apache.spark.sql.DataFrame
-import scala.io.Source
 
 /**
  * Controller for jobs logic.
@@ -59,6 +49,7 @@ object JobCtrl {
                                  else Left(new UnsupportedOperationException("Please ensure query parameters are coherent"))
                                ))
       fileImportOpt       <- EitherT(IO(fileImportOpt.as[FileImportOptDtoIn]))
+
       // Computations
       fileImportDataFrame <- JobSvc.readStream(fileImportOpt, fileImport, nbRows)
       dataPreview         <- JobSvc.preview(fileImportDataFrame, nbRows, minColIdx, maxColIdx)

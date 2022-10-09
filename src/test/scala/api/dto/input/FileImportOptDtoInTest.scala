@@ -2,37 +2,114 @@ package com.ilovedatajjia
 package api.dto.input
 
 import api.dto.input.FileImportOptDtoIn._
-import api.helpers.CirceExtension.RichString
 import api.helpers.NormTypeEnum._
-import cats.data.EitherT
 import cats.effect.IO
-import cats.effect.testing.scalatest.AsyncIOSpec
-import cats.implicits._
+import cats.effect.testing.scalatest._
+import cats.effect.unsafe.implicits.global.compute
+import io.circe.parser.parse
+import org.scalatest.freespec.AsyncFreeSpec
 import org.scalatest.matchers.should.Matchers
-import org.scalatest.prop.TableDrivenPropertyChecks
-import org.scalatest.propspec.AnyPropSpec
-import scala.io.Source
+import scala.concurrent.ExecutionContext
 
 /**
  * [[FileImportOptDtoIn]] test(s).
  */
-class FileImportOptDtoInTest extends AnyPropSpec with TableDrivenPropertyChecks with Matchers with AsyncIOSpec {
+class FileImportOptDtoInTest extends AsyncFreeSpec with AsyncIOSpec with Matchers {
 
-  // UT1 to UT3
-  private val uts = Table(
-    ("ut", "path", "expected"),
-    ("**UT1** - CustomColBase decoding", "ut1", CustomColBase(Categorical)),
-    ("**UT2** - CustomColDate decoding", "ut2", CustomColDate(Date, "yyyy-MM-dd")),
-    ("**UT3** - CustomColTimestamp decoding", "ut3", CustomColTimestamp(Timestamp, "yyyy-MM-dd HH:mm:ss.SSSSSS"))
-  )
-  forAll(uts) { (ut, path, expected) =>
-    property(ut) {
-      (for {
-        rcsPath <- IO(getClass.getResource(s"/api/input/FileImportOptDtoIn/$path").getPath).attemptT
-        input   <-
-          IO(Source.fromFile(s"$rcsPath/input.json")).bracket(x => IO(x.mkString.toJson))(x => IO(x.close)).attemptT
-        output  <- EitherT[CustomColType](IO(input.as[CustomColType]))
-      } yield output).asserting(_.value shouldBe Right(expected))
+  // Global thread pool
+  override implicit val executionContext: ExecutionContext = compute
+
+  // CustomColType test(s)
+  "CustomColType test(s)" - {
+    "**UT1** - JSON can be decoded into CustomColBase" in {
+      IO(parse("""{
+                 |  "nameType": "Categorical"
+                 |}
+                 |""".stripMargin).flatMap(_.as[CustomColType])).asserting(_ shouldBe Right(CustomColBase(Categorical)))
+    }
+
+    "**UT2** - JSON can be decoded into CustomColDate" in {
+      IO(parse("""{
+                 |  "nameType": "Date",
+                 |  "dateFormat": "yyyy-MM-dd"
+                 |}""".stripMargin).flatMap(_.as[CustomColType]))
+        .asserting(_ shouldBe Right(CustomColDate(Date, "yyyy-MM-dd")))
+    }
+
+    "**UT3** - JSON can be decoded into CustomColTimestamp" in {
+      IO(parse("""{
+                 |  "nameType": "Timestamp",
+                 |  "timestampFormat": "yyyy-MM-dd HH:mm:ss.SSSSSS"
+                 |}""".stripMargin).flatMap(_.as[CustomColType]))
+        .asserting(_ shouldBe Right(CustomColTimestamp(Timestamp, "yyyy-MM-dd HH:mm:ss.SSSSSS")))
+    }
+  }
+
+  // CustomSchema test(s)
+  "CustomSchema test(s)" - {
+    "**UT1** - JSON can be decoded into CustomSchema" in {
+      IO(parse("""{
+                 |  "natColIdx": 0,
+                 |  "newColType": {
+                 |    "nameType": "Numerical"
+                 |  },
+                 |  "newColName": "_c0"
+                 |}""".stripMargin).flatMap(_.as[CustomSchema]))
+        .asserting(_ shouldBe Right(CustomSchema(0, Some(CustomColBase(Numerical)), "_c0")))
+    }
+
+    "**UT2** - CustomSchema JSON can be decoded without \"newColType\"" in {
+      IO(parse("""{
+                 |  "natColIdx": 0,
+                 |  "newColName": "_c0"
+                 |}""".stripMargin).flatMap(_.as[CustomSchema]))
+        .asserting(_ shouldBe Right(CustomSchema(0, None, "_c0")))
+    }
+  }
+
+  // CsvImportOptDtoIn test(s)
+  "CsvImportOptDtoIn test(s)" - {
+    "**UT1** - JSON can be decoded into CsvImportOptDtoIn" in {
+      IO(parse("""{
+                 |  "sep": ",",
+                 |  "quote": "\"",
+                 |  "escape": "\\",
+                 |  "header": false,
+                 |  "inferSchema": false,
+                 |  "customSchema": {
+                 |    "natColIdx": 0,
+                 |    "newColType": {
+                 |      "nameType": "Numerical"
+                 |    },
+                 |    "newColName": "_c0"
+                 |  }
+                 |}""".stripMargin).flatMap(_.as[FileImportOptDtoIn]))
+        .asserting(
+          _ shouldBe Right(
+            CsvImportOptDtoIn(",",
+                              "\"",
+                              "\\",
+                              header = false,
+                              inferSchema = false,
+                              Some(CustomSchema(0, Some(CustomColBase(Numerical)), "_c0")))))
+    }
+  }
+
+  // JsonImportOptDtoIn test(s)
+  "JsonImportOptDtoIn test(s)" - {
+    "**UT1** - JSON can be decoded into JsonImportOptDtoIn" in {
+      IO(parse("""{
+                 |  "inferSchema": false,
+                 |  "customSchema": {
+                 |    "natColIdx": 0,
+                 |    "newColType": {
+                 |      "nameType": "Numerical"
+                 |    },
+                 |    "newColName": "_c0"
+                 |  }
+                 |}""".stripMargin).flatMap(_.as[FileImportOptDtoIn]))
+        .asserting(_ shouldBe Right(
+          JsonImportOptDtoIn(inferSchema = false, Some(CustomSchema(0, Some(CustomColBase(Numerical)), "_c0")))))
     }
   }
 

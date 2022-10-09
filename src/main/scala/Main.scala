@@ -1,10 +1,10 @@
 package com.ilovedatajjia
 
+import api.services.SessionSvc
 import cats.effect.IO
 import cats.effect.IOApp
 import config.AppServer
 import config.SparkServer
-import api.services.SessionSvc
 
 /**
  * Application configurations & entrypoint.

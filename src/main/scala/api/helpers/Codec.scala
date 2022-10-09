@@ -14,7 +14,7 @@ object Codec {
    * @param x
    *   Supposed in UTF-8
    */
-  implicit class RichString(x: String) {
+  implicit class CodecRichString(x: String) {
 
     /**
      * Hash [[x]] to SHA-1 hexadecimal string representation.

@@ -2,8 +2,11 @@ package com.ilovedatajjia
 package api.dto.input
 
 import api.helpers.NormTypeEnum.NormType
+import cats.syntax.functor._
 import io.circe._
+import io.circe.generic.auto._
 import io.circe.generic.semiauto._
+import io.circe.syntax._
 
 /**
  * File import options.
@@ -32,7 +35,7 @@ object FileImportOptDtoIn {
    * @param newColName
    *   New column name
    */
-  case class CustomSchema(natColIdx: Int, newColType: CustomColType, newColName: String)
+  case class CustomSchema(natColIdx: Int, newColType: Option[CustomColType], newColName: String)
 
   /**
    * CSV file options.
@@ -49,9 +52,9 @@ object FileImportOptDtoIn {
    * @param customSchema
    *   Custom schema to apply (cannot be used with [[inferSchema]])
    */
-  case class CsvImportOptDtoIn(sep: Char,
-                               quote: Char,
-                               escape: Char,
+  case class CsvImportOptDtoIn(sep: String,
+                               quote: String,
+                               escape: String,
                                header: Boolean,
                                inferSchema: Boolean,
                                customSchema: Option[CustomSchema])
@@ -67,11 +70,18 @@ object FileImportOptDtoIn {
   case class JsonImportOptDtoIn(inferSchema: Boolean, customSchema: Option[CustomSchema]) extends FileImportOptDtoIn
 
   // JSON encoders & decoders
-  implicit val encCustomColType: Encoder[CustomColType] = deriveEncoder
-  implicit val decCustomColType: Decoder[CustomColType] = deriveDecoder
+  implicit val encCustomColType: Encoder[CustomColType] = Encoder.instance { _.asJson }
+  implicit val decCustomColType: Decoder[CustomColType] = List[Decoder[CustomColType]](
+    Decoder[CustomColDate].widen,
+    Decoder[CustomColTimestamp].widen,
+    Decoder[CustomColBase].widen // Last because less restrictive
+  ).reduceLeft(_ or _)
   implicit val encCustomSchema: Encoder[CustomSchema]   = deriveEncoder
   implicit val decCustomSchema: Decoder[CustomSchema]   = deriveDecoder
-  implicit val enc: Encoder[FileImportOptDtoIn]         = deriveEncoder
-  implicit val dec: Decoder[FileImportOptDtoIn]         = deriveDecoder
+  implicit val enc: Encoder[FileImportOptDtoIn]         = Encoder.instance { _.asJson }
+  implicit val dec: Decoder[FileImportOptDtoIn]         = List[Decoder[FileImportOptDtoIn]](
+    Decoder[CsvImportOptDtoIn].widen,
+    Decoder[JsonImportOptDtoIn].widen
+  ).reduceLeft(_ or _)
 
 }

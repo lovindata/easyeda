@@ -93,7 +93,7 @@ object NormTypeEnum extends Enumeration {
    * @param x
    *   Applied on
    */
-  implicit class RichString(x: String) {
+  implicit class NormTypeEnumRichString(x: String) {
 
     /**
      * Get Spark DataType representation of [[x]].
