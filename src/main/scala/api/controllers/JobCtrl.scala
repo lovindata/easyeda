@@ -25,11 +25,11 @@ object JobCtrl {
    * @param fileImport
    *   Ready to be drained stream corresponding the file data
    * @param nbRows
-   *   Number of rows of the preview
+   *   Number of rows in the preview (`-1` for all rows)
    * @param minColIdx
    *   Included border minimum index column (Starts from `1` or equal `-1` for no columns)
    * @param maxColIdx
-   *   Included border maximum index column (`-1` for all on the right)
+   *   Included border maximum index column (Higher or equal than `minColIdx` or `-1`)
    * @return
    *   Data preview
    */
@@ -41,14 +41,14 @@ object JobCtrl {
                      maxColIdx: Int): EitherT[IO, Throwable, DataPreviewDtoOut] =
     for {
       // Validations
-      _                   <- EitherT(
-                               IO(
-                                 if ((-1 <= nbRows) && (minColIdx == 0)) Right(())
-                                 else if ((-1 <= nbRows) && (1 <= minColIdx) && (minColIdx <= maxColIdx)) Right(())
-                                 else if ((-1 <= nbRows) && (1 <= minColIdx) && (maxColIdx == -1)) Right(())
-                                 else Left(new UnsupportedOperationException("Please ensure query parameters are coherent"))
-                               ))
-      fileImportOpt       <- EitherT(IO(fileImportOpt.as[FileImportOptDtoIn]))
+      _             <- EitherT(
+                         IO(
+                           if ((-1 <= nbRows) && (minColIdx == 0)) Right(())
+                           else if ((-1 <= nbRows) && (1 <= minColIdx) && (minColIdx <= maxColIdx)) Right(())
+                           else if ((-1 <= nbRows) && (1 <= minColIdx) && (maxColIdx == -1)) Right(())
+                           else Left(new UnsupportedOperationException("Please ensure query parameters are coherent"))
+                         ))
+      fileImportOpt <- EitherT(IO(fileImportOpt.as[FileImportOptDtoIn]))
 
       // Computations
       fileImportDataFrame <- JobSvc.readStream(fileImportOpt, fileImport, nbRows)

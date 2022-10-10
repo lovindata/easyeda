@@ -116,13 +116,13 @@ paths:
             $ref: "#/components/schemas/Int32MinusOneToMax"
         - name: minColIdx
           in: query
-          description: Included starting index column (an int32 starting from `1`)
+          description: Included border minimum index column (Starts from `1` or equal `-1` for no columns)
           required: true
           schema:
-            $ref: "#/components/schemas/Int32OneToMax"
+            $ref: "#/components/schemas/Int32MinusOneToMaxZeroExcluded"
         - name: maxColIdx
           in: query
-          description: Included ending index column (Higher or equal than `minColIdx` or `-1`)
+          description: Included border maximum index column (`-1` for all on the right)
           required: true
           schema:
             $ref: "#/components/schemas/Int32MinusOneToMaxZeroExcluded"

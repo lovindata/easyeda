@@ -3,21 +3,14 @@ package api.dto.input
 
 import api.dto.input.FileImportOptDtoIn._
 import api.helpers.NormTypeEnum._
+import api.helpers.CustomCatsEffectSpec
 import cats.effect.IO
-import cats.effect.testing.scalatest._
-import cats.effect.unsafe.implicits.global.compute
 import io.circe.parser.parse
-import org.scalatest.freespec.AsyncFreeSpec
-import org.scalatest.matchers.should.Matchers
-import scala.concurrent.ExecutionContext
 
 /**
  * [[FileImportOptDtoIn]] test(s).
  */
-class FileImportOptDtoInTest extends AsyncFreeSpec with AsyncIOSpec with Matchers {
-
-  // Global thread pool
-  override implicit val executionContext: ExecutionContext = compute
+class FileImportOptDtoInTest extends CustomCatsEffectSpec {
 
   // CustomColType test(s)
   "CustomColType test(s)" - {
@@ -76,22 +69,28 @@ class FileImportOptDtoInTest extends AsyncFreeSpec with AsyncIOSpec with Matcher
                  |  "escape": "\\",
                  |  "header": false,
                  |  "inferSchema": false,
-                 |  "customSchema": {
-                 |    "natColIdx": 0,
-                 |    "newColType": {
-                 |      "nameType": "Numerical"
-                 |    },
-                 |    "newColName": "_c0"
-                 |  }
+                 |  "customSchema": [
+                 |    {
+                 |      "natColIdx": 0,
+                 |      "newColType": {
+                 |        "nameType": "Numerical"
+                 |      },
+                 |      "newColName": "_c0"
+                 |    }
+                 |  ]
                  |}""".stripMargin).flatMap(_.as[FileImportOptDtoIn]))
-        .asserting(
-          _ shouldBe Right(
-            CsvImportOptDtoIn(",",
-                              "\"",
-                              "\\",
-                              header = false,
-                              inferSchema = false,
-                              Some(CustomColSchema(0, Some(CustomColBase(Numerical)), "_c0")))))
+        .asserting {
+          case Left(e) => fail(e)
+          case Right(
+                output: CsvImportOptDtoIn
+              ) => // De-wrap because Option[Array[_]] equality cannot be tested directly
+            output.sep shouldBe ","
+            output.quote shouldBe "\""
+            output.escape shouldBe "\\"
+            output.header shouldBe false
+            output.inferSchema shouldBe false
+            output.customSchema.get shouldBe Array(CustomColSchema(0, Some(CustomColBase(Numerical)), "_c0"))
+        }
     }
   }
 
@@ -100,16 +99,24 @@ class FileImportOptDtoInTest extends AsyncFreeSpec with AsyncIOSpec with Matcher
     "**UT1** - JSON can be decoded into JsonImportOptDtoIn" in {
       IO(parse("""{
                  |  "inferSchema": false,
-                 |  "customSchema": {
-                 |    "natColIdx": 0,
-                 |    "newColType": {
-                 |      "nameType": "Numerical"
-                 |    },
-                 |    "newColName": "_c0"
-                 |  }
+                 |  "customSchema": [
+                 |    {
+                 |      "natColIdx": 0,
+                 |      "newColType": {
+                 |        "nameType": "Numerical"
+                 |      },
+                 |      "newColName": "_c0"
+                 |    }
+                 |  ]
                  |}""".stripMargin).flatMap(_.as[FileImportOptDtoIn]))
-        .asserting(_ shouldBe Right(
-          JsonImportOptDtoIn(inferSchema = false, Some(CustomColSchema(0, Some(CustomColBase(Numerical)), "_c0")))))
+        .asserting {
+          case Left(e) => fail(e)
+          case Right(
+                output: JsonImportOptDtoIn
+              ) => // De-wrap because Option[Array[_]] equality cannot be tested directly
+            output.inferSchema shouldBe false
+            output.customSchema.get shouldBe Array(CustomColSchema(0, Some(CustomColBase(Numerical)), "_c0"))
+        }
     }
   }
 

@@ -100,11 +100,11 @@ object JobSvc {
    * Compute preview of an input [[DataFrame]].
    * @param input
    *   The DataFrame
-   * @param nbRows
-   *   Number of rows of the preview
-   * @param minColIdx
+   * @param nbRowsValidated
+   *   Number of rows in the preview (`-1` for all rows)
+   * @param minColIdxValidated
    *   Included border minimum index column (Starts from `1` or equal `-1` for no columns)
-   * @param maxColIdx
+   * @param maxColIdxValidated
    *   Included border maximum index column (`-1` for all on the right)
    * @param timeout
    *   Preview computation timeout
@@ -112,45 +112,56 @@ object JobSvc {
    *   Data preview
    */
   def preview(input: DataFrame,
-              nbRows: Int,
-              minColIdx: Int,
-              maxColIdx: Int,
-              timeout: FiniteDuration = 10.seconds): EitherT[IO, Throwable, DataPreviewDtoOut] = IO
-    .interruptibleMany {
-      // Column slicer
-      def colPrevSlicer[A: ClassTag](x: Array[A]): Array[A] = (minColIdx, maxColIdx) match {
-        case (-1, _) => Array()
-        case (_, -1) => x
-        case _       => x.slice(minColIdx - 1, maxColIdx - 1)
-      }
+              nbRowsValidated: Int,
+              minColIdxValidated: Int,
+              maxColIdxValidated: Int,
+              timeout: FiniteDuration = 10.seconds): EitherT[IO, Throwable, DataPreviewDtoOut] = (for {
+    // Intermediate result (DataFrame to compute and scalaSchema)
+    intermediateOut           <- IO {
+                                   // Column slicer
+                                   def colPrevSlicer[A: ClassTag](x: Array[A]): Array[A] =
+                                     (minColIdxValidated, maxColIdxValidated) match {
+                                       case (-1, _) => Array()
+                                       case (_, -1) => x
+                                       case _       => x.slice(minColIdxValidated - 1, maxColIdxValidated - 1)
+                                     }
 
-      // Retrieve the sample schema
-      val scalaSchema: Array[(String, NormType)] = colPrevSlicer(input.schema.fields).map {
-        case StructField(name, dataType, _, _) => (name, dataType.toNormType)
-      }
+                                   // Retrieve the sample schema
+                                   val scalaSchema: Array[(String, NormType)] =
+                                     colPrevSlicer(input.schema.fields).map { case StructField(name, dataType, _, _) =>
+                                       (name, dataType.toNormType)
+                                     }
 
-      // Prepare the Spark DAG for sampling values
-      val inputColsToAllString: Array[Column] =
-        colPrevSlicer(input.columns).map(colName => col(colName).cast(StringType).as(colName))
-      val inputAllString: DataFrame           = input.select(inputColsToAllString: _*).na.fill("") // To handle "null" values
-      val inputColForValues: Column           = array(inputAllString.columns.map(col): _*) as "_$VALUES_"
-      val inputValues: DataFrame              = inputAllString.select(
-        inputColForValues
-      ) // 1 Column where each row "i" is in format "[<_c0_vi>, ..., <_cj_vi>, ..., <_cn_vi>]"
+                                   // Prepare the Spark DAG for sampling values
+                                   val inputColsToAllString: Array[Column] =
+                                     colPrevSlicer(input.columns).map(colName => col(colName).cast(StringType).as(colName))
+                                   val inputAllString: DataFrame           =
+                                     input.select(inputColsToAllString: _*).na.fill("") // To handle "null" values
+                                   val inputColForValues: Column =
+                                     array(inputAllString.columns.map(col): _*) as "_$VALUES_"
+                                   val inputValues: DataFrame    = inputAllString.select(
+                                     inputColForValues
+                                   ) // 1 Column where each row "i" is in format "[<_c0_vi>, ..., <_cj_vi>, ..., <_cn_vi>]"
 
-      // Retrieve the sample values
-      val rowValues: Array[Row]             = inputValues.head(nbRows) // <- Blocking operation
-      val scalaValues: Array[Array[String]] = rowValues
-        .map(
-          _.getAs[mutable.ArraySeq[String]]("_$VALUES_")
-        ) // ArrayType(StringType) == ArraySeq[String]
-        .map(_.toArray)
+                                   // Return
+                                   (inputValues, scalaSchema)
+                                 }
+    (inputValues, scalaSchema) = intermediateOut
 
-      // Return
-      DataPreviewDtoOut(DataConf(scalaValues.length, scalaSchema.length),
-                        scalaSchema.map(DataSchema.tupled),
-                        scalaValues)
-    }
+    // Retrieve the sample values
+    rowValues   <- IO.blocking { // Blocking operation on Spark
+                     if (nbRowsValidated == -1) inputValues.collect()
+                     else inputValues.head(nbRowsValidated)
+                   }
+    scalaValues <- IO(
+                     rowValues
+                       .map(
+                         _.getAs[mutable.ArraySeq[String]]("_$VALUES_")
+                       ) // ArrayType(StringType) == ArraySeq[String]
+                       .map(_.toArray))
+  } yield DataPreviewDtoOut(DataConf(scalaValues.length, scalaSchema.length),
+                            scalaSchema.map(DataSchema.tupled),
+                            scalaValues))
     .timeout(timeout)
     .attemptT
 
