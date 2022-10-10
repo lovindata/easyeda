@@ -122,7 +122,7 @@ paths:
             $ref: "#/components/schemas/Int32MinusOneToMaxZeroExcluded"
         - name: maxColIdx
           in: query
-          description: Included border maximum index column (`-1` for all on the right)
+          description: Included border maximum index column (Higher or equal than `minColIdx` or `-1`)
           required: true
           schema:
             $ref: "#/components/schemas/Int32MinusOneToMaxZeroExcluded"
