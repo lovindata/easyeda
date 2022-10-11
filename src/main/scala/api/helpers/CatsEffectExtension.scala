@@ -3,6 +3,7 @@ package api.helpers
 
 import cats.effect.IO
 import cats.implicits._
+import scala.concurrent.duration.FiniteDuration
 import scala.reflect.ClassTag // Necessary for Array[B]
 
 /**
@@ -17,7 +18,7 @@ object CatsEffectExtension {
    * @tparam A
    *   Wrapped type
    */
-  implicit class RichArray[A](x: Array[A]) {
+  implicit class CatsEffectExtensionRichArray[A](x: Array[A]) {
 
     /**
      * Classical traverse on [[IO]] but for [[Array]].
@@ -40,6 +41,29 @@ object CatsEffectExtension {
      *   Folded left [[Array]] of [[IO]]
      */
     def foldLeftM[B: ClassTag](u0: B)(f: (B, A) => IO[B]): IO[B] = x.toList.foldLeftM(u0)(f)
+
+  }
+
+  /**
+   * Rich functions for [[IO]].
+   * @param x
+   *   An io
+   * @tparam A
+   *   Wrapped type
+   */
+  implicit class CatsEffectExtensionRichIO[A](x: IO[A]) {
+
+    /**
+     * Apply or not a timeout.
+     * @param time
+     *   Timeout duration
+     * @return
+     *   Timeout applied or not
+     */
+    def timeoutOption(time: Option[FiniteDuration]): IO[A] = time match {
+      case None       => x
+      case Some(time) => x.timeout(time)
+    }
 
   }
 

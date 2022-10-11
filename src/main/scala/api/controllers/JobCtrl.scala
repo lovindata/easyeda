@@ -10,6 +10,7 @@ import cats.data.EitherT
 import cats.effect.IO
 import fs2.Stream
 import io.circe.Json
+import scala.concurrent.duration._
 
 /**
  * Controller for jobs logic.
@@ -52,7 +53,7 @@ object JobCtrl {
 
       // Computations
       fileImportDataFrame <- JobSvc.readStream(fileImportOpt, fileImport, nbRows)
-      dataPreview         <- JobSvc.preview(fileImportDataFrame, nbRows, minColIdx, maxColIdx)
+      dataPreview         <- JobSvc.preview(fileImportDataFrame, nbRows, minColIdx, maxColIdx, Some(10.seconds))
     } yield dataPreview
 
   /*

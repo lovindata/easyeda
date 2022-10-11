@@ -5,6 +5,7 @@ import api.dto.input.FileImportOptDtoIn
 import api.dto.input.FileImportOptDtoIn._
 import api.dto.output.DataPreviewDtoOut
 import api.dto.output.DataPreviewDtoOut._
+import api.helpers.CatsEffectExtension._
 import api.helpers.NormTypeEnum._
 import cats.data.EitherT
 import cats.effect.IO
@@ -58,9 +59,9 @@ object JobSvc {
                            "dateFormat"         -> "yyyy-MM-dd",
                            "timestampNTZFormat" -> "yyyy-MM-dd HH:mm:ss.SSSSSS",
                            // Parsed options
-                           "sep"                -> opts.sep.toString,
-                           "quote"              -> opts.quote.toString,
-                           "escape"             -> opts.escape.toString,
+                           "sep"                -> opts.sep,
+                           "quote"              -> opts.quote,
+                           "escape"             -> opts.escape,
                            "header"             -> opts.header.toString,
                            "inferSchema"        -> opts.inferSchema.toString
                          )
@@ -115,15 +116,16 @@ object JobSvc {
               nbRowsValidated: Int,
               minColIdxValidated: Int,
               maxColIdxValidated: Int,
-              timeout: FiniteDuration = 10.seconds): EitherT[IO, Throwable, DataPreviewDtoOut] = (for {
+              timeout: Option[FiniteDuration]): EitherT[IO, Throwable, DataPreviewDtoOut] = (for {
     // Intermediate result (DataFrame to compute and scalaSchema)
     intermediateOut           <- IO {
                                    // Column slicer
                                    def colPrevSlicer[A: ClassTag](x: Array[A]): Array[A] =
                                      (minColIdxValidated, maxColIdxValidated) match {
-                                       case (-1, _) => Array()
-                                       case (_, -1) => x
-                                       case _       => x.slice(minColIdxValidated - 1, maxColIdxValidated - 1)
+                                       case (-1, _)                           => Array()
+                                       case (1, -1)                           => x
+                                       case (_, -1) if minColIdxValidated > 1 => x.drop(minColIdxValidated - 1)
+                                       case _                                 => x.slice(minColIdxValidated - 1, maxColIdxValidated)
                                      }
 
                                    // Retrieve the sample schema
@@ -162,7 +164,7 @@ object JobSvc {
   } yield DataPreviewDtoOut(DataConf(scalaValues.length, scalaSchema.length),
                             scalaSchema.map(DataSchema.tupled),
                             scalaValues))
-    .timeout(timeout)
+    .timeoutOption(timeout)
     .attemptT
 
 }

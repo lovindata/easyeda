@@ -3,14 +3,15 @@ package api.dto.input
 
 import api.dto.input.FileImportOptDtoIn._
 import api.helpers.NormTypeEnum._
-import api.helpers.CustomCatsEffectSpec
 import cats.effect.IO
+import com.ilovedatajjia.ut.helpers.CustomCatsEffectSparkSpec
 import io.circe.parser.parse
+import org.scalatest.exceptions.TestFailedException
 
 /**
  * [[FileImportOptDtoIn]] test(s).
  */
-class FileImportOptDtoInTest extends CustomCatsEffectSpec {
+class FileImportOptDtoInTest extends CustomCatsEffectSparkSpec {
 
   // CustomColType test(s)
   "CustomColType test(s)" - {
@@ -20,7 +21,6 @@ class FileImportOptDtoInTest extends CustomCatsEffectSpec {
                  |}
                  |""".stripMargin).flatMap(_.as[CustomColType])).asserting(_ shouldBe Right(CustomColBase(Categorical)))
     }
-
     "**UT2** - JSON can be decoded into CustomColDate" in {
       IO(parse("""{
                  |  "nameType": "Date",
@@ -28,7 +28,6 @@ class FileImportOptDtoInTest extends CustomCatsEffectSpec {
                  |}""".stripMargin).flatMap(_.as[CustomColType]))
         .asserting(_ shouldBe Right(CustomColDate(Date, "yyyy-MM-dd")))
     }
-
     "**UT3** - JSON can be decoded into CustomColTimestamp" in {
       IO(parse("""{
                  |  "nameType": "Timestamp",
@@ -50,7 +49,6 @@ class FileImportOptDtoInTest extends CustomCatsEffectSpec {
                  |}""".stripMargin).flatMap(_.as[CustomColSchema]))
         .asserting(_ shouldBe Right(CustomColSchema(0, Some(CustomColBase(Numerical)), "_c0")))
     }
-
     "**UT2** - CustomSchema JSON can be decoded without \"newColType\"" in {
       IO(parse("""{
                  |  "natColIdx": 0,
@@ -90,6 +88,7 @@ class FileImportOptDtoInTest extends CustomCatsEffectSpec {
             output.header shouldBe false
             output.inferSchema shouldBe false
             output.customSchema.get shouldBe Array(CustomColSchema(0, Some(CustomColBase(Numerical)), "_c0"))
+          case _       => fail("Failed because of incorrect type `FileImportOptDtoIn`")
         }
     }
   }
@@ -116,6 +115,7 @@ class FileImportOptDtoInTest extends CustomCatsEffectSpec {
               ) => // De-wrap because Option[Array[_]] equality cannot be tested directly
             output.inferSchema shouldBe false
             output.customSchema.get shouldBe Array(CustomColSchema(0, Some(CustomColBase(Numerical)), "_c0"))
+          case _       => fail("Failed because of incorrect type `FileImportOptDtoIn`")
         }
     }
   }
