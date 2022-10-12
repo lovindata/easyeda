@@ -5,7 +5,7 @@ import io.circe.Json
 import io.circe.parser.parse
 
 /**
- * Extension rich functions for `Circe`.
+ * Extension methods for `Circe` objects.
  */
 object CirceExtension {
 

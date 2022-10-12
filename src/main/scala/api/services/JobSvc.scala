@@ -6,6 +6,7 @@ import api.dto.input.FileImportOptDtoIn._
 import api.dto.output.DataPreviewDtoOut
 import api.dto.output.DataPreviewDtoOut._
 import api.helpers.CatsEffectExtension._
+import api.helpers.Fs2Extension._
 import api.helpers.NormTypeEnum._
 import cats.data.EitherT
 import cats.effect.IO
@@ -33,69 +34,71 @@ object JobSvc {
    *   File options
    * @param fileImport
    *   File binaries
-   * @param nbRows
-   *   Number of rows useful in the stream
+   * @param nbRowsPreviewValidated
+   *   Number of rows useful in the stream (`-1` means read all stream otherwise `nbRowsPreviewValidated` > 0)
    * @return
    *   Spark [[DataFrame]]
    */
   def readStream(fileImportOptDtoIn: FileImportOptDtoIn,
                  fileImport: Stream[IO, Byte],
-                 nbRows: Int,
-                 timeout: FiniteDuration = 10.seconds): EitherT[IO, Throwable, DataFrame] = fileImportOptDtoIn match {
-    // 0 - If CSV file
-    case opts: CsvImportOptDtoIn  =>
-      for {
-        fileDrained <- fileImport
-                         .through(text.utf8.decode)
-                         .through(text.lines)
-                         .take(nbRows)
-                         .compile
-                         .toList
-                         .attemptT
-        output      <- IO.interruptibleMany {
-                         val readOptions: Map[String, String] = Map(
-                           // Default options
-                           "mode"               -> "FAILFAST",
-                           "dateFormat"         -> "yyyy-MM-dd",
-                           "timestampNTZFormat" -> "yyyy-MM-dd HH:mm:ss.SSSSSS",
-                           // Parsed options
-                           "sep"                -> opts.sep,
-                           "quote"              -> opts.quote,
-                           "escape"             -> opts.escape,
-                           "header"             -> opts.header.toString,
-                           "inferSchema"        -> opts.inferSchema.toString
-                         )
-                         val inputDS: Dataset[String]         = spark.createDataset(fileDrained)
-                         spark.read.options(readOptions).csv(inputDS).withNormTypes
-                       }.timeout(timeout)
-                         .attemptT
-      } yield output
-    // 1 - If JSON file
-    case opts: JsonImportOptDtoIn =>
-      for {
-        fileDrained <- fileImport
-                         .through(byteArrayParser)
-                         .take(nbRows)
-                         .compile
-                         .toList
-                         .attemptT
-        output      <- IO.interruptibleMany {
-                         val readOptions: Map[String, String] = Map(
-                           // Default options
-                           "mode"               -> "FAILFAST",
-                           "dateFormat"         -> "yyyy-MM-dd",
-                           "timestampNTZFormat" -> "yyyy-MM-dd HH:mm:ss.SSSSSS",
-                           // Parsed options
-                           "primitivesAsString" -> (!opts.inferSchema).toString
-                         )
-                         val inputDS: Dataset[String]         = spark.createDataset(fileDrained.map(_.noSpaces))
-                         spark.read.options(readOptions).json(inputDS).withNormTypes
-                       }.timeout(timeout)
-                         .attemptT
-      } yield output
-    // 2 - Unknown options
-    case _                        => EitherT.left(throw new RuntimeException("Unknown matching type for `fileImportOptDtoIn`"))
-  }
+                 nbRowsPreviewValidated: Int,
+                 timeout: Option[FiniteDuration] = Some(10.seconds)): EitherT[IO, Throwable, DataFrame] =
+    fileImportOptDtoIn match {
+      // 0 - If CSV file
+      case opts: CsvImportOptDtoIn  =>
+        (for {
+          fileDrained <- fileImport
+                           .through(text.utf8.decode)
+                           .through(text.lines)
+                           .zipWithIndex // TODO find an optimized way to read your stream
+                           .ta { case (line, idx) =>
+                             if (opts.header && nbRowsPreviewValidated != -1) nbRowsPreviewValidated + 1
+                             else nbRowsPreviewValidated
+                           }
+                           .compile
+                           .toList
+          output      <- IO.interruptibleMany {
+                           val readOptions: Map[String, String] = Map(
+                             // Default options
+                             "mode"               -> "FAILFAST",
+                             "dateFormat"         -> "yyyy-MM-dd",
+                             "timestampNTZFormat" -> "yyyy-MM-dd HH:mm:ss.SSSSSS",
+                             // Parsed options
+                             "sep"                -> opts.sep,
+                             "quote"              -> opts.quote,
+                             "escape"             -> opts.escape,
+                             "header"             -> opts.header.toString,
+                             "inferSchema"        -> opts.inferSchema.toString
+                           )
+                           val inputDS: Dataset[String]         = spark.createDataset(fileDrained)
+                           spark.read.options(readOptions).csv(inputDS).withNormTypes
+                         }
+        } yield output).timeoutOption(timeout).attemptT
+      // 1 - If JSON file
+      case opts: JsonImportOptDtoIn =>
+        (for {
+          fileDrained <- fileImport
+                           .through(byteArrayParser)
+                           .take(nbRowsPreviewValidated)
+                           .compile
+                           .toList
+          output      <- IO.interruptibleMany {
+                           val readOptions: Map[String, String] = Map(
+                             // Default options
+                             "mode"               -> "FAILFAST",
+                             "dateFormat"         -> "yyyy-MM-dd",
+                             "timestampNTZFormat" -> "yyyy-MM-dd HH:mm:ss.SSSSSS",
+                             // Parsed options
+                             "primitivesAsString" -> (!opts.inferSchema).toString
+                           )
+                           val inputDS: Dataset[String]         = spark.createDataset(fileDrained.map(_.noSpaces))
+                           spark.read.options(readOptions).json(inputDS).withNormTypes
+                         }
+        } yield output).timeoutOption(timeout).attemptT
+      // 2 - Unknown options
+      case _                        =>
+        EitherT.left[DataFrame](IO(new RuntimeException("Unknown matching type for `fileImportOptDtoIn`")))
+    }
 
   /**
    * Compute preview of an input [[DataFrame]].

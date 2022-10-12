@@ -7,7 +7,7 @@ import scala.concurrent.duration.FiniteDuration
 import scala.reflect.ClassTag // Necessary for Array[B]
 
 /**
- * Extension functions for `Cats Effect`.
+ * Extension methods for `Cats Effect` objects.
  */
 object CatsEffectExtension {
 

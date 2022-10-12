@@ -10,7 +10,8 @@ import org.scalatest.matchers.should.Matchers
 import scala.concurrent.ExecutionContext
 
 /**
- * [[AsyncFreeSpec]] scala test spec with [[cats.effect.testing]] matchers & runtime and [[SparkSession]].
+ * [[AsyncFreeSpec]] scala test spec with [[cats.effect.testing]] matchers & runtime and [[SparkSession]] (will start
+ * only if at least one of your test needs it).
  */
 trait CustomCatsEffectSparkSpec extends AsyncFreeSpec with AsyncIOSpec with Matchers with BeforeAndAfterAll {
 
@@ -18,7 +19,7 @@ trait CustomCatsEffectSparkSpec extends AsyncFreeSpec with AsyncIOSpec with Matc
   override implicit val executionContext: ExecutionContext = compute
 
   // Lazy spark session (will be initialized only when necessary)
-  implicit val spark: SparkSession = SparkSession
+  implicit lazy val spark: SparkSession = SparkSession
     .builder()
     .appName("EasyEDATest")
     .master("local[*]")

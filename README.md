@@ -28,9 +28,8 @@ It means none of your source data are saved somewhere plus everything are done o
 # Logbook (🙏😣 Work still in progress...)
 
 - Continue with dev on preview
-  - After testing all `1` (nbRows, minColIdx, ...) gives no data
-  - Issue with SparkSession & AsyncFreeSpec it not allows you to have sub-unit-tests (😼 TODO currently HERE 😼)
-  - UTs for Preview computation & ReadStream 
+  - TODO on `readStream` solving bugs & optimizing (😼 TODO currently HERE 😼)
+  - UTs for ReadStream 
 - Building whole execution of preview
   - Job will be launched without saving to DBs for the moment
 - Think about cron jobs not terminated but still here sessions ?

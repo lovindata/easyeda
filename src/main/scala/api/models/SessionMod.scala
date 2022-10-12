@@ -1,7 +1,7 @@
 package com.ilovedatajjia
 package api.models
 
-import api.helpers.Codec._
+import api.helpers.CodecExtension._
 import api.helpers.SessionStateEnum._
 import api.models.SessionMod._
 import cats.effect.Clock

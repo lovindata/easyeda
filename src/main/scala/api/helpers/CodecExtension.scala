@@ -5,9 +5,9 @@ import java.nio.charset.StandardCharsets
 import java.security.MessageDigest
 
 /**
- * Containing rich functions encoding, decoding and hashing.
+ * Extension methods for encoding objects.
  */
-object Codec {
+object CodecExtension {
 
   /**
    * Rich functions applicable on [[String]].
