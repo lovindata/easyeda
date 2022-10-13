@@ -28,8 +28,9 @@ It means none of your source data are saved somewhere plus everything are done o
 # Logbook (🙏😣 Work still in progress...)
 
 - Continue with dev on preview
-  - TODO on `readStream` solving bugs & optimizing (😼 TODO currently HERE 😼)
-  - UTs for ReadStream 
+  - UTs for ReadStream (😼 TODO currently HERE 😼)
+    - Solve issue with Cats Fs2 Path
+    - Make the UT1 work
 - Building whole execution of preview
   - Job will be launched without saving to DBs for the moment
 - Think about cron jobs not terminated but still here sessions ?

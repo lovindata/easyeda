@@ -6,7 +6,6 @@ import api.dto.input.FileImportOptDtoIn._
 import api.dto.output.DataPreviewDtoOut
 import api.dto.output.DataPreviewDtoOut._
 import api.helpers.CatsEffectExtension._
-import api.helpers.Fs2Extension._
 import api.helpers.NormTypeEnum._
 import cats.data.EitherT
 import cats.effect.IO
@@ -35,7 +34,7 @@ object JobSvc {
    * @param fileImport
    *   File binaries
    * @param nbRowsPreviewValidated
-   *   Number of rows useful in the stream (`-1` means read all stream otherwise `nbRowsPreviewValidated` > 0)
+   *   Number of rows wanted for the preview (`-1` means read all stream otherwise `nbRowsPreviewValidated` > 0)
    * @return
    *   Spark [[DataFrame]]
    */
@@ -47,16 +46,14 @@ object JobSvc {
       // 0 - If CSV file
       case opts: CsvImportOptDtoIn  =>
         (for {
-          fileDrained <- fileImport
-                           .through(text.utf8.decode)
-                           .through(text.lines)
-                           .zipWithIndex // TODO find an optimized way to read your stream
-                           .ta { case (line, idx) =>
-                             if (opts.header && nbRowsPreviewValidated != -1) nbRowsPreviewValidated + 1
-                             else nbRowsPreviewValidated
-                           }
-                           .compile
-                           .toList
+          fileDrained <- ((opts.header, nbRowsPreviewValidated) match {
+                           case (_, -1)    => // `-1` -> all lines
+                             fileImport.through(text.utf8.decode).through(text.lines)
+                           case (false, _) => // else no header -> take
+                             fileImport.through(text.utf8.decode).through(text.lines).take(nbRowsPreviewValidated)
+                           case (true, _)  => // else header -> take + 1
+                             fileImport.through(text.utf8.decode).through(text.lines).take(nbRowsPreviewValidated + 1)
+                         }).compile.toList
           output      <- IO.interruptibleMany {
                            val readOptions: Map[String, String] = Map(
                              // Default options

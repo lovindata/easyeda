@@ -1,15 +1,35 @@
 package com.ilovedatajjia
 package api.services
 
+import api.dto.input.FileImportOptDtoIn.CsvImportOptDtoIn
 import api.dto.output.DataPreviewDtoOut._
 import api.helpers.NormTypeEnum._
-import ut.helpers.CustomCatsEffectSparkSpec
-import ut.helpers.SparkUtils
+import ut.helpers._
 
 /**
  * [[JobSvc]] test(s).
  */
 class JobSvcTest extends CustomCatsEffectSparkSpec {
+
+  // JobSvc.readStream test(s)
+  "JobSvc.readStream test(s)" - {
+    "**UT1** - Can read stream all lines" in {
+      (for {
+        fileImport <- Fs2Utils.fromResourceStream("/api/services/JobSvc/readStream/ut1/fileImport.csv", 1)
+        outputDf   <- JobSvc
+                        .readStream(CsvImportOptDtoIn(",", "\"", "\\", header = false, inferSchema = false, None),
+                                    fileImport,
+                                    3,
+                                    None)
+                        .value
+        expectedDf <- SparkUtils.fromResourceDataFrame("/api/services/JobSvc/readStream/ut1/expected.json",
+                                                       "/api/services/JobSvc/readStream/ut1/expected.ddl")
+      } yield (outputDf, expectedDf)).asserting {
+        case (Left(e), _)                  => fail(e)
+        case (Right(outputDf), expectedDf) => outputDf shouldBeDataFrame expectedDf
+      }
+    }
+  }
 
   // JobSvc.preview test(s)
   "JobSvc.preview test(s)" - {

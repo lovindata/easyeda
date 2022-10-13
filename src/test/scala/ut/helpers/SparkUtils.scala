@@ -15,9 +15,9 @@ object SparkUtils {
   /**
    * Read JSON [[DataFrame]] representation.
    * @param path
-   *   JSON path
+   *   JSON resource path
    * @param schema
-   *   The [[DataFrame]] schema
+   *   The [[DataFrame]] schema resource path
    * @param spark
    *   implicit [[SparkSession]]
    * @return
