@@ -22,7 +22,7 @@ It means none of your source data are saved somewhere plus everything are done o
 
 - [Stack used image](docs/stackUsed.png) can be directly modified via [draw.io](https://app.diagrams.net/)
 - [IntelliJ IDEA CE](https://www.jetbrains.com/idea/) was used to build the source code part
-- [Postman](https://www.postman.com/) was used to edit the [OpenAPI documentation](src/main/resources/swagger/openapi.yaml) part
+- [Postman](https://www.postman.com/) was used to edit the [OpenAPI documentation](src/main/resources/swagger/openapi.yaml) part (TODO correction here)
 
 
 # Logbook (🙏😣 Work still in progress...)
@@ -36,7 +36,7 @@ It means none of your source data are saved somewhere plus everything are done o
 - Think about cron jobs not terminated but still here sessions ?
   - K8S stateless compatibility too be-careful ⚠️
     - The implementation of "not-continue"
-- Setup config files
+- Work on Logging (Spark logs annoying + No app logging)
 - Start DEV on Spark NLP Service
 
 
