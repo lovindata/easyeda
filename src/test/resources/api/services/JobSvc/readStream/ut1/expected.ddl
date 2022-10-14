@@ -1,4 +1,4 @@
-`_c0` INTEGER,
+`_c0` DOUBLE,
 `_c1` STRING,
-`_c2` DATE,
+`_c2` TIMESTAMP,
 `_c3` TIMESTAMP

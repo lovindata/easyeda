@@ -13,11 +13,11 @@ class JobSvcTest extends CustomCatsEffectSparkSpec {
 
   // JobSvc.readStream test(s)
   "JobSvc.readStream test(s)" - {
-    "**UT1** - Can read stream all lines" in {
+    "**UT1** - Can read stream multiple lines (+ Date inferSchema in Timestamp)" in {
       (for {
         fileImport <- Fs2Utils.fromResourceStream("/api/services/JobSvc/readStream/ut1/fileImport.csv", 1)
         outputDf   <- JobSvc
-                        .readStream(CsvImportOptDtoIn(",", "\"", "\\", header = false, inferSchema = false, None),
+                        .readStream(CsvImportOptDtoIn(",", "\"", "\\", header = false, inferSchema = true, None),
                                     fileImport,
                                     2,
                                     None)
