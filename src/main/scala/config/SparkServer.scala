@@ -12,7 +12,7 @@ object SparkServer {
 
   // Variable to use for Spark API
   private var sparkInitialization: SparkSession = _
-  lazy val spark: SparkSession                  = sparkInitialization // Scala `var` cannot be used with Spark implicits
+  implicit lazy val spark: SparkSession         = sparkInitialization // Scala `var` cannot be used with Spark implicits
 
   /**
    * Run the Spark single node service.

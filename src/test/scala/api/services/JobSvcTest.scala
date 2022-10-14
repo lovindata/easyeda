@@ -19,14 +19,23 @@ class JobSvcTest extends CustomCatsEffectSparkSpec {
         outputDf   <- JobSvc
                         .readStream(CsvImportOptDtoIn(",", "\"", "\\", header = false, inferSchema = false, None),
                                     fileImport,
-                                    3,
+                                    2,
                                     None)
                         .value
         expectedDf <- SparkUtils.fromResourceDataFrame("/api/services/JobSvc/readStream/ut1/expected.json",
                                                        "/api/services/JobSvc/readStream/ut1/expected.ddl")
       } yield (outputDf, expectedDf)).asserting {
         case (Left(e), _)                  => fail(e)
-        case (Right(outputDf), expectedDf) => outputDf shouldBeDataFrame expectedDf
+        case (Right(outputDf), expectedDf) =>
+          println("#####")
+          outputDf.printSchema()
+          outputDf.show(false)
+
+          println("#####")
+          expectedDf.printSchema()
+          expectedDf.show(false)
+
+          outputDf shouldBeDataFrame expectedDf
       }
     }
   }

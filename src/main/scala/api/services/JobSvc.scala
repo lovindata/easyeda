@@ -10,8 +10,6 @@ import api.helpers.NormTypeEnum._
 import cats.data.EitherT
 import cats.effect.IO
 import cats.implicits._
-import config.SparkServer.spark
-import config.SparkServer.spark.implicits._
 import fs2.Stream
 import fs2.text
 import io.circe.fs2.byteArrayParser
@@ -41,7 +39,8 @@ object JobSvc {
   def readStream(fileImportOptDtoIn: FileImportOptDtoIn,
                  fileImport: Stream[IO, Byte],
                  nbRowsPreviewValidated: Int,
-                 timeout: Option[FiniteDuration] = Some(10.seconds)): EitherT[IO, Throwable, DataFrame] =
+                 timeout: Option[FiniteDuration] = Some(10.seconds))(implicit
+      spark: SparkSession): EitherT[IO, Throwable, DataFrame] =
     fileImportOptDtoIn match {
       // 0 - If CSV file
       case opts: CsvImportOptDtoIn  =>
@@ -67,6 +66,7 @@ object JobSvc {
                              "header"             -> opts.header.toString,
                              "inferSchema"        -> opts.inferSchema.toString
                            )
+                           import spark.implicits._
                            val inputDS: Dataset[String]         = spark.createDataset(fileDrained)
                            spark.read.options(readOptions).csv(inputDS).withNormTypes
                          }
@@ -88,6 +88,7 @@ object JobSvc {
                              // Parsed options
                              "primitivesAsString" -> (!opts.inferSchema).toString
                            )
+                           import spark.implicits._
                            val inputDS: Dataset[String]         = spark.createDataset(fileDrained.map(_.noSpaces))
                            spark.read.options(readOptions).json(inputDS).withNormTypes
                          }

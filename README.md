@@ -29,11 +29,13 @@ It means none of your source data are saved somewhere plus everything are done o
 
 - Continue with dev on preview
   - UTs for ReadStream (😼 TODO currently HERE 😼)
-    - Solve issue with Cats Fs2 Path
-    - Make the UT1 work
+    - Make the UT1 work (Equal display but not equal ?!)
 - Building whole execution of preview
   - Job will be launched without saving to DBs for the moment
+- Implement e2e exception handling with proper `EitherT[IO, Throwable, A]`
 - Think about cron jobs not terminated but still here sessions ?
+  - K8S stateless compatibility too be-careful ⚠️
+    - The implementation of "not-continue"
 - Setup config files
 - Start DEV on Spark NLP Service
 

@@ -8,6 +8,7 @@ import api.models.SessionMod
 import api.services.JobSvc
 import cats.data.EitherT
 import cats.effect.IO
+import config.SparkServer.spark
 import fs2.Stream
 import io.circe.Json
 import scala.concurrent.duration._
