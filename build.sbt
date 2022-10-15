@@ -55,6 +55,8 @@ libraryDependencies += "org.apache.spark" %% "spark-mllib" % "3.3.0" % "provided
  * Test dependencies
  */
 // https://mvnrepository.com/artifact/org.scalatest/scalatest
-libraryDependencies += "org.scalatest" %% "scalatest"                     % "3.2.14" % Test
+libraryDependencies += "org.scalatest"     %% "scalatest"                     % "3.2.14"   % Test
+// https://mvnrepository.com/artifact/org.scalatestplus/mockito-4-6
+libraryDependencies += "org.scalatestplus" %% "mockito-4-6"                   % "3.2.14.0" % Test
 // https://mvnrepository.com/artifact/org.typelevel/cats-effect-testing-scalatest
-libraryDependencies += "org.typelevel" %% "cats-effect-testing-scalatest" % "1.4.0"  % Test
+libraryDependencies += "org.typelevel"     %% "cats-effect-testing-scalatest" % "1.4.0"    % Test

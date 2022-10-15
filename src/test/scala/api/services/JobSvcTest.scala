@@ -1,9 +1,12 @@
 package com.ilovedatajjia
 package api.services
 
-import api.dto.input.FileImportOptDtoIn.CsvImportOptDtoIn
+import api.dto.input.FileImportOptDtoIn._
 import api.dto.output.DataPreviewDtoOut._
 import api.helpers.NormTypeEnum._
+import fs2.Stream
+import java.util.concurrent.TimeoutException
+import scala.concurrent.duration.DurationInt
 import ut.helpers._
 
 /**
@@ -13,7 +16,7 @@ class JobSvcTest extends CustomCatsEffectSparkSpec {
 
   // JobSvc.readStream test(s)
   "JobSvc.readStream test(s)" - {
-    "**UT1** - Can read stream multiple lines (+ Date inferSchema in Timestamp)" in {
+    "**UT1** - Can read csv stream multiple lines (+ Date inferSchema is in Timestamp)" in {
       (for {
         fileImport <- Fs2Utils.fromResourceStream("/api/services/JobSvc/readStream/ut1/fileImport.csv", 1)
         outputDf   <- JobSvc
@@ -21,22 +24,103 @@ class JobSvcTest extends CustomCatsEffectSparkSpec {
                                     fileImport,
                                     2,
                                     None)
-                        .value
         expectedDf <- SparkUtils.fromResourceDataFrame("/api/services/JobSvc/readStream/ut1/expected.json",
                                                        "/api/services/JobSvc/readStream/ut1/expected.ddl")
-      } yield (outputDf, expectedDf)).asserting {
-        case (Left(e), _)                  => fail(e)
-        case (Right(outputDf), expectedDf) =>
-          println("#####")
-          outputDf.printSchema()
-          outputDf.show(false)
-
-          println("#####")
-          expectedDf.printSchema()
-          expectedDf.show(false)
-
-          outputDf shouldBeDataFrame expectedDf
+      } yield (outputDf, expectedDf)).value.asserting {
+        case Left(e)                       => fail(e)
+        case Right((outputDf, expectedDf)) => outputDf shouldBeDataFrame expectedDf
       }
+    }
+    "**UT2** - Can read csv stream across multiple chunks" in {
+      (for {
+        fileImport <- Fs2Utils.fromResourceStream("/api/services/JobSvc/readStream/ut2/fileImport.csv", 10)
+        outputDf   <- JobSvc
+                        .readStream(CsvImportOptDtoIn(",", "\"", "\\", header = true, inferSchema = true, None),
+                                    fileImport,
+                                    2,
+                                    None)
+        expectedDf <- SparkUtils.fromResourceDataFrame("/api/services/JobSvc/readStream/ut2/expected.json",
+                                                       "/api/services/JobSvc/readStream/ut2/expected.ddl")
+      } yield (outputDf, expectedDf)).value.asserting {
+        case Left(e)                       => fail(e)
+        case Right((outputDf, expectedDf)) => outputDf shouldBeDataFrame expectedDf
+      }
+    }
+    "**UT3** - Can read csv 0 lines" in {
+      (for {
+        fileImport <- Fs2Utils.fromResourceStream("/api/services/JobSvc/readStream/ut3/fileImport.csv", 1)
+        outputDf   <- JobSvc
+                        .readStream(CsvImportOptDtoIn(",", "\"", "\\", header = false, inferSchema = false, None),
+                                    fileImport,
+                                    0,
+                                    None)
+        expectedDf <- SparkUtils.fromResourceDataFrame("/api/services/JobSvc/readStream/ut3/expected.json",
+                                                       "/api/services/JobSvc/readStream/ut3/expected.ddl")
+      } yield (outputDf, expectedDf)).value.asserting {
+        case Left(e)                       => fail(e)
+        case Right((outputDf, expectedDf)) => outputDf shouldBeDataFrame expectedDf
+      }
+    }
+    "**UT4** - Can read csv all lines" in {
+      (for {
+        fileImport <- Fs2Utils.fromResourceStream("/api/services/JobSvc/readStream/ut4/fileImport.csv", 1)
+        outputDf   <- JobSvc
+                        .readStream(CsvImportOptDtoIn(";", "\"", "\\", header = true, inferSchema = false, None),
+                                    fileImport,
+                                    -1,
+                                    None)
+        expectedDf <- SparkUtils.fromResourceDataFrame("/api/services/JobSvc/readStream/ut4/expected.json",
+                                                       "/api/services/JobSvc/readStream/ut4/expected.ddl")
+      } yield (outputDf, expectedDf)).value.asserting {
+        case Left(e)                       => fail(e)
+        case Right((outputDf, expectedDf)) => outputDf shouldBeDataFrame expectedDf
+      }
+    }
+    "**UT5** - Can read json stream multiple lines (+ Date & Timestamp do not work)" in {
+      (for {
+        fileImport <- Fs2Utils.fromResourceStream("/api/services/JobSvc/readStream/ut5/fileImport.json", 10)
+        outputDf   <- JobSvc
+                        .readStream(JsonImportOptDtoIn(inferSchema = true, None), fileImport, 2, None)
+        expectedDf <- SparkUtils.fromResourceDataFrame("/api/services/JobSvc/readStream/ut5/expected.json",
+                                                       "/api/services/JobSvc/readStream/ut5/expected.ddl")
+      } yield (outputDf, expectedDf)).value.asserting {
+        case Left(e)                       => fail(e)
+        case Right((outputDf, expectedDf)) => outputDf shouldBeDataFrame expectedDf
+      }
+    }
+    "**UT6** - Can read all json stream lines" in {
+      (for {
+        fileImport <- Fs2Utils.fromResourceStream("/api/services/JobSvc/readStream/ut6/fileImport.json", 1)
+        outputDf   <- JobSvc
+                        .readStream(JsonImportOptDtoIn(inferSchema = false, None), fileImport, -1, None)
+        expectedDf <- SparkUtils.fromResourceDataFrame("/api/services/JobSvc/readStream/ut6/expected.json",
+                                                       "/api/services/JobSvc/readStream/ut6/expected.ddl")
+      } yield (outputDf, expectedDf)).value.asserting {
+        case Left(e)                       => fail(e)
+        case Right((outputDf, expectedDf)) => outputDf shouldBeDataFrame expectedDf
+      }
+    }
+    "**UT7** - Raise exception when read unknown file options" in {
+      JobSvc.readStream(null, Stream.emits(Array.empty[Byte]), 0, None).value.asserting {
+        case Left(e)  =>
+          e.getClass shouldBe classOf[RuntimeException]
+          e.getMessage shouldBe "Unknown matching type for `fileImportOptDtoIn`"
+        case Right(_) => fail
+      }
+    }
+    "**UT8** - Can raise timeout exception" in {
+      JobSvc
+        .readStream(JsonImportOptDtoIn(inferSchema = true, None),
+                    Stream.emits(Array.empty[Byte]),
+                    0,
+                    timeout = Some(0.second))
+        .value
+        .asserting {
+          case Left(e)  =>
+            e.getClass shouldBe classOf[TimeoutException]
+            e.getMessage shouldBe "0 seconds"
+          case Right(_) => fail
+        }
     }
   }
 
@@ -46,8 +130,8 @@ class JobSvcTest extends CustomCatsEffectSparkSpec {
       (for {
         input      <- SparkUtils.fromResourceDataFrame("/api/services/JobSvc/preview/ut1/input.json",
                                                        "/api/services/JobSvc/preview/ut1/input.ddl")
-        prevDtoOut <- JobSvc.preview(input, 2, 3, 6, None).value
-      } yield prevDtoOut).asserting {
+        prevDtoOut <- JobSvc.preview(input, 2, 3, 6, None)
+      } yield prevDtoOut).value.asserting {
         case Left(e)       => fail(e)
         case Right(output) =>
           output.dataConf shouldBe DataConf(2, 4)
@@ -63,8 +147,8 @@ class JobSvcTest extends CustomCatsEffectSparkSpec {
       (for {
         input      <- SparkUtils.fromResourceDataFrame("/api/services/JobSvc/preview/ut2/input.json",
                                                        "/api/services/JobSvc/preview/ut2/input.ddl")
-        prevDtoOut <- JobSvc.preview(input, -1, 3, 6, None).value
-      } yield prevDtoOut).asserting {
+        prevDtoOut <- JobSvc.preview(input, -1, 3, 6, None)
+      } yield prevDtoOut).value.asserting {
         case Left(e)       => fail(e)
         case Right(output) =>
           output.dataConf shouldBe DataConf(4, 4)
@@ -84,8 +168,8 @@ class JobSvcTest extends CustomCatsEffectSparkSpec {
       (for {
         input      <- SparkUtils.fromResourceDataFrame("/api/services/JobSvc/preview/ut3/input.json",
                                                        "/api/services/JobSvc/preview/ut3/input.ddl")
-        prevDtoOut <- JobSvc.preview(input, 2, 3, -1, None).value
-      } yield prevDtoOut).asserting {
+        prevDtoOut <- JobSvc.preview(input, 2, 3, -1, None)
+      } yield prevDtoOut).value.asserting {
         case Left(e)       => fail(e)
         case Right(output) =>
           output.dataConf shouldBe DataConf(2, 7)
@@ -114,8 +198,8 @@ class JobSvcTest extends CustomCatsEffectSparkSpec {
       (for {
         input      <- SparkUtils.fromResourceDataFrame("/api/services/JobSvc/preview/ut4/input.json",
                                                        "/api/services/JobSvc/preview/ut4/input.ddl")
-        prevDtoOut <- JobSvc.preview(input, 2, -1, 6, None).value
-      } yield prevDtoOut).asserting {
+        prevDtoOut <- JobSvc.preview(input, 2, -1, 6, None)
+      } yield prevDtoOut).value.asserting {
         case Left(e)       => fail(e)
         case Right(output) =>
           output.dataConf shouldBe DataConf(2, 0)
@@ -127,8 +211,8 @@ class JobSvcTest extends CustomCatsEffectSparkSpec {
       (for {
         input      <- SparkUtils.fromResourceDataFrame("/api/services/JobSvc/preview/ut5/input.json",
                                                        "/api/services/JobSvc/preview/ut5/input.ddl")
-        prevDtoOut <- JobSvc.preview(input, 2, 1, -1, None).value
-      } yield prevDtoOut).asserting {
+        prevDtoOut <- JobSvc.preview(input, 2, 1, -1, None)
+      } yield prevDtoOut).value.asserting {
         case Left(e)       => fail(e)
         case Right(output) =>
           output.dataConf shouldBe DataConf(2, 7)
@@ -157,8 +241,8 @@ class JobSvcTest extends CustomCatsEffectSparkSpec {
       (for {
         input      <- SparkUtils.fromResourceDataFrame("/api/services/JobSvc/preview/ut6/input.json",
                                                        "/api/services/JobSvc/preview/ut6/input.ddl")
-        prevDtoOut <- JobSvc.preview(input, 999, 1, 999, None).value
-      } yield prevDtoOut).asserting {
+        prevDtoOut <- JobSvc.preview(input, 999, 1, 999, None)
+      } yield prevDtoOut).value.asserting {
         case Left(e)       => fail(e)
         case Right(output) =>
           output.dataConf shouldBe DataConf(1, 1)

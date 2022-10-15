@@ -1,7 +1,10 @@
 package com.ilovedatajjia
 package ut.helpers
 
+import cats.data.EitherT
 import cats.effect.IO
+import cats.effect.implicits._
+import cats.implicits._
 import org.apache.spark.sql._
 import org.apache.spark.sql.types.StructType
 import scala.io.BufferedSource
@@ -23,14 +26,16 @@ object SparkUtils {
    * @return
    *   A Spark [[DataFrame]]
    */
-  def fromResourceDataFrame(path: String, schema: String)(implicit spark: SparkSession): IO[DataFrame] =
-    IO(Source.fromFile(getClass.getResource(schema).getPath)).bracket { x: BufferedSource =>
-      IO(
+  def fromResourceDataFrame(path: String, schema: String)(implicit
+      spark: SparkSession): EitherT[IO, Throwable, DataFrame] =
+    IO(Source.fromFile(getClass.getResource(schema).getPath)).attemptT.bracket { x: BufferedSource =>
+      IO {
+        val strDDL: String = x.mkString
         spark.read
-          .schema(StructType.fromDDL(x.mkString))
+          .schema { if (strDDL.isBlank) StructType(Nil) else StructType.fromDDL(strDDL) }
           .option("multiLine", "true")
           .json(getClass.getResource(path).getPath)
-      )
-    }(x => IO(x.close()))
+      }.attemptT
+    }(x => EitherT.right(IO(x.close())))
 
 }

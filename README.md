@@ -27,9 +27,7 @@ It means none of your source data are saved somewhere plus everything are done o
 
 # Logbook (🙏😣 Work still in progress...)
 
-- Continue with dev on preview
-  - UTs for ReadStream (😼 TODO currently HERE 😼)
-    - Make the UT1 work (Equal display but not equal ?!)
+- Migrate to Redis
 - Building whole execution of preview
   - Job will be launched without saving to DBs for the moment
 - Implement e2e exception handling with proper `EitherT[IO, Throwable, A]`
@@ -37,13 +35,11 @@ It means none of your source data are saved somewhere plus everything are done o
   - K8S stateless compatibility too be-careful ⚠️
     - The implementation of "not-continue"
 - Work on Logging (Spark logs annoying + No app logging)
+- Continue DEV on basic statistics
 - Start DEV on Spark NLP Service
+  - Introduce the type `Sentence`
 
 
 # Notes
 
-- `_.withReceiveBufferSize(256 * 1024)` & `_.take(2)` both are related. The buffer size is exactly defining how many
-elements you have in your `Stream[IO, String]`
-- User will import everytime its file
-  - because don't want to save its data
-  - better to not have customParams because not analyzable via SQL or through auto framework
+- Need to learn Redis

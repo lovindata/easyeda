@@ -44,7 +44,7 @@ trait CustomCatsEffectSparkSpec extends AsyncFreeSpec with AsyncIOSpec with Matc
      *   Expected [[DataFrame]]
      */
     def shouldBeDataFrame(expected: DataFrame): Assertion = {
-      output.schema.fields.map(x => (x.name, x.dataType)) shouldBe output.schema.fields.map(x => (x.name, x.dataType))
+      output.schema.fields.map(x => (x.name, x.dataType)) shouldBe expected.schema.fields.map(x => (x.name, x.dataType))
       output.collect() should contain theSameElementsAs expected.collect()
     }
 

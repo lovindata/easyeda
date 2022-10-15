@@ -74,11 +74,9 @@ object JobSvc {
       // 1 - If JSON file
       case opts: JsonImportOptDtoIn =>
         (for {
-          fileDrained <- fileImport
-                           .through(byteArrayParser)
-                           .take(nbRowsPreviewValidated)
-                           .compile
-                           .toList
+          fileDrained <-
+            (if (nbRowsPreviewValidated > 0) fileImport.through(byteArrayParser).take(nbRowsPreviewValidated)
+             else fileImport.through(byteArrayParser)).compile.toList
           output      <- IO.interruptibleMany {
                            val readOptions: Map[String, String] = Map(
                              // Default options
