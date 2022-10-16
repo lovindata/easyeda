@@ -1,0 +1,10 @@
+version: "3.9"
+services:
+  redis:
+    image: redis/redis-stack:6.2.4-v3
+    volumes:
+      - "./conf/redis-stack.conf:/etc/redis-stack.conf"
+      - "./data:/data" # For keeping actual data
+    ports:
+      - "8001:8001" # UI
+      - "6379:6379" # Server
