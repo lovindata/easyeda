@@ -28,6 +28,11 @@ It means none of your source data are saved somewhere plus everything are done o
 # Logbook (🙏😣 Work still in progress...)
 
 - Migrate to Redis
+  - Learn redis
+  - Setup AOF every sec mode
+  - Start migration DEV setup
+    - [scala-redis](https://github.com/debasishg/scala-redis)
+    - OR [redis4cats](https://github.com/profunktor/redis4cats)
 - Building whole execution of preview
   - Job will be launched without saving to DBs for the moment
 - Implement e2e exception handling with proper `EitherT[IO, Throwable, A]`
