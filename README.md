@@ -28,7 +28,7 @@ It means none of your source data are saved somewhere plus everything are done o
 # Logbook (🙏😣 Work still in progress...)
 
 - Migrate to Redis
-  - Learn redis
+  - Learn redis data types & [pseudo tables](https://stackoverflow.com/questions/16375188/redis-strings-vs-redis-hashes-to-represent-json-efficiency)
   - Setup AOF every sec mode
   - Start migration DEV setup
     - [scala-redis](https://github.com/debasishg/scala-redis)

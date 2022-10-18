@@ -43,6 +43,12 @@ libraryDependencies += "org.tpolecat"  %% "doobie-postgres-circe" % "1.0.0-RC2"
 // https://mvnrepository.com/artifact/org.postgresql/postgresql
 libraryDependencies += "org.postgresql" % "postgresql"            % "42.5.0"
 
+// Redis4Cats
+// https://mvnrepository.com/artifact/dev.profunktor/redis4cats-effects
+libraryDependencies += "dev.profunktor" %% "redis4cats-effects"  % "1.2.0"
+// https://mvnrepository.com/artifact/dev.profunktor/redis4cats-log4cats
+libraryDependencies += "dev.profunktor" %% "redis4cats-log4cats" % "1.2.0"
+
 // Spark
 // https://mvnrepository.com/artifact/org.apache.spark/spark-core
 libraryDependencies += "org.apache.spark" %% "spark-core"  % "3.3.0"
