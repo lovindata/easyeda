@@ -5,12 +5,12 @@ import api.models.JobMod.JobStatus.JobStatus
 import api.models.JobMod.JobType.JobType
 import cats.effect.Clock
 import cats.effect.IO
-import config.DBDriver._
-import doobie._                        // Always needed import
-import doobie.implicits._              // Always needed import
-import doobie.implicits.javasql._      // Always needed import
-import doobie.postgres._               // Always needed import
-import doobie.postgres.implicits._     // Always needed import
+// import config.DBDriver._
+// import doobie._                    // Always needed import
+// import doobie.implicits._          // Always needed import
+// import doobie.implicits.javasql._  // Always needed import
+// import doobie.postgres._           // Always needed import
+// import doobie.postgres.implicits._ // Always needed import
 import java.sql.Timestamp
 
 /**

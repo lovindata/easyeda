@@ -29,10 +29,8 @@ It means none of your source data are saved somewhere plus everything are done o
 
 - Migrate to Redis
   - Learn redis data types & [pseudo tables](https://stackoverflow.com/questions/16375188/redis-strings-vs-redis-hashes-to-represent-json-efficiency)
-  - Setup AOF every sec mode
   - Start migration DEV setup
-    - [scala-redis](https://github.com/debasishg/scala-redis)
-    - OR [redis4cats](https://github.com/profunktor/redis4cats)
+  - Setup AOF every sec mode
 - Building whole execution of preview
   - Job will be launched without saving to DBs for the moment
 - Implement e2e exception handling with proper `EitherT[IO, Throwable, A]`
@@ -47,4 +45,5 @@ It means none of your source data are saved somewhere plus everything are done o
 
 # Notes
 
-- Need to learn Redis
+- [Jedis JavaDoc](https://javadoc.io/doc/redis.clients/jedis/latest/index.html)
+- [Redis commands](https://redis.io/commands/)

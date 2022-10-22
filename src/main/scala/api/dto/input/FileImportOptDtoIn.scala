@@ -18,6 +18,25 @@ sealed trait FileImportOptDtoIn
  */
 object FileImportOptDtoIn {
 
+  // JSON encoders & decoders
+  implicit val encCustomColType: Encoder[CustomColType]  = Encoder.instance {
+    _.asJson
+  }
+  implicit val decCustomColType: Decoder[CustomColType]  = List[Decoder[CustomColType]](
+    Decoder[CustomColDate].widen,
+    Decoder[CustomColTimestamp].widen,
+    Decoder[CustomColBase].widen // Last because less restrictive
+  ).reduceLeft(_ or _)
+  implicit val encCustomSchema: Encoder[CustomColSchema] = deriveEncoder
+  implicit val decCustomSchema: Decoder[CustomColSchema] = deriveDecoder
+  implicit val enc: Encoder[FileImportOptDtoIn]          = Encoder.instance {
+    _.asJson
+  }
+  implicit val dec: Decoder[FileImportOptDtoIn]          = List[Decoder[FileImportOptDtoIn]](
+    Decoder[CsvImportOptDtoIn].widen,
+    Decoder[JsonImportOptDtoIn].widen
+  ).reduceLeft(_ or _)
+
   /**
    * Custom column type.
    */
@@ -69,20 +88,5 @@ object FileImportOptDtoIn {
    */
   case class JsonImportOptDtoIn(inferSchema: Boolean, customSchema: Option[Array[CustomColSchema]])
       extends FileImportOptDtoIn
-
-  // JSON encoders & decoders
-  implicit val encCustomColType: Encoder[CustomColType]  = Encoder.instance { _.asJson }
-  implicit val decCustomColType: Decoder[CustomColType]  = List[Decoder[CustomColType]](
-    Decoder[CustomColDate].widen,
-    Decoder[CustomColTimestamp].widen,
-    Decoder[CustomColBase].widen // Last because less restrictive
-  ).reduceLeft(_ or _)
-  implicit val encCustomSchema: Encoder[CustomColSchema] = deriveEncoder
-  implicit val decCustomSchema: Decoder[CustomColSchema] = deriveDecoder
-  implicit val enc: Encoder[FileImportOptDtoIn]          = Encoder.instance { _.asJson }
-  implicit val dec: Decoder[FileImportOptDtoIn]          = List[Decoder[FileImportOptDtoIn]](
-    Decoder[CsvImportOptDtoIn].widen,
-    Decoder[JsonImportOptDtoIn].widen
-  ).reduceLeft(_ or _)
 
 }

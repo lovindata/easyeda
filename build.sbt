@@ -9,6 +9,14 @@ lazy val root = (project in file("."))
 /**
  * Dev dependencies
  */
+// CatsEffect
+// https://mvnrepository.com/artifact/org.typelevel/cats-effect
+libraryDependencies += "org.typelevel" %% "cats-effect" % "3.3.14"
+// https://mvnrepository.com/artifact/org.typelevel/log4cats-core
+libraryDependencies += "org.typelevel" %% "log4cats-core" % "2.5.0"
+// https://mvnrepository.com/artifact/org.typelevel/log4cats-slf4j
+libraryDependencies += "org.typelevel" %% "log4cats-slf4j" % "2.5.0"
+
 // Http4s
 // https://mvnrepository.com/artifact/org.http4s/http4s-ember-server
 libraryDependencies += "org.http4s"    %% "http4s-ember-server" % "0.23.16"
@@ -19,7 +27,7 @@ libraryDependencies += "org.http4s"    %% "http4s-circe"        % "0.23.16"
 // https://mvnrepository.com/artifact/org.http4s/http4s-dsl
 libraryDependencies += "org.http4s"    %% "http4s-dsl"          % "0.23.16"
 // https://mvnrepository.com/artifact/ch.qos.logback/logback-classic
-libraryDependencies += "ch.qos.logback" % "logback-classic"     % "1.4.3" % Runtime // Needed otherwise SLF4J will failed
+libraryDependencies += "ch.qos.logback" % "logback-classic"     % "1.4.4" % Runtime // Needed otherwise SLF4J will failed
 
 // Circe
 // https://mvnrepository.com/artifact/io.circe/circe-parser
@@ -31,6 +39,7 @@ libraryDependencies += "io.circe" %% "circe-generic-extras" % "0.14.2"
 // https://mvnrepository.com/artifact/io.circe/circe-fs2
 libraryDependencies += "io.circe" %% "circe-fs2"            % "0.14.0"
 
+/*
 // Doobie
 // https://mvnrepository.com/artifact/org.tpolecat/doobie-core
 libraryDependencies += "org.tpolecat"  %% "doobie-core"           % "1.0.0-RC2"
@@ -42,12 +51,11 @@ libraryDependencies += "org.tpolecat"  %% "doobie-postgres"       % "1.0.0-RC2"
 libraryDependencies += "org.tpolecat"  %% "doobie-postgres-circe" % "1.0.0-RC2"
 // https://mvnrepository.com/artifact/org.postgresql/postgresql
 libraryDependencies += "org.postgresql" % "postgresql"            % "42.5.0"
+ */
 
-// Redis4Cats
-// https://mvnrepository.com/artifact/dev.profunktor/redis4cats-effects
-libraryDependencies += "dev.profunktor" %% "redis4cats-effects"  % "1.2.0"
-// https://mvnrepository.com/artifact/dev.profunktor/redis4cats-log4cats
-libraryDependencies += "dev.profunktor" %% "redis4cats-log4cats" % "1.2.0"
+// Jedis
+// https://mvnrepository.com/artifact/redis.clients/jedis
+libraryDependencies += "redis.clients" % "jedis" % "4.3.0"
 
 // Spark
 // https://mvnrepository.com/artifact/org.apache.spark/spark-core

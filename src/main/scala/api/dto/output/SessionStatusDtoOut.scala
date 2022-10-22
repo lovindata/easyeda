@@ -24,14 +24,13 @@ case class SessionStatusDtoOut(id: Long, createdAt: String, updatedAt: String, t
  */
 object SessionStatusDtoOut {
 
-  // JSON encoders
+  // JSON (de)serializers
   implicit val jsonEncoder: Encoder[SessionStatusDtoOut] = deriveEncoder
   implicit val jsonDecoder: Decoder[SessionStatusDtoOut] = deriveDecoder
 
   // Entity encoders
-  implicit val entityEncoder: EntityEncoder[IO, SessionStatusDtoOut]             =
-    jsonEncoderOf[IO, SessionStatusDtoOut]
-  implicit val arrayEntityEncoder: EntityEncoder[IO, Array[SessionStatusDtoOut]] =
-    jsonEncoderOf[IO, Array[SessionStatusDtoOut]]
+  implicit val entityEncoder: EntityEncoder[IO, SessionStatusDtoOut]           = jsonEncoderOf[IO, SessionStatusDtoOut]
+  implicit val listEntityEncoder: EntityEncoder[IO, List[SessionStatusDtoOut]] =
+    jsonEncoderOf[IO, List[SessionStatusDtoOut]]
 
 }

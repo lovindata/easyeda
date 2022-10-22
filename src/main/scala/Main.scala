@@ -14,6 +14,6 @@ object Main extends IOApp.Simple {
   /**
    * Run all the required requisites.
    */
-  override def run: IO[Unit] = SessionSvc.initProcessExistingSessions >> SparkServer.run >> AppServer.run
+  override def run: IO[Unit] = SessionSvc.setupSessionSvc >> SparkServer.run >> AppServer.run
 
 }

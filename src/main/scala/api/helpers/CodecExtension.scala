@@ -33,15 +33,6 @@ object CodecExtension {
 
     }
 
-    /**
-     * Verify if the SHA-1 hashed [[x]] is equal to the value.
-     * @param inputSha1Hex
-     *   Supposed an hexadecimal string
-     * @return
-     *   `true` if equals `false` otherwise
-     */
-    def inSha1HexEquals(inputSha1Hex: String): Boolean = x.toSha1Hex == inputSha1Hex
-
   }
 
 }

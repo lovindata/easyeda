@@ -1,6 +1,10 @@
 package com.ilovedatajjia
 package api.routes.utils
 
+import api.dto.output.AppFatalThrowableDtoOut
+import api.helpers.AppLayerException
+import api.helpers.AppLayerException._
+import api.helpers.Http4sExtension._
 import cats.data.EitherT
 import cats.effect.IO
 import org.http4s._
@@ -19,32 +23,29 @@ object Response {
    * @tparam A
    *   [[IO]] result type
    */
-  implicit class RichResponseIO[A](x: IO[A]) {
+  implicit class ResponseRichIO[A](x: IO[A]) {
 
     /**
-     * Response 200 or 500 according the [[IO]] result.
+     * Response the [[IO]] result with a provided status code.
+     * @param statusCode
+     *   Status code
      * @param w
      *   Make sure to have an existing [[EntityEncoder]] in scope
      * @return
-     *   HTTP response with the result or Default [[InternalServerError]] with the caught exception message
+     *   HTTP response with the result
      */
-    def toResponse(implicit w: EntityEncoder[IO, A]): IO[Response[IO]] = x.redeemWith(
-      (e: Throwable) => InternalServerError(e.toString),
-      (result: A) => Ok(result)
-    )
+    def toResponse(statusCode: Status)(implicit w: EntityEncoder[IO, A]): IO[Response[IO]] = x.redeemWith(
+      // Unexpected cases
+      {
+        case e: Exception =>
+          RouteLayerException(msgServer = "Not handled exception at the moment it will be in next releases",
+                              overHandledException = Some(e),
+                              statusCodeServer = Status.NotExtended).toResponseIO
+        case t: Throwable => InternalServerError(AppFatalThrowableDtoOut(overHandledThrowable = t.toString))
+      },
 
-    /**
-     * Response 200 or 500 according the [[IO]] result.
-     * @param entity
-     *   Custom response entity
-     * @param w
-     *   Make sure to have an existing [[EntityEncoder]] in scope
-     * @return
-     *   HTTP response with the custom entity or Default [[InternalServerError]] with the caught exception message
-     */
-    def toResponseWithEntity[B](entity: B)(implicit w: EntityEncoder[IO, B]): IO[Response[IO]] = x.redeemWith(
-      (e: Throwable) => InternalServerError(e.toString),
-      (_: A) => Ok(entity)
+      // Expected case
+      (result: A) => statusCode.toResponseIOWithDtoOut(result)
     )
 
   }
@@ -56,19 +57,34 @@ object Response {
    * @tparam A
    *   Result type
    */
-  implicit class RichEitherT[A](x: EitherT[IO, Throwable, A]) {
+  implicit class ResponseRichEitherT[A](x: EitherT[IO, AppLayerException, A]) {
 
     /**
-     * Response 200 or 500 according the [[IO]] result.
+     * Response the [[IO]] result with a provided status code.
+     * @param statusCode
+     *   Status code
      * @param w
      *   Make sure to have an existing [[EntityEncoder]] in scope
      * @return
-     *   HTTP response with the result or Default [[InternalServerError]] with the caught exception message
+     *   HTTP response with the result OR
+     *   - [[InternalServerError]] if any caught exception
      */
-    def toResponse(implicit w: EntityEncoder[IO, A]): IO[Response[IO]] = x.value.flatMap {
-      case Left(e: Throwable) => InternalServerError(e.toString)
-      case Right(result)      => Ok(result)
-    }
+    def toResponse(statusCode: Status)(implicit w: EntityEncoder[IO, A]): IO[Response[IO]] = x.value.redeemWith(
+      // Unexpected cases
+      {
+        case e: Exception =>
+          RouteLayerException(msgServer = "Not handled exception at the moment it will be in next releases",
+                              overHandledException = Some(e),
+                              statusCodeServer = Status.NotExtended).toResponseIO
+        case t: Throwable => InternalServerError(AppFatalThrowableDtoOut(overHandledThrowable = t.toString))
+      },
+
+      // Expected cases
+      {
+        case Left(e)       => e.toResponseIO
+        case Right(result) => statusCode.toResponseIOWithDtoOut(result)
+      }
+    )
 
   }
 

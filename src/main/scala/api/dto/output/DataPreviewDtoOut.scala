@@ -24,6 +24,19 @@ case class DataPreviewDtoOut(dataConf: DataConf, dataSchema: Array[DataSchema], 
  */
 object DataPreviewDtoOut {
 
+  // JSON (de)serializers
+  implicit val dataConfEnc: Encoder[DataConf]          = deriveEncoder
+  implicit val dataConfDec: Decoder[DataConf]          = deriveDecoder
+  implicit val dataSchEnc: Encoder[DataSchema]         = deriveEncoder
+  implicit val dataSchDec: Decoder[DataSchema]         = deriveDecoder
+  implicit val dataPrevEnc: Encoder[DataPreviewDtoOut] = deriveEncoder
+  implicit val dataPrevDec: Decoder[DataPreviewDtoOut] = deriveDecoder
+
+  // Entity encoder
+  implicit val dataConfEntEnc: EntityEncoder[IO, DataConf]          = jsonEncoderOf[IO, DataConf]
+  implicit val dataSchEntEnc: EntityEncoder[IO, DataSchema]         = jsonEncoderOf[IO, DataSchema]
+  implicit val dataPrevEntEnc: EntityEncoder[IO, DataPreviewDtoOut] = jsonEncoderOf[IO, DataPreviewDtoOut]
+
   /**
    * For preview configurations.
    * @param nbRows
@@ -41,18 +54,5 @@ object DataPreviewDtoOut {
    *   Column type
    */
   case class DataSchema(colName: String, colType: NormType)
-
-  // JSON encoders & decoders
-  implicit val dataConfEnc: Encoder[DataConf]          = deriveEncoder
-  implicit val dataConfDec: Decoder[DataConf]          = deriveDecoder
-  implicit val dataSchEnc: Encoder[DataSchema]         = deriveEncoder
-  implicit val dataSchDec: Decoder[DataSchema]         = deriveDecoder
-  implicit val dataPrevEnc: Encoder[DataPreviewDtoOut] = deriveEncoder
-  implicit val dataPrevDec: Decoder[DataPreviewDtoOut] = deriveDecoder
-
-  // Entity encoder
-  implicit val dataConfEntEnc: EntityEncoder[IO, DataConf]          = jsonEncoderOf[IO, DataConf]
-  implicit val dataSchEntEnc: EntityEncoder[IO, DataSchema]         = jsonEncoderOf[IO, DataSchema]
-  implicit val dataPrevEntEnc: EntityEncoder[IO, DataPreviewDtoOut] = jsonEncoderOf[IO, DataPreviewDtoOut]
 
 }

@@ -22,7 +22,7 @@ case class SessionAuthDtoOut(id: Long, authToken: String)
  */
 object SessionAuthDtoOut {
 
-  // JSON encoders & decoders
+  // JSON (de)serializers
   implicit val jsonEncoder: Encoder[SessionAuthDtoOut] = deriveEncoder
   implicit val jsonDecoder: Decoder[SessionAuthDtoOut] = deriveDecoder
 

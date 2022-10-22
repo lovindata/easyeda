@@ -20,10 +20,12 @@ object ConfigLoader {
   val sparkUIPort: String = sys.env.getOrElse("EASYEDA_SPARK_UI_PORT", default = "4040")
 
   // DB conf(s)
+  /*
   val dbPort: String      = sys.env.getOrElse("EASYEDA_POSTGRESQL_PORT", default = "5432")
   val dbName: String      = sys.env.getOrElse("EASYEDA_POSTGRESQL_DB_NAME", default = "easyeda")
   val dbUser: String      = sys.env.getOrElse("EASYEDA_POSTGRESQL_USER", default = "easyeda-user")
   val dbPwd: String       = sys.env.getOrElse("EASYEDA_POSTGRESQL_PWD", default = "easyeda-pwd")
+   */
   val dbPortRedis: String = sys.env.getOrElse("EASYEDA_REDIS_PORT", default = "6379")
 
   // App logic conf(s)

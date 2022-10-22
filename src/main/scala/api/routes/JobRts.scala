@@ -2,8 +2,8 @@ package com.ilovedatajjia
 package api.routes
 
 import api.controllers.JobCtrl
+import api.controllers.SessionCtrl.withAuth
 import api.models.SessionMod
-import api.routes.utils.Auth._
 import api.routes.utils.Request._
 import api.routes.utils.Response._
 import cats.effect.IO
@@ -37,7 +37,7 @@ object JobRts {
               (fileImportOpt: Json, fileImport: Stream[IO, Byte]) =>
                 JobCtrl
                   .computePreview(session, fileImportOpt, fileImport, nbRowsParsed, minColIdxParsed, maxColIdxParsed)
-                  .toResponse
+                  .toResponse(Status.Ok)
             }
           }
         )

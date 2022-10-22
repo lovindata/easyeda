@@ -2,10 +2,12 @@ package com.ilovedatajjia
 package api.services
 
 import api.dto.output._
-import api.helpers.CatsEffectExtension._
+import api.helpers.AppLayerException
 import api.helpers.SessionStateEnum._
 import api.models.SessionMod
+import cats.data.EitherT
 import cats.effect._
+import cats.effect.implicits._
 import cats.effect.std.UUIDGen
 import cats.implicits._
 import config.ConfigLoader.continueExistingSessions
@@ -18,28 +20,31 @@ import java.util.Base64
 object SessionSvc {
 
   /**
-   * Restart inactivity checks of existing sessions or terminate them.
+   * Setup sessions service.
    */
-  def initProcessExistingSessions: IO[Unit] = for {
+  def setupSessionSvc: IO[Unit] = for {
+    // Restart inactivity checks of existing sessions OR terminate them
     sessions <- SessionMod.listSessions(Some(Active))
     _        <- if (continueExistingSessions) {
-                  sessions.traverse(_.startCronJobInactivityCheck())
+                  sessions.parTraverse(_.startCronJobInactivityCheck())
                 } else {
-                  sessions.traverse(_.terminate)
+                  sessions.parTraverse(_.terminate).value.void
                 }
   } yield ()
 
   /**
-   * Verify if existing [[SessionMod]] and refresh its activity. (Exception thrown if no session can be retrieved)
+   * Verify if existing [[SessionMod]] and refresh its activity.
    * @param authTokenToVerify
    *   The brut authorization token
    * @return
-   *   The identified session
+   *   The identified session OR
+   *   - under called exception from [[SessionMod.getWithAuthToken]]
+   *   - under called exception from [[SessionMod.refreshStatus]]
    */
-  def verifyAuthorization(authTokenToVerify: String): IO[SessionMod] = for {
+  def verifyAuthorization(authTokenToVerify: String): EitherT[IO, AppLayerException, SessionMod] = for {
     session         <- SessionMod.getWithAuthToken(authTokenToVerify)
     upToDateSession <- session.terminatedAt match {
-                         case Some(_) => IO(session)
+                         case Some(_) => EitherT.right[AppLayerException](IO(session))
                          case None    => session.refreshStatus // Refresh only if not terminated
                        }
   } yield upToDateSession
@@ -68,9 +73,9 @@ object SessionSvc {
    * @return
    *   Session updated status
    */
-  def terminateSession(validatedSession: SessionMod): IO[SessionStatusDtoOut] = for {
+  def terminateSession(validatedSession: SessionMod): EitherT[IO, AppLayerException, SessionStatusDtoOut] = for {
     updatedSession <- validatedSession.terminatedAt match {
-                        case Some(_) => IO(validatedSession)
+                        case Some(_) => EitherT.right[AppLayerException](IO(validatedSession))
                         case None    => validatedSession.terminate // Terminate only if not terminated
                       }
   } yield SessionStatusDtoOut(updatedSession.id,
@@ -79,24 +84,15 @@ object SessionSvc {
                               updatedSession.terminatedAt.map(_.toString))
 
   /**
-   * List all non terminated sessions.
-   * @param validatedSession
-   *   A validated session
-   * @param state
+   * List retrievable sessions.
+   * @param validatedState
    *   Filtering sessions according a certain state
    * @return
-   *   Listing of all non terminated sessions
+   *   Listing of sessions
    */
-  def listSessions(validatedSession: SessionMod, state: String): IO[Array[SessionStatusDtoOut]] = for {
-    // Validate the parameter
-    filterState   <- IO(state match {
-                       case "ALL"             => None
-                       case "ACTIVE_ONLY"     => Some(Active)
-                       case "TERMINATED_ONLY" => Some(Terminated)
-                     })
-
+  def listSessions(validatedState: Option[SessionStateType]): IO[List[SessionStatusDtoOut]] = for {
     // Starting listing
-    sessions      <- SessionMod.listSessions(filterState)
+    sessions      <- SessionMod.listSessions(validatedState)
     sessionsStatus = sessions.map(session =>
                        SessionStatusDtoOut(session.id,
                                            session.createdAt.toString,
