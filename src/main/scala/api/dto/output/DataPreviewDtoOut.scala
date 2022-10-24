@@ -17,7 +17,7 @@ import org.http4s.circe.jsonEncoderOf
  * @param dataValues
  *   Values
  */
-case class DataPreviewDtoOut(dataConf: DataConf, dataSchema: Array[DataSchema], dataValues: Array[Array[String]])
+case class DataPreviewDtoOut(dataConf: DataConf, dataSchema: List[DataSchema], dataValues: List[List[String]])
 
 /**
  * [[DataPreviewDtoOut]] companion object with encoders & decoders.

@@ -38,8 +38,8 @@ object SessionSvc {
    *   The brut authorization token
    * @return
    *   The identified session OR
-   *   - under called exception from [[SessionMod.getWithAuthToken]]
-   *   - under called exception from [[SessionMod.refreshStatus]]
+   *   - exception from [[SessionMod.getWithAuthToken]]
+   *   - exception from [[SessionMod.refreshStatus]]
    */
   def verifyAuthorization(authTokenToVerify: String): EitherT[IO, AppLayerException, SessionMod] = for {
     session         <- SessionMod.getWithAuthToken(authTokenToVerify)

@@ -94,7 +94,7 @@ case class SessionMod(id: Long,
    * @return
    *   The up-to-date session OR
    *   - [[ModelLayerException]] missing field [[updatedAt]]
-   *   - under called exception [[getWithId]]
+   *   - exception [[getWithId]]
    */
   def refreshStatus: EitherT[IO, AppLayerException, SessionMod] = for {
     nowTimestamp    <- EitherT.right(Clock[IO].realTime.map(x => new Timestamp(x.toMillis)))
@@ -137,7 +137,7 @@ case class SessionMod(id: Long,
    * @return
    *   The up-to-date session OR
    *   - [[ModelLayerException]] if already terminated session
-   *   - under called exception [[getWithId]]
+   *   - exception [[getWithId]]
    */
   def terminate: EitherT[IO, AppLayerException, SessionMod] = for {
     nowTimestamp    <- EitherT.right(Clock[IO].realTime.map(x => new Timestamp(x.toMillis)))
@@ -271,7 +271,7 @@ object SessionMod {
    *   Session with this authorization token to find
    * @return
    *   The corresponding Session OR
-   *   - under called exception [[getWithId]]
+   *   - exception [[getWithId]]
    */
   def getWithAuthToken(authToken: String): EitherT[IO, AppLayerException, SessionMod] = for {
     sessionId <- EitherT.right(redisDriver.use(x => IO.blocking(x.hget(authTokToIdKey, authToken.toSha1Hex))))

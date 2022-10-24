@@ -3,6 +3,7 @@ package api.routes
 
 import api.controllers.JobCtrl
 import api.controllers.SessionCtrl.withAuth
+import api.helpers.AppLayerException.RouteLayerException
 import api.models.SessionMod
 import api.routes.utils.Request._
 import api.routes.utils.Response._
@@ -11,7 +12,6 @@ import cats.implicits._
 import fs2.Stream
 import io.circe.Json
 import org.http4s._
-import org.http4s.circe.CirceEntityCodec.circeEntityEncoder
 import org.http4s.dsl.io._
 
 /**
@@ -30,9 +30,11 @@ object JobRts {
       (nbRows, minColIdx, maxColIdx)
         .mapN((_, _, _))
         .fold(
-          parseFailures => BadRequest(parseFailures.toList.mkString("\n")),
+          // If failing query parameters
+          parseFailures => RouteLayerException(msgServer = parseFailures.toList.mkString("\n")).toResponseIO,
+
+          // Else request with file upload and its parameters
           { case (nbRowsParsed, minColIdxParsed, maxColIdxParsed) =>
-            // Request with file upload and its parameters
             req.req.withJSONAndFileBytesMultipart("fileImportOpt", "fileImport") {
               (fileImportOpt: Json, fileImport: Stream[IO, Byte]) =>
                 JobCtrl
