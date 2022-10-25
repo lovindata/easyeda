@@ -1,13 +1,13 @@
 package com.ilovedatajjia
 package config
 
-import api.helpers.CirceExtension._
+//import api.helpers.CirceExtension._
 import cats.effect._
-import cats.effect.unsafe.implicits.global.compute
-import config.ConfigLoader._
-import doobie._
-import doobie.hikari.HikariTransactor
-import io.circe.Json
+//import cats.effect.unsafe.implicits.global.compute
+//import config.ConfigLoader._
+//import doobie._
+//import doobie.hikari.HikariTransactor
+//import io.circe.Json
 import redis.clients.jedis.JedisPooled
 import redis.clients.jedis.UnifiedJedis
 

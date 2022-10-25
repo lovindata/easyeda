@@ -7,11 +7,30 @@ import cats.effect.implicits._
 import cats.implicits._
 import scala.concurrent.TimeoutException
 import scala.concurrent.duration.FiniteDuration
+import scala.language.implicitConversions
 
 /**
  * Extension methods for [[cats.effect]] objects.
  */
 object CatsEffectExtension {
+
+  /**
+   * Implicit to make [[EitherT]] covariant on [[Left]] and [[Right]].
+   * @param x
+   *   Source invariant [[EitherT]]
+   * @tparam E
+   *   [[Left]] source type
+   * @tparam A
+   *   [[Right]] source type
+   * @tparam E2
+   *   [[Left]] closest type subtype of [[E]]
+   * @tparam A2
+   *   [[Right]] closest type subtype of [[A]]
+   * @return
+   *   Covariant [[EitherT]]
+   */
+  implicit def eitherTCovariant[E, A, E2 >: E, A2 >: A](x: EitherT[IO, E, A]): EitherT[IO, E2, A2] =
+    x.widen[A2].leftWiden[E2]
 
   /**
    * Rich functions for [[IO]].
@@ -21,18 +40,6 @@ object CatsEffectExtension {
    *   Wrapped type
    */
   implicit class CatsEffectExtensionRichIO[A](x: IO[A]) {
-
-    /**
-     * Apply or not a [[IO.timeout]]. It raises [[TimeoutException]] in the case of timeout.
-     * @param time
-     *   Timeout duration
-     * @return
-     *   Timeout applied or not
-     */
-    def timeoutOption(time: Option[FiniteDuration]): IO[A] = time match {
-      case None       => x
-      case Some(time) => x.timeout(time)
-    }
 
     /**
      * Manage only [[Exception]] and let pass the [[Throwable]].
@@ -58,16 +65,18 @@ object CatsEffectExtension {
   implicit class CatsEffectExtensionRichEitherT[E, A](x: EitherT[IO, E, A]) {
 
     /**
-     * Apply or not a [[IO.timeout]]. It manages [[TimeoutException]] as left in the case of timeout.
+     * Apply or not a [[IO.timeout]], it manages [[TimeoutException]] as left in the case of timeout. (Method implicitly
+     * covariant in left and right)
      * @param time
      *   Timeout duration with [[None]] means infinite
      * @return
      *   Timeout applied or not
      */
-    def timeoutOptionTo(time: Option[FiniteDuration], fallbackTo: E): EitherT[IO, E, A] = time match {
-      case None       => x
-      case Some(time) => x.timeoutTo(time, EitherT.left(IO(fallbackTo)))
-    }
+    def timeoutOptionTo[E2 >: E, A2 >: A](time: Option[FiniteDuration], fallbackTo: E2): EitherT[IO, E2, A2] =
+      time match {
+        case None        => x.widen[A2].leftWiden[E2]
+        case Some(sTime) => x.widen[A2].leftWiden[E2].timeoutTo(sTime, EitherT.left[A2](IO(fallbackTo)))
+      }
 
   }
 

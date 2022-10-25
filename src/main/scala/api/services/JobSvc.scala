@@ -11,7 +11,6 @@ import api.helpers.CatsEffectExtension._
 import api.helpers.NormTypeEnum._
 import cats.data.EitherT
 import cats.effect.IO
-import cats.implicits._
 import fs2.Stream
 import fs2.text
 import io.circe.fs2.byteArrayParser
@@ -27,6 +26,23 @@ import scala.reflect.ClassTag
  * Service layer for jobs.
  */
 object JobSvc {
+
+  /**
+   * Wrapper for auto-starting & auto-closing a [[JobMod]] state. ([[EitherT]] version)
+   * @param sessionId
+   *   Session ID
+   * @param f
+   *   Wrapped function
+   * @tparam A
+   *   Output type
+   * @return
+   *   Output from wrapped function
+   */
+  def withJob[A](sessionId: Long)(f: EitherT[IO, AppLayerException, A]): EitherT[IO, AppLayerException, A] = for {
+    jobInRunning <- JobMod(sessionId)
+    output       <- f
+    _            <- jobInRunning.terminate
+  } yield output
 
   /**
    * Read the stream according the csv options.
@@ -75,7 +91,7 @@ object JobSvc {
                      val inputDS: Dataset[String]         = spark.createDataset(fileDrained)
                      spark.read.options(readOptions).csv(inputDS).withNormTypes
                    }.attemptE
-                     .leftMap[AppLayerException](x =>
+                     .leftMap(x =>
                        ServiceLayerException("Not processable csv file into DataFrame", Some(x), Status.UnprocessableEntity))
   } yield output
 
@@ -212,17 +228,16 @@ object JobSvc {
     (inputValues, scalaSchema) = intermediateOut
 
     // Retrieve the sample values
-    rowValues   <- EitherT.right(IO.blocking { // Blocking operation on Spark
+    rowValues   <- EitherT.right(IO.interruptibleMany { // Blocking operation on Spark
                      (if (nbRowsValidated == -1) inputValues.collect()
                       else inputValues.head(nbRowsValidated)).toList
                    })
-    scalaValues <- EitherT.right[AppLayerException](
-                     IO(
-                       rowValues
-                         .map(
-                           _.getAs[mutable.ArraySeq[String]]("_$VALUES_")
-                         ) // ArrayType(StringType) == ArraySeq[String]
-                         .map(_.toList)))
+    scalaValues <-
+      EitherT.right[AppLayerException](
+        IO(
+          rowValues
+            .map(_.getAs[mutable.ArraySeq[String]]("_$VALUES_")) // ArrayType(StringType) == ArraySeq[String]
+            .map(_.toList)))
   } yield DataPreviewDtoOut(DataConf(scalaValues.length, scalaSchema.length),
                             scalaSchema.map(DataSchema.tupled),
                             scalaValues)).timeoutOptionTo(

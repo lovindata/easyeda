@@ -36,9 +36,9 @@ object JobRts {
           // Else request with file upload and its parameters
           { case (nbRowsParsed, minColIdxParsed, maxColIdxParsed) =>
             req.req.withJSONAndFileBytesMultipart("fileImportOpt", "fileImport") {
-              (fileImportOpt: Json, fileImport: Stream[IO, Byte]) =>
+              (fileImportOpt: Json, fileImport: Stream[IO, Byte], fileName: String) =>
                 JobCtrl
-                  .computePreview(session, fileImportOpt, fileImport, nbRowsParsed, minColIdxParsed, maxColIdxParsed)
+                  .computePreview(session, fileImportOpt, fileImport, fileName, nbRowsParsed, minColIdxParsed, maxColIdxParsed)
                   .toResponse(Status.Ok)
             }
           }

@@ -36,22 +36,27 @@ object Request {
      *   HTTP response from the execution `f` OR un-processable entity response
      */
     def withJSONAndFileBytesMultipart(jsonPartName: String, fileBytesPartName: String)(
-        f: (Json, Stream[IO, Byte]) => IO[Response[IO]]): IO[Response[IO]] =
-      req.decode[Multipart[IO]] { multiPart: Multipart[IO] =>
+        f: (Json, Stream[IO, Byte], String) => IO[Response[IO]]): IO[Response[IO]] = req.decode[Multipart[IO]] {
+      multiPart: Multipart[IO] =>
         // Retrieve parts from the Multipart[IO]
-        val streams: Map[String, Stream[IO, Byte]] = multiPart.parts
+        val streams: Map[String, (Stream[IO, Byte], Option[String])] = multiPart.parts
           .collect {
             case part: Part[IO] if part.name.isDefined /* && part.contentType.isDefined
             (SwaggerUI issue cannot send with MediaType) */ =>
-              (part.name.get, part.contentType, part.body)
+              (part.name.get, part.contentType, part.body, part.filename)
           }
           .collect {
-            case (`jsonPartName`, _, jsonPartBody) /* if contentType.mediaType.satisfies(MediaType.application.json)
-              (SwaggerUI issue cannot send with MediaType) */ => "jsonPart" -> jsonPartBody
-            case (`fileBytesPartName`, Some(contentType), fileBytesBody)
+            case (`jsonPartName`,
+                  _,
+                  jsonPartBody,
+                  None
+                ) /* if contentType.mediaType.satisfies(MediaType.application.json)
+              (SwaggerUI issue cannot send with MediaType) */ =>
+              "jsonPart" -> (jsonPartBody, None)
+            case (`fileBytesPartName`, Some(contentType), fileBytesBody, Some(fileName))
                 if contentType.mediaType.satisfies(MediaType.text.csv) || contentType.mediaType.satisfies(
                   MediaType.application.json) =>
-              "fileBytesPart" -> fileBytesBody
+              "fileBytesPart" -> (fileBytesBody, Some(fileName))
           }
           // If duplicated `jsonPartName` or `fileBytesPartName` than first one defined only
           // (= will take only the latest tuple if duplicated keys)
@@ -67,17 +72,18 @@ object Request {
         } else {
           // Drain byte from streams
           val jsonDrained: IO[Json]             =
-            streams("jsonPart").through(text.utf8.decode).foldMonoid.through(stringStreamParser).compile.lastOrError
-          val fileBytesStream: Stream[IO, Byte] = streams("fileBytesPart")
+            streams("jsonPart")._1.through(text.utf8.decode).foldMonoid.through(stringStreamParser).compile.lastOrError
+          val fileBytesStream: Stream[IO, Byte] = streams("fileBytesPart")._1
+          val fileName: String                  = streams("fileBytesPart")._2.get // Sure defined (_.collect + case above)
 
           // Apply `f`
           jsonDrained.redeemWith(
             (e: Throwable) =>
               UnprocessableEntity(s"Please ensure the part `$jsonPartName` is parsable in json (${e.toString})"),
-            { json => f(json, fileBytesStream) }
+            { json => f(json, fileBytesStream, fileName) }
           )
         }
-      }
+    }
 
   }
 

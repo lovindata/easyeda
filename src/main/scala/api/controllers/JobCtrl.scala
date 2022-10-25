@@ -29,6 +29,8 @@ object JobCtrl {
    *   File options to validate
    * @param fileImport
    *   Ready to be drained stream corresponding the file data
+   * @param fileName
+   *   File binaries file name
    * @param nbRows
    *   Number of rows in the preview (`-1` for all rows)
    * @param minColIdx
@@ -45,34 +47,37 @@ object JobCtrl {
   def computePreview(validatedSession: SessionMod,
                      fileImportOpt: Json,
                      fileImport: Stream[IO, Byte],
+                     fileName: String,
                      nbRows: Int,
                      minColIdx: Int,
                      maxColIdx: Int): EitherT[IO, AppLayerException, DataPreviewDtoOut] = for {
     // Validations
-    _                   <- EitherT(
-                             IO(
-                               if ((-1 <= nbRows) && (minColIdx == 0)) Right(())
-                               else if ((-1 <= nbRows) && (1 <= minColIdx) && (minColIdx <= maxColIdx)) Right(())
-                               else if ((-1 <= nbRows) && (1 <= minColIdx) && (maxColIdx == -1)) Right(())
-                               else
-                                 Left(
-                                   ControllerLayerException(msgServer =
-                                                              "Query parameters `nbRows`, `minColIdx` and `maxColIdx` not coherent",
-                                                            statusCodeServer = Status.UnprocessableEntity))
-                             ))
-    fileImportOpt       <- EitherT(
-                             IO(
-                               fileImportOpt
-                                 .as[FileImportOptDtoIn]
-                                 .left
-                                 .map(x =>
-                                   ControllerLayerException(msgServer = "Not parsable file options",
-                                                            overHandledException = Some(x),
-                                                            statusCodeServer = Status.UnprocessableEntity))))
+    _             <- EitherT(
+                       IO(
+                         if ((-1 <= nbRows) && (minColIdx == 0)) Right(())
+                         else if ((-1 <= nbRows) && (1 <= minColIdx) && (minColIdx <= maxColIdx)) Right(())
+                         else if ((-1 <= nbRows) && (1 <= minColIdx) && (maxColIdx == -1)) Right(())
+                         else
+                           Left(
+                             ControllerLayerException(msgServer =
+                                                        "Query parameters `nbRows`, `minColIdx` and `maxColIdx` not coherent",
+                                                      statusCodeServer = Status.UnprocessableEntity))
+                       ))
+    fileImportOpt <- EitherT(
+                       IO(
+                         fileImportOpt
+                           .as[FileImportOptDtoIn]
+                           .left
+                           .map(x =>
+                             ControllerLayerException(msgServer = "Not parsable file options",
+                                                      overHandledException = Some(x),
+                                                      statusCodeServer = Status.UnprocessableEntity))))
 
     // Computations
-    fileImportDataFrame <- JobSvc.readStream(fileImportOpt, fileImport, nbRows)
-    dataPreview         <- JobSvc.preview(fileImportDataFrame, nbRows, minColIdx, maxColIdx, Some(10.seconds))
+    dataPreview   <- JobSvc.withJob(validatedSession.id)(for {
+                       fileImportDataFrame <- JobSvc.readStream(fileImportOpt, fileImport, nbRows)
+                       dataPreview         <- JobSvc.preview(fileImportDataFrame, nbRows, minColIdx, maxColIdx, Some(10.seconds))
+                     } yield dataPreview)
   } yield dataPreview
 
 }
