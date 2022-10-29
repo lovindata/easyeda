@@ -27,23 +27,28 @@ It means none of your source data are saved somewhere plus everything are done o
 
 # Logbook (🙏😣 Work still in progress...)
 
-- Building whole execution of preview (😼 HERE AT THE MOMENT 😼)
-  - Design properly the data saved in the DB for Jobs
+- Finalize (😼 HERE AT THE MOMENT 😼)
+  - Rework the already in-place UTs
+  - Testing E2E the first version redis migration
+  - Testing E2E job preview
 - Migrate to Redis (😼 HERE AT THE MOMENT 😼)
-  - Learn redis data types & [pseudo tables](https://stackoverflow.com/questions/16375188/redis-strings-vs-redis-hashes-to-represent-json-efficiency)
-  - Start migration DEV setup
   - Setup AOF every sec mode
-- Implement e2e exception handling with proper `EitherT[IO, Exception, A]` (😼 HERE AT THE MOMENT 😼)
+- Start learning event streams & prepare async routes for Job monitoring
 - Think about cron jobs not terminated but still here sessions ?
   - K8S stateless compatibility too be-careful ⚠️
     - The implementation of "not-continue"
 - Work on Logging (Spark logs annoying + No app logging)
 - Continue DEV on basic statistics
+- Start learning ReactJs & FrontEnd dev
 - Start DEV on Spark NLP Service
   - Introduce the type `Sentence`
+- Reach decent overall coverage for UTs
+  - Needs to test redis functions for models objects
+  - Setup coverage CI/CD
 
 
 # Notes
 
+- [NoSQL Data modelling patterns & theories](https://redis.com/blog/nosql-data-modeling/#:~:text=What%20is%20a%20NoSQL%20data,how%20it%20all%20connects%20together.)
 - [Jedis JavaDoc](https://javadoc.io/doc/redis.clients/jedis/latest/index.html)
 - [Redis commands](https://redis.io/commands/)

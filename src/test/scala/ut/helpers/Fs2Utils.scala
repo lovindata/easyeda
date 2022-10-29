@@ -1,9 +1,9 @@
 package com.ilovedatajjia
 package ut.helpers
 
+import api.helpers.CatsEffectExtension._
 import cats.data.EitherT
 import cats.effect.IO
-import cats.implicits._
 import fs2._
 import fs2.io.file._
 import java.nio.file.Paths
@@ -22,18 +22,18 @@ object Fs2Utils {
    * @return
    *   Simulated [[Stream]]
    */
-  def fromResourceStream(path: String, nbChunks: Int): EitherT[IO, Throwable, Stream[IO, Byte]] = for {
-    _             <- IO(nbChunks.ensuring(_ >= 1)).attemptT
+  def fromResourceStream(path: String, nbChunks: Int): EitherT[IO, Exception, Stream[IO, Byte]] = for {
+    _             <- IO(nbChunks.ensuring(_ >= 1)).attemptE
     stringRep     <- Files[IO]
                        .readAll(Path(Paths.get(getClass.getResource(path).toURI).toString))
                        .through(text.utf8.decode)
                        .compile
                        .string
-                       .attemptT
+                       .attemptE
     stringRepLen   = stringRep.length
     winSize        = if (stringRepLen % nbChunks == 0) stringRepLen / nbChunks
                      else stringRepLen / nbChunks + 1 // Round up equivalent
-    stringSplitRep = stringRep.grouped(winSize).toArray
+    stringSplitRep = stringRep.grouped(winSize).toList
     streamRep      = Stream.emits(stringSplitRep).through(text.utf8.encode)
   } yield streamRep
 

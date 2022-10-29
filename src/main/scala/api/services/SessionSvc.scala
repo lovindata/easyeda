@@ -3,7 +3,7 @@ package api.services
 
 import api.dto.output._
 import api.helpers.AppLayerException
-import api.helpers.SessionStateEnum._
+import com.ilovedatajjia.api.models.SessionStateEnum._
 import api.models.SessionMod
 import cats.data.EitherT
 import cats.effect._

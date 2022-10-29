@@ -279,7 +279,7 @@ components:
               default: yyyy-MM-dd HH:mm:ss.SSSSSS
     CustomColSchema:
       type: object
-      required: [natColIdx, newColType]
+      required: [natColIdx]
       properties:
         natColIdx:
           $ref: "#/components/schemas/Int32OneToMax"

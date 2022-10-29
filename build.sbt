@@ -11,9 +11,9 @@ lazy val root = (project in file("."))
  */
 // CatsEffect
 // https://mvnrepository.com/artifact/org.typelevel/cats-effect
-libraryDependencies += "org.typelevel" %% "cats-effect" % "3.3.14"
+libraryDependencies += "org.typelevel" %% "cats-effect"    % "3.3.14"
 // https://mvnrepository.com/artifact/org.typelevel/log4cats-core
-libraryDependencies += "org.typelevel" %% "log4cats-core" % "2.5.0"
+libraryDependencies += "org.typelevel" %% "log4cats-core"  % "2.5.0"
 // https://mvnrepository.com/artifact/org.typelevel/log4cats-slf4j
 libraryDependencies += "org.typelevel" %% "log4cats-slf4j" % "2.5.0"
 
@@ -35,35 +35,21 @@ libraryDependencies += "io.circe" %% "circe-parser"         % "0.14.3"
 // https://mvnrepository.com/artifact/io.circe/circe-generic
 libraryDependencies += "io.circe" %% "circe-generic"        % "0.14.3"
 // https://mvnrepository.com/artifact/io.circe/circe-generic-extras
-libraryDependencies += "io.circe" %% "circe-generic-extras" % "0.14.2"
+libraryDependencies += "io.circe" %% "circe-generic-extras" % "0.14.3"
 // https://mvnrepository.com/artifact/io.circe/circe-fs2
 libraryDependencies += "io.circe" %% "circe-fs2"            % "0.14.0"
 
-/*
-// Doobie
-// https://mvnrepository.com/artifact/org.tpolecat/doobie-core
-libraryDependencies += "org.tpolecat"  %% "doobie-core"           % "1.0.0-RC2"
-// https://mvnrepository.com/artifact/org.tpolecat/doobie-hikari
-libraryDependencies += "org.tpolecat"  %% "doobie-hikari"         % "1.0.0-RC2"
-// https://mvnrepository.com/artifact/org.tpolecat/doobie-postgres
-libraryDependencies += "org.tpolecat"  %% "doobie-postgres"       % "1.0.0-RC2"
-// https://mvnrepository.com/artifact/org.tpolecat/doobie-postgres-circe
-libraryDependencies += "org.tpolecat"  %% "doobie-postgres-circe" % "1.0.0-RC2"
-// https://mvnrepository.com/artifact/org.postgresql/postgresql
-libraryDependencies += "org.postgresql" % "postgresql"            % "42.5.0"
- */
-
 // Jedis
 // https://mvnrepository.com/artifact/redis.clients/jedis
-libraryDependencies += "redis.clients" % "jedis" % "4.3.0"
+libraryDependencies += "redis.clients" % "jedis" % "4.3.1"
 
 // Spark
 // https://mvnrepository.com/artifact/org.apache.spark/spark-core
-libraryDependencies += "org.apache.spark" %% "spark-core"  % "3.3.0"
+libraryDependencies += "org.apache.spark" %% "spark-core"  % "3.3.1"
 // https://mvnrepository.com/artifact/org.apache.spark/spark-sql
-libraryDependencies += "org.apache.spark" %% "spark-sql"   % "3.3.0" % "provided"
+libraryDependencies += "org.apache.spark" %% "spark-sql"   % "3.3.1" % "provided"
 // https://mvnrepository.com/artifact/org.apache.spark/spark-mllib
-libraryDependencies += "org.apache.spark" %% "spark-mllib" % "3.3.0" % "provided"
+libraryDependencies += "org.apache.spark" %% "spark-mllib" % "3.3.1" % "provided"
 
 /**
  * Test dependencies

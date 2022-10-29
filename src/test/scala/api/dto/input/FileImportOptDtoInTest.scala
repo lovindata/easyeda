@@ -3,10 +3,10 @@ package api.dto.input
 
 import api.dto.input.FileImportOptDtoIn._
 import api.helpers.NormTypeEnum._
+import ut.helpers.CustomCatsEffectSparkSpec
+import cats.implicits._
 import cats.effect.IO
-import com.ilovedatajjia.ut.helpers.CustomCatsEffectSparkSpec
 import io.circe.parser.parse
-import org.scalatest.exceptions.TestFailedException
 
 /**
  * [[FileImportOptDtoIn]] test(s).
@@ -47,14 +47,24 @@ class FileImportOptDtoInTest extends CustomCatsEffectSparkSpec {
                  |  },
                  |  "newColName": "_c0"
                  |}""".stripMargin).flatMap(_.as[CustomColSchema]))
-        .asserting(_ shouldBe Right(CustomColSchema(0, Some(CustomColBase(Numerical)), "_c0")))
+        .asserting(_ shouldBe Right(CustomColSchema(0, CustomColBase(Numerical).some, "_c0".some)))
     }
     "**UT2** - CustomSchema JSON can be decoded without \"newColType\"" in {
       IO(parse("""{
                  |  "natColIdx": 0,
                  |  "newColName": "_c0"
                  |}""".stripMargin).flatMap(_.as[CustomColSchema]))
-        .asserting(_ shouldBe Right(CustomColSchema(0, None, "_c0")))
+        .asserting(_ shouldBe Right(CustomColSchema(0, None, "_c0".some)))
+    }
+    "**UT3** - CustomSchema JSON can be decoded without \"newColName\"" in {
+      IO(parse(
+        """{
+          |  "natColIdx": 0,
+          |  "newColType": {
+          |    "nameType": "Numerical"
+          |  }
+          |}""".stripMargin).flatMap(_.as[CustomColSchema]))
+        .asserting(_ shouldBe Right(CustomColSchema(0, CustomColBase(Numerical).some, None)))
     }
   }
 
@@ -87,7 +97,7 @@ class FileImportOptDtoInTest extends CustomCatsEffectSparkSpec {
             output.escape shouldBe "\\"
             output.header shouldBe false
             output.inferSchema shouldBe false
-            output.customSchema.get shouldBe Array(CustomColSchema(0, Some(CustomColBase(Numerical)), "_c0"))
+            output.customSchema.get shouldBe Array(CustomColSchema(0, CustomColBase(Numerical).some, "_c0".some))
           case _       => fail("Failed because of incorrect type `FileImportOptDtoIn`")
         }
     }
@@ -114,7 +124,7 @@ class FileImportOptDtoInTest extends CustomCatsEffectSparkSpec {
                 output: JsonImportOptDtoIn
               ) => // De-wrap because Option[Array[_]] equality cannot be tested directly
             output.inferSchema shouldBe false
-            output.customSchema.get shouldBe Array(CustomColSchema(0, Some(CustomColBase(Numerical)), "_c0"))
+            output.customSchema.get shouldBe Array(CustomColSchema(0, CustomColBase(Numerical).some, "_c0".some))
           case _       => fail("Failed because of incorrect type `FileImportOptDtoIn`")
         }
     }

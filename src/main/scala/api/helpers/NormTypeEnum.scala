@@ -1,9 +1,7 @@
 package com.ilovedatajjia
 package api.helpers
 
-import io.circe.Decoder
-import io.circe.Encoder
-import io.circe.Json
+import io.circe._
 import org.apache.spark.sql.Column
 import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.types._
@@ -13,13 +11,16 @@ import org.apache.spark.sql.types._
  */
 object NormTypeEnum extends Enumeration {
 
-  // Possible normalized types
+  // Main enumerations
   type NormType = Value
   val Numerical, Categorical, Date, Timestamp: NormType = Value
 
-  // JSON Encoder & Decoder
-  implicit val normTypeDec: Decoder[NormType] = _.value.as[String].map(_.toNormType)
+  // JSON (de)serializers
   implicit val normTypeEnc: Encoder[NormType] = x => Json.fromString(x.toString)
+  implicit val normTypeDec: Decoder[NormType] = _.value.as[String].flatMap {
+    case x if List("Numerical", "Categorical", "Date", "Timestamp").contains(x) => Right(x.toNormType)
+    case x                                                                      => Left(DecodingFailure(s"$x unknown type", List()))
+  }
 
   /**
    * Rich functions for [[DataType]].
@@ -38,7 +39,7 @@ object NormTypeEnum extends Enumeration {
       case _: StringType    => NormTypeEnum.Categorical
       case _: DateType      => NormTypeEnum.Date
       case _: TimestampType => NormTypeEnum.Timestamp
-      case _                => throw new UnsupportedOperationException(s"$x not Spark normalize type")
+      case _                => throw new UnsupportedOperationException(s"$x not Spark normalized type")
     }
 
     /**
@@ -105,7 +106,7 @@ object NormTypeEnum extends Enumeration {
       case "Categorical" => Categorical
       case "Date"        => Date
       case "Timestamp"   => Timestamp
-      case _             => throw new UnsupportedOperationException(s"$x unknown `NormType`")
+      case _             => throw new UnsupportedOperationException(s"Unknown normalized type `$x`")
     }
 
   }

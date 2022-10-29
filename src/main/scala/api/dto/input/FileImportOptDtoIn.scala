@@ -18,10 +18,8 @@ sealed trait FileImportOptDtoIn
  */
 object FileImportOptDtoIn {
 
-  // JSON encoders & decoders
-  implicit val encCustomColType: Encoder[CustomColType]  = Encoder.instance {
-    _.asJson
-  }
+  // JSON (de)serializers for `CustomColSchema`
+  implicit val encCustomColType: Encoder[CustomColType]  = Encoder.instance { _.asJson }
   implicit val decCustomColType: Decoder[CustomColType]  = List[Decoder[CustomColType]](
     Decoder[CustomColDate].widen,
     Decoder[CustomColTimestamp].widen,
@@ -29,10 +27,10 @@ object FileImportOptDtoIn {
   ).reduceLeft(_ or _)
   implicit val encCustomSchema: Encoder[CustomColSchema] = deriveEncoder
   implicit val decCustomSchema: Decoder[CustomColSchema] = deriveDecoder
-  implicit val enc: Encoder[FileImportOptDtoIn]          = Encoder.instance {
-    _.asJson
-  }
-  implicit val dec: Decoder[FileImportOptDtoIn]          = List[Decoder[FileImportOptDtoIn]](
+
+  // JSON (de)serializers for `FileImportOptDtoIn`
+  implicit val enc: Encoder[FileImportOptDtoIn] = Encoder.instance { _.asJson }
+  implicit val dec: Decoder[FileImportOptDtoIn] = List[Decoder[FileImportOptDtoIn]](
     Decoder[CsvImportOptDtoIn].widen,
     Decoder[JsonImportOptDtoIn].widen
   ).reduceLeft(_ or _)
@@ -48,13 +46,13 @@ object FileImportOptDtoIn {
   /**
    * Custom schema.
    * @param natColIdx
-   *   Natural index of a column starting from `0`.
+   *   Natural index of a column starting at `1`.
    * @param newColType
-   *   Custom column type
+   *   Optional new custom column type
    * @param newColName
-   *   New column name
+   *   Optional new column name
    */
-  case class CustomColSchema(natColIdx: Int, newColType: Option[CustomColType], newColName: String)
+  case class CustomColSchema(natColIdx: Int, newColType: Option[CustomColType], newColName: Option[String])
 
   /**
    * CSV file options.
@@ -76,7 +74,7 @@ object FileImportOptDtoIn {
                                escape: String,
                                header: Boolean,
                                inferSchema: Boolean,
-                               customSchema: Option[Array[CustomColSchema]])
+                               customSchema: Option[List[CustomColSchema]])
       extends FileImportOptDtoIn
 
   /**
@@ -86,7 +84,7 @@ object FileImportOptDtoIn {
    * @param customSchema
    *   Custom schema to apply (cannot be used with [[inferSchema]])
    */
-  case class JsonImportOptDtoIn(inferSchema: Boolean, customSchema: Option[Array[CustomColSchema]])
+  case class JsonImportOptDtoIn(inferSchema: Boolean, customSchema: Option[List[CustomColSchema]])
       extends FileImportOptDtoIn
 
 }

@@ -42,6 +42,7 @@ object JobCtrl {
    *   - [[ControllerLayerException]] if not coherent query parameters
    *   - [[ControllerLayerException]] if not parsable file options
    *   - exception from [[JobSvc.readStream]]
+   *   - exception from [[JobSvc.passCustomSchema]]
    *   - exception from [[JobSvc.preview]]
    */
   def computePreview(validatedSession: SessionMod,
@@ -52,32 +53,40 @@ object JobCtrl {
                      minColIdx: Int,
                      maxColIdx: Int): EitherT[IO, AppLayerException, DataPreviewDtoOut] = for {
     // Validations
-    _             <- EitherT(
-                       IO(
-                         if ((-1 <= nbRows) && (minColIdx == 0)) Right(())
-                         else if ((-1 <= nbRows) && (1 <= minColIdx) && (minColIdx <= maxColIdx)) Right(())
-                         else if ((-1 <= nbRows) && (1 <= minColIdx) && (maxColIdx == -1)) Right(())
-                         else
-                           Left(
-                             ControllerLayerException(msgServer =
-                                                        "Query parameters `nbRows`, `minColIdx` and `maxColIdx` not coherent",
-                                                      statusCodeServer = Status.UnprocessableEntity))
-                       ))
-    fileImportOpt <- EitherT(
-                       IO(
-                         fileImportOpt
-                           .as[FileImportOptDtoIn]
-                           .left
-                           .map(x =>
-                             ControllerLayerException(msgServer = "Not parsable file options",
-                                                      overHandledException = Some(x),
-                                                      statusCodeServer = Status.UnprocessableEntity))))
+    _                   <- EitherT(
+                             IO(
+                               if ((-1 <= nbRows) && (minColIdx == 0)) Right(())
+                               else if ((-1 <= nbRows) && (1 <= minColIdx) && (minColIdx <= maxColIdx)) Right(())
+                               else if ((-1 <= nbRows) && (1 <= minColIdx) && (maxColIdx == -1)) Right(())
+                               else
+                                 Left(
+                                   ControllerLayerException(msgServer =
+                                                              "Query parameters `nbRows`, `minColIdx` and `maxColIdx` not coherent",
+                                                            statusCodeServer = Status.UnprocessableEntity))
+                             ))
+    fileImportOptParsed <- EitherT(
+                             IO(
+                               fileImportOpt
+                                 .as[FileImportOptDtoIn]
+                                 .left
+                                 .map(x =>
+                                   ControllerLayerException(msgServer = "Not parsable file options",
+                                                            overHandledException = Some(x),
+                                                            statusCodeServer = Status.UnprocessableEntity))))
 
     // Computations
-    dataPreview   <- JobSvc.withJob(validatedSession.id)(for {
-                       fileImportDataFrame <- JobSvc.readStream(fileImportOpt, fileImport, nbRows)
-                       dataPreview         <- JobSvc.preview(fileImportDataFrame, nbRows, minColIdx, maxColIdx, Some(10.seconds))
-                     } yield dataPreview)
+    inputs               = Json.obj(
+                             "fileImportOpt" -> fileImportOpt,
+                             "fileName"      -> Json.fromString(fileName),
+                             "nbRows"        -> Json.fromInt(nbRows),
+                             "minColIdx"     -> Json.fromInt(minColIdx),
+                             "maxColIdx"     -> Json.fromInt(maxColIdx)
+                           )
+    dataPreview         <- JobSvc.withJob(validatedSession.id, inputs, Some(10.seconds))(for {
+                             fileImportDataFrame <- JobSvc.readStream(fileImportOptParsed, fileImport, nbRows)
+                             dfWithCustomSch     <- JobSvc.passCustomSchema(fileImportDataFrame, fileImportOptParsed)
+                             dataPreview         <- JobSvc.preview(dfWithCustomSch, nbRows, minColIdx, maxColIdx)
+                           } yield dataPreview)
   } yield dataPreview
 
 }

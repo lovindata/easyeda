@@ -3,16 +3,22 @@ package api.services
 
 import api.dto.input.FileImportOptDtoIn
 import api.dto.input.FileImportOptDtoIn._
+import api.dto.output.AppLayerExceptionDtoOut
 import api.dto.output.DataPreviewDtoOut
 import api.dto.output.DataPreviewDtoOut._
 import api.helpers.AppLayerException
 import api.helpers.AppLayerException.ServiceLayerException
 import api.helpers.CatsEffectExtension._
 import api.helpers.NormTypeEnum._
+import api.models.JobMod
 import cats.data.EitherT
 import cats.effect.IO
+import cats.effect.implicits._
+import cats.implicits._
 import fs2.Stream
 import fs2.text
+import io.circe.Encoder
+import io.circe.Json
 import io.circe.fs2.byteArrayParser
 import org.apache.spark.sql._
 import org.apache.spark.sql.functions._
@@ -31,6 +37,10 @@ object JobSvc {
    * Wrapper for auto-starting & auto-closing a [[JobMod]] state. ([[EitherT]] version)
    * @param sessionId
    *   Session ID
+   * @param inputs
+   *   JSON representation of the input(s)
+   * @param timeout
+   *   Job computation timeout
    * @param f
    *   Wrapped function
    * @tparam A
@@ -38,11 +48,20 @@ object JobSvc {
    * @return
    *   Output from wrapped function
    */
-  def withJob[A](sessionId: Long)(f: EitherT[IO, AppLayerException, A]): EitherT[IO, AppLayerException, A] = for {
-    jobInRunning <- JobMod(sessionId)
-    output       <- f
-    _            <- jobInRunning.terminate
-  } yield output
+  def withJob[A](sessionId: Long, inputs: Json, timeout: Option[FiniteDuration])(
+      f: EitherT[IO, AppLayerException, A])(implicit
+      encOutFailed: Encoder[AppLayerExceptionDtoOut],
+      encOutSucceeded: Encoder[A]): EitherT[IO, AppLayerException, A] = EitherT(for {
+    jobInRunning <- JobMod(sessionId, inputs)
+    output       <- f.timeoutOptionTo(
+                      timeout,
+                      ServiceLayerException(
+                        s"Exceeded timeout `$timeout` for job `${jobInRunning.id}`, data or options need to be restrained",
+                        statusCodeServer = Status.BadRequest)
+                    ).value
+    outputJson    = output.bimap(x => encOutFailed(x.toDtoOut), x => encOutSucceeded(x))
+    _            <- jobInRunning.terminate(outputJson).value
+  } yield output)
 
   /**
    * Read the stream according the csv options.
@@ -57,7 +76,9 @@ object JobSvc {
    *   - [[ServiceLayerException]] if pooling [[Stream]] failed
    *   - [[ServiceLayerException]] if building [[DataFrame]] failed
    */
-  private def readStreamCsv(opts: CsvImportOptDtoIn, fileImport: Stream[IO, Byte], nbRowsPreviewValidated: Int)(implicit
+  private[services] def readStreamCsv(opts: CsvImportOptDtoIn,
+                                      fileImport: Stream[IO, Byte],
+                                      nbRowsPreviewValidated: Int)(implicit
       spark: SparkSession): EitherT[IO, AppLayerException, DataFrame] = for {
     // Drain to stream
     fileDrained <- ((opts.header, nbRowsPreviewValidated) match {
@@ -108,8 +129,10 @@ object JobSvc {
    *   - [[ServiceLayerException]] if pooling [[Stream]] failed
    *   - [[ServiceLayerException]] if building [[DataFrame]] failed
    */
-  private def readStreamJson(opts: JsonImportOptDtoIn, fileImport: Stream[IO, Byte], nbRowsPreviewValidated: Int)(
-      implicit spark: SparkSession): EitherT[IO, AppLayerException, DataFrame] = for {
+  private[services] def readStreamJson(opts: JsonImportOptDtoIn,
+                                       fileImport: Stream[IO, Byte],
+                                       nbRowsPreviewValidated: Int)(implicit
+      spark: SparkSession): EitherT[IO, AppLayerException, DataFrame] = for {
     // Drain to stream
     fileDrained <- (if (nbRowsPreviewValidated > 0) fileImport.through(byteArrayParser).take(nbRowsPreviewValidated)
                     else fileImport.through(byteArrayParser)).compile.toList.attemptE.leftMap(x =>
@@ -152,22 +175,87 @@ object JobSvc {
    *   - exception from [[readStreamCsv]]
    *   - exception from [[readStreamJson]]
    */
-  def readStream(fileImportOptDtoIn: FileImportOptDtoIn,
-                 fileImport: Stream[IO, Byte],
-                 nbRowsPreviewValidated: Int,
-                 timeout: Option[FiniteDuration] = Some(10.seconds))(implicit
-      spark: SparkSession): EitherT[IO, AppLayerException, DataFrame] = (fileImportOptDtoIn match {
+  def readStream(fileImportOptDtoIn: FileImportOptDtoIn, fileImport: Stream[IO, Byte], nbRowsPreviewValidated: Int)(
+      implicit spark: SparkSession): EitherT[IO, AppLayerException, DataFrame] = fileImportOptDtoIn match {
     // 0 - If CSV file
     case opts: CsvImportOptDtoIn  => readStreamCsv(opts, fileImport, nbRowsPreviewValidated)
     // 1 - If JSON file
     case opts: JsonImportOptDtoIn => readStreamJson(opts, fileImport, nbRowsPreviewValidated)
     // 2 - Unknown options
     case _                        => EitherT.left[DataFrame](IO(ServiceLayerException("Unknown matching type for `fileImportOptDtoIn`")))
-  }).timeoutOptionTo(
-    timeout,
-    ServiceLayerException(s"Exceeded timeout `$timeout` when reading stream, data or options need to be restrained",
-                          statusCodeServer = Status.BadRequest)
-  )
+  }
+
+  /**
+   * Apply the custom schema on an input [[DataFrame]]. (Do nothing in case of non define custom schema)
+   * @param input
+   *   Spark input [[DataFrame]]
+   * @param customSchema
+   *   Custom schema to apply
+   * @return
+   *   Spark [[DataFrame]] with the custom schema applied OR
+   *   - [[ServiceLayerException]] if out of bound natural index
+   *   - [[ServiceLayerException]] if incoherent custom type on a column
+   */
+  private def applyCustomSchema(input: DataFrame,
+                                customSchema: List[CustomColSchema]): EitherT[IO, AppLayerException, DataFrame] =
+    for {
+      // Replace natural index by actual names in the selector
+      natIdxRep    <- EitherT(IO {
+                        val inputColNames: Array[String] = input.columns
+                        val nbCols: Int                  = input.columns.length
+                        customSchema.traverse { // Using `_.traverse` for first failed
+                          case CustomColSchema(natIdx, normType, newColName) if natIdx < nbCols =>
+                            Right(inputColNames(natIdx), normType, newColName)
+                          case CustomColSchema(natIdx, _, _)                                    =>
+                            Left(
+                              ServiceLayerException(s"Out of bound column index `$natIdx` not in `[1 $nbCols]`",
+                                                    statusCodeServer = Status.UnprocessableEntity))
+                        }
+                      })
+
+      // Apply the column types & new names in the selector
+      inputOutCols <-
+        EitherT(IO {
+          natIdxRep.traverse { // Using `_.traverse` for first failed
+            case (natColName, Some(CustomColBase(newColType)), optionalNewColName)                   =>
+              Right(
+                input(natColName)
+                  .cast(newColType.toDataType)
+                  .as(optionalNewColName.getOrElse(natColName)))
+            case (natColName, Some(CustomColDate(Date, fmtDate)), optionalNewColName)                =>
+              Right(to_date(input(natColName), fmtDate).as(optionalNewColName.getOrElse(natColName)))
+            case (natColName, Some(CustomColTimestamp(Timestamp, fmtTimestamp)), optionalNewColName) =>
+              Right(to_timestamp(input(natColName), fmtTimestamp).as(optionalNewColName.getOrElse(natColName)))
+            case (natColName, None, optionalNewColName)                                              =>
+              Right(input(natColName).as(optionalNewColName.getOrElse(natColName)))
+            case (natColName, _, _)                                                                  =>
+              Left(
+                ServiceLayerException(s"Incoherent defined custom type for the column `$natColName`",
+                                      statusCodeServer = Status.UnprocessableEntity))
+          }
+        })
+    } yield input.select(inputOutCols: _*)
+
+  /**
+   * Pass the custom schema step if the file options contains one. (Do nothing otherwise)
+   * @param input
+   *   Input [[DataFrame]] to pass the custom schema on
+   * @param fileImportOptDtoIn
+   *   [[FileImportOptDtoIn]] containing a potential custom schema
+   * @return
+   *   Input [[DataFrame]] with the custom schema step passed OR
+   *   - exception from [[applyCustomSchema]]
+   */
+  def passCustomSchema(input: DataFrame,
+                       fileImportOptDtoIn: FileImportOptDtoIn): EitherT[IO, AppLayerException, DataFrame] =
+    fileImportOptDtoIn match {
+      // Cases to apply custom schema
+      case CsvImportOptDtoIn(_, _, _, _, _, Some(customSchema)) => applyCustomSchema(input, customSchema)
+      case JsonImportOptDtoIn(_, Some(customSchema))            => applyCustomSchema(input, customSchema)
+
+      // Cases to not apply custom schema
+      case _ => EitherT.right(IO(input))
+    }
 
   /**
    * Compute preview of an input [[DataFrame]].
@@ -179,8 +267,6 @@ object JobSvc {
    *   Included border minimum index column (Starts from `1` or equal `-1` for no columns)
    * @param maxColIdxValidated
    *   Included border maximum index column (`-1` for all on the right)
-   * @param timeout
-   *   Preview computation timeout
    * @return
    *   Data preview OR
    *   - [[ServiceLayerException]] if issue on computing DataFrame preview or schema
@@ -189,8 +275,7 @@ object JobSvc {
   def preview(input: DataFrame,
               nbRowsValidated: Int,
               minColIdxValidated: Int,
-              maxColIdxValidated: Int,
-              timeout: Option[FiniteDuration]): EitherT[IO, AppLayerException, DataPreviewDtoOut] = (for {
+              maxColIdxValidated: Int): EitherT[IO, AppLayerException, DataPreviewDtoOut] = for {
     // Intermediate result (DataFrame to compute and scalaSchema)
     intermediateOut           <- IO {
                                    // Column slicer
@@ -240,10 +325,6 @@ object JobSvc {
             .map(_.toList)))
   } yield DataPreviewDtoOut(DataConf(scalaValues.length, scalaSchema.length),
                             scalaSchema.map(DataSchema.tupled),
-                            scalaValues)).timeoutOptionTo(
-    timeout,
-    ServiceLayerException(s"Exceeded timeout `$timeout` when computing preview, data or options need to be restrained",
-                          statusCodeServer = Status.BadRequest)
-  )
+                            scalaValues)
 
 }

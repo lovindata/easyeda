@@ -4,7 +4,7 @@ package api.controllers
 import api.dto.output.SessionStatusDtoOut
 import api.helpers.AppLayerException
 import api.helpers.AppLayerException._
-import api.helpers.SessionStateEnum._
+import com.ilovedatajjia.api.models.SessionStateEnum._
 import api.models.SessionMod
 import api.services.SessionSvc
 import cats.data._
