@@ -6,16 +6,16 @@ import cats.effect.unsafe.implicits.global.compute
 import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.SparkSession
 import org.scalatest.Assertion
-import org.scalatest.BeforeAndAfterAll
 import org.scalatest.freespec.AsyncFreeSpec
 import org.scalatest.matchers.should.Matchers
 import scala.concurrent.ExecutionContext
+import scala.language.implicitConversions
 
 /**
  * [[AsyncFreeSpec]] scala test spec with [[cats.effect.testing]] matchers & runtime and [[SparkSession]] (will start
  * only if at least one of your test needs it).
  */
-trait CustomCatsEffectSparkSpec extends AsyncFreeSpec with AsyncIOSpec with Matchers with BeforeAndAfterAll {
+trait CatsEffectSparkMockitoSpec extends AsyncFreeSpec with AsyncIOSpec with Matchers { // with AsyncMockitoSugar {
 
   // Global thread pool
   override implicit val executionContext: ExecutionContext = compute

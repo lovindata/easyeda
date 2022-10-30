@@ -3,7 +3,7 @@ package api.dto.input
 
 import api.dto.input.FileImportOptDtoIn._
 import api.helpers.NormTypeEnum._
-import ut.helpers.CustomCatsEffectSparkSpec
+import ut.helpers.CatsEffectSparkMockitoSpec
 import cats.implicits._
 import cats.effect.IO
 import io.circe.parser.parse
@@ -11,7 +11,7 @@ import io.circe.parser.parse
 /**
  * [[FileImportOptDtoIn]] test(s).
  */
-class FileImportOptDtoInTest extends CustomCatsEffectSparkSpec {
+class FileImportOptDtoInTest extends CatsEffectSparkMockitoSpec {
 
   // CustomColType test(s)
   "CustomColType test(s)" - {

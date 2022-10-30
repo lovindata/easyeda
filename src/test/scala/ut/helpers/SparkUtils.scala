@@ -25,10 +25,10 @@ object SparkUtils {
    *   implicit [[SparkSession]]
    * @return
    *   A Spark [[DataFrame]] OR
-   *   - [[Exception]] if issue occurred
+   *   - [[Throwable]] if issue occurred
    */
   def fromResourceDataFrame(path: String, schema: String)(implicit
-      spark: SparkSession): EitherT[IO, Exception, DataFrame] =
+      spark: SparkSession): EitherT[IO, Throwable, DataFrame] =
     IO(Source.fromFile(getClass.getResource(schema).getPath)).attemptE.bracket { x: BufferedSource =>
       IO {
         val strDDL: String = x.mkString

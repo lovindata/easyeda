@@ -39,10 +39,6 @@ libraryDependencies += "io.circe" %% "circe-generic-extras" % "0.14.3"
 // https://mvnrepository.com/artifact/io.circe/circe-fs2
 libraryDependencies += "io.circe" %% "circe-fs2"            % "0.14.0"
 
-// Jedis
-// https://mvnrepository.com/artifact/redis.clients/jedis
-libraryDependencies += "redis.clients" % "jedis" % "4.3.1"
-
 // Spark
 // https://mvnrepository.com/artifact/org.apache.spark/spark-core
 libraryDependencies += "org.apache.spark" %% "spark-core"  % "3.3.1"
@@ -51,12 +47,16 @@ libraryDependencies += "org.apache.spark" %% "spark-sql"   % "3.3.1" % "provided
 // https://mvnrepository.com/artifact/org.apache.spark/spark-mllib
 libraryDependencies += "org.apache.spark" %% "spark-mllib" % "3.3.1" % "provided"
 
+// Redis
+// https://mvnrepository.com/artifact/redis.clients/jedis
+libraryDependencies += "redis.clients" % "jedis" % "4.3.1"
+
 /**
  * Test dependencies
  */
 // https://mvnrepository.com/artifact/org.scalatest/scalatest
-libraryDependencies += "org.scalatest"     %% "scalatest"                     % "3.2.14"   % Test
-// https://mvnrepository.com/artifact/org.scalatestplus/mockito-4-6
-libraryDependencies += "org.scalatestplus" %% "mockito-4-6"                   % "3.2.14.0" % Test
+libraryDependencies += "org.scalatest" %% "scalatest"                     % "3.2.14"  % Test
+// https://mvnrepository.com/artifact/org.mockito/mockito-scala-scalatest
+libraryDependencies += "org.mockito"   %% "mockito-scala-scalatest"       % "1.17.12" % Test
 // https://mvnrepository.com/artifact/org.typelevel/cats-effect-testing-scalatest
-libraryDependencies += "org.typelevel"     %% "cats-effect-testing-scalatest" % "1.4.0"    % Test
+libraryDependencies += "org.typelevel" %% "cats-effect-testing-scalatest" % "1.4.0"   % Test

@@ -53,12 +53,16 @@ object JobSvc {
       encOutFailed: Encoder[AppLayerExceptionDtoOut],
       encOutSucceeded: Encoder[A]): EitherT[IO, AppLayerException, A] = EitherT(for {
     jobInRunning <- JobMod(sessionId, inputs)
-    output       <- f.timeoutOptionTo(
-                      timeout,
-                      ServiceLayerException(
-                        s"Exceeded timeout `$timeout` for job `${jobInRunning.id}`, data or options need to be restrained",
-                        statusCodeServer = Status.BadRequest)
-                    ).value
+    output       <- timeout match {
+                      case None          => f.value
+                      case Some(timeout) =>
+                        f.value.timeoutTo(
+                          timeout,
+                          IO(Left(ServiceLayerException(
+                            s"Exceeded timeout `$timeout` for job `${jobInRunning.id}`, data or options need to be restrained",
+                            statusCodeServer = Status.BadRequest)))
+                        )
+                    }
     outputJson    = output.bimap(x => encOutFailed(x.toDtoOut), x => encOutSucceeded(x))
     _            <- jobInRunning.terminate(outputJson).value
   } yield output)
@@ -76,9 +80,7 @@ object JobSvc {
    *   - [[ServiceLayerException]] if pooling [[Stream]] failed
    *   - [[ServiceLayerException]] if building [[DataFrame]] failed
    */
-  private[services] def readStreamCsv(opts: CsvImportOptDtoIn,
-                                      fileImport: Stream[IO, Byte],
-                                      nbRowsPreviewValidated: Int)(implicit
+  private def readStreamCsv(opts: CsvImportOptDtoIn, fileImport: Stream[IO, Byte], nbRowsPreviewValidated: Int)(implicit
       spark: SparkSession): EitherT[IO, AppLayerException, DataFrame] = for {
     // Drain to stream
     fileDrained <- ((opts.header, nbRowsPreviewValidated) match {
@@ -129,10 +131,8 @@ object JobSvc {
    *   - [[ServiceLayerException]] if pooling [[Stream]] failed
    *   - [[ServiceLayerException]] if building [[DataFrame]] failed
    */
-  private[services] def readStreamJson(opts: JsonImportOptDtoIn,
-                                       fileImport: Stream[IO, Byte],
-                                       nbRowsPreviewValidated: Int)(implicit
-      spark: SparkSession): EitherT[IO, AppLayerException, DataFrame] = for {
+  private def readStreamJson(opts: JsonImportOptDtoIn, fileImport: Stream[IO, Byte], nbRowsPreviewValidated: Int)(
+      implicit spark: SparkSession): EitherT[IO, AppLayerException, DataFrame] = for {
     // Drain to stream
     fileDrained <- (if (nbRowsPreviewValidated > 0) fileImport.through(byteArrayParser).take(nbRowsPreviewValidated)
                     else fileImport.through(byteArrayParser)).compile.toList.attemptE.leftMap(x =>
@@ -182,7 +182,11 @@ object JobSvc {
     // 1 - If JSON file
     case opts: JsonImportOptDtoIn => readStreamJson(opts, fileImport, nbRowsPreviewValidated)
     // 2 - Unknown options
-    case _                        => EitherT.left[DataFrame](IO(ServiceLayerException("Unknown matching type for `fileImportOptDtoIn`")))
+    case _                        =>
+      EitherT.left[DataFrame](
+        IO(
+          ServiceLayerException("File options correctly received but will handled in the next version",
+                                statusCodeServer = Status.BadRequest)))
   }
 
   /**

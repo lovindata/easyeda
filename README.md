@@ -1,13 +1,14 @@
 # EasyEDA - Easy fast exploratory data analysis
 
 [![Generic badge](https://img.shields.io/badge/Scala-2.13-darkred.svg?style=plastic)](https://www.scala-lang.org/)
+[![Generic badge](https://img.shields.io/badge/CatsEffect-3.3-lightblue.svg?style=plastic)](https://typelevel.org/cats-effect/)
 [![Generic badge](https://img.shields.io/badge/Http4s-0.23-red.svg?style=plastic)](https://http4s.org/#)
 [![Generic badge](https://img.shields.io/badge/Spark-3.3-orange.svg?style=plastic)](https://spark.apache.org/)
 [![Generic badge](https://img.shields.io/badge/SBT-1.7-blue.svg?style=plastic)](https://www.scala-sbt.org/)
 [![Generic badge](https://img.shields.io/badge/OpenJDK-11-white.svg?style=plastic)](https://adoptium.net/)
-[![Generic badge](https://img.shields.io/badge/SwaggerUI-4.14-green.svg?style=plastic)](https://swagger.io/)
 [![Generic badge](https://img.shields.io/badge/Jedis-4.3-black.svg?style=plastic)](https://github.com/redis/jedis)
 [![Generic badge](https://img.shields.io/badge/RedisStack-6.2-orangered.svg?style=plastic)](https://redis.io/docs/stack/)
+[![Generic badge](https://img.shields.io/badge/SwaggerUI-4.14-green.svg?style=plastic)](https://swagger.io/)
 
 ![stackUsed](docs/stackUsed.png)
 
@@ -30,6 +31,8 @@ It means none of your source data are saved somewhere and everything are done on
 
 - Finalize (😼 HERE AT THE MOMENT 😼)
   - Rework the already in-place UTs
+    - Issue with combined AsyncFreeSpec + `withObjectMocked => Unit`
+    - Think about if there is an issue of design ?
   - Testing E2E the first version redis migration
   - Testing E2E job preview
 - Migrate to Redis (😼 HERE AT THE MOMENT 😼)
