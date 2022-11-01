@@ -56,7 +56,5 @@ libraryDependencies += "redis.clients" % "jedis" % "4.3.1"
  */
 // https://mvnrepository.com/artifact/org.scalatest/scalatest
 libraryDependencies += "org.scalatest" %% "scalatest"                     % "3.2.14"  % Test
-// https://mvnrepository.com/artifact/org.mockito/mockito-scala-scalatest
-libraryDependencies += "org.mockito"   %% "mockito-scala-scalatest"       % "1.17.12" % Test
 // https://mvnrepository.com/artifact/org.typelevel/cats-effect-testing-scalatest
 libraryDependencies += "org.typelevel" %% "cats-effect-testing-scalatest" % "1.4.0"   % Test

@@ -44,14 +44,14 @@ object AppLayerException {
    * [[AppLayerException]] happening in the [[api.routes]] layer.
    * @param msgServer
    *   HTTP server message to send to client
-   * @param overHandledException
-   *   Defined if covering an actual handled exception
    * @param statusCodeServer
    *   HTTP status code to send to client
+   * @param overHandledException
+   *   Defined if covering an actual handled exception
    */
   case class RouteLayerException(msgServer: String,
-                                 overHandledException: Option[Exception] = None,
-                                 statusCodeServer: Status = InternalServerError)
+                                 statusCodeServer: Status = InternalServerError,
+                                 overHandledException: Option[Exception] = None)
       extends AppLayerException {
 
     /**
@@ -66,14 +66,14 @@ object AppLayerException {
    * [[AppLayerException]] happening in the [[api.controllers]] layer.
    * @param msgServer
    *   HTTP server message to send to client
-   * @param overHandledException
-   *   Defined if covering an actual handled exception
    * @param statusCodeServer
    *   HTTP status code to send to client
+   * @param overHandledException
+   *   Defined if covering an actual handled exception
    */
   case class ControllerLayerException(msgServer: String,
-                                      overHandledException: Option[Exception] = None,
-                                      statusCodeServer: Status = Status.InternalServerError)
+                                      statusCodeServer: Status = Status.InternalServerError,
+                                      overHandledException: Option[Exception] = None)
       extends AppLayerException {
 
     /**
@@ -88,14 +88,14 @@ object AppLayerException {
    * [[AppLayerException]] happening in the [[api.services]] layer.
    * @param msgServer
    *   HTTP server message to send to client
-   * @param overHandledException
-   *   Defined if covering an actual handled exception
    * @param statusCodeServer
    *   HTTP status code to send to client
+   * @param overHandledException
+   *   Defined if covering an actual handled exception
    */
   case class ServiceLayerException(msgServer: String,
-                                   overHandledException: Option[Exception] = None,
-                                   statusCodeServer: Status = Status.InternalServerError)
+                                   statusCodeServer: Status = Status.InternalServerError,
+                                   overHandledException: Option[Exception] = None)
       extends AppLayerException {
 
     /**
@@ -110,14 +110,14 @@ object AppLayerException {
    * [[AppLayerException]] happening in the [[api.models]] layer.
    * @param msgServer
    *   HTTP server message to send to client
-   * @param overHandledException
-   *   Defined if covering an actual handled exception
    * @param statusCodeServer
    *   HTTP status code to send to client
+   * @param overHandledException
+   *   Defined if covering an actual handled exception
    */
   case class ModelLayerException(msgServer: String,
-                                 overHandledException: Option[Exception] = None,
-                                 statusCodeServer: Status = Status.InternalServerError)
+                                 statusCodeServer: Status = Status.InternalServerError,
+                                 overHandledException: Option[Exception] = None)
       extends AppLayerException {
 
     /**

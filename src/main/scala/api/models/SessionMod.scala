@@ -79,11 +79,11 @@ case class SessionMod(id: Long, createdAt: Timestamp, updatedAt: Timestamp, term
    *   - exception from [[getWithId]]
    */
   def refreshStatus: EitherT[IO, AppLayerException, SessionMod] = for {
-    nowTimestamp    <- EitherT.right(Clock[IO].realTime.map(x => new Timestamp(x.toMillis)))
+    nowTimestamp    <- EitherT.right(Clock[IO].realTime.map(_.toMillis))
     _               <- EitherT(redisDriver.use(x =>
                          IO {
                            val repStatus: String =
-                             x.jsonSet(dataKey(id), new Path("updatedAt"), nowTimestamp.toString, new JsonSetParams().xx)
+                             x.jsonSet(dataKey(id), new Path("updatedAt"), nowTimestamp, new JsonSetParams().xx)
                            repStatus match {
                              case "OK" => Right(())
                              case _    =>
@@ -168,8 +168,10 @@ object SessionMod {
     id        <- redisDriver.use(x => IO.blocking(x.incr(autoIdIncKey)))
     _         <- redisDriver.use(x => IO.blocking(x.hset(idsKey, authTokenSha1, id.toString)))
     newSession = SessionMod(id, nowTimestamp, nowTimestamp, None)
-    _         <- redisDriver.use(x =>
-                   IO.blocking(x.jsonSetWithPlainString(dataKey(id), Path.ROOT_PATH, encSessionMod(newSession).noSpaces)))
+    _         <-
+      redisDriver.use(x =>
+        IO.blocking(
+          x.jsonSetWithPlainString(dataKey(id), Path.ROOT_PATH, encSessionMod(newSession).deepDropNullValues.noSpaces)))
   } yield newSession
 
   /**

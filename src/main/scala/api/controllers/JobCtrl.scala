@@ -10,6 +10,7 @@ import api.models.SessionMod
 import api.services.JobSvc
 import cats.data.EitherT
 import cats.effect.IO
+import cats.implicits._
 import config.SparkServer.spark
 import fs2.Stream
 import io.circe.Json
@@ -59,20 +60,16 @@ object JobCtrl {
                                else if ((-1 <= nbRows) && (1 <= minColIdx) && (minColIdx <= maxColIdx)) Right(())
                                else if ((-1 <= nbRows) && (1 <= minColIdx) && (maxColIdx == -1)) Right(())
                                else
-                                 Left(
-                                   ControllerLayerException(msgServer =
-                                                              "Query parameters `nbRows`, `minColIdx` and `maxColIdx` not coherent",
-                                                            statusCodeServer = Status.UnprocessableEntity))
+                                 Left(ControllerLayerException("Query parameters `nbRows`, `minColIdx` and `maxColIdx` not coherent",
+                                                               Status.UnprocessableEntity))
                              ))
-    fileImportOptParsed <- EitherT(
-                             IO(
-                               fileImportOpt
-                                 .as[FileImportOptDtoIn]
-                                 .left
-                                 .map(x =>
-                                   ControllerLayerException(msgServer = "Not parsable file options",
-                                                            overHandledException = Some(x),
-                                                            statusCodeServer = Status.UnprocessableEntity))))
+    fileImportOptParsed <-
+      EitherT(
+        IO(
+          fileImportOpt
+            .as[FileImportOptDtoIn]
+            .left
+            .map(x => ControllerLayerException("Not parsable file options", Status.UnprocessableEntity, x.some))))
 
     // Computations
     inputs               = Json.obj(

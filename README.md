@@ -29,14 +29,12 @@ It means none of your source data are saved somewhere and everything are done on
 
 # Logbook (🙏😣 Work still in progress...)
 
-- Finalize (😼 HERE AT THE MOMENT 😼)
+- Finalize 
   - Rework the already in-place UTs
-    - Issue with combined AsyncFreeSpec + `withObjectMocked => Unit`
-    - Think about if there is an issue of design ?
-  - Testing E2E the first version redis migration
-  - Testing E2E job preview
-- Migrate to Redis (😼 HERE AT THE MOMENT 😼)
-  - Setup AOF every sec mode
+    - Issue with combined AsyncFreeSpec + `withObjectMocked => Unit` (PAUSED)
+  - Job will stay on "Running" it error handling need to be on overall `withJob` (😼 HERE AT THE MOMENT 😼)
+- Migrate to Redis
+  - Setup AOF every sec mode (😼 HERE AT THE MOMENT 😼)
 - Start learning event streams & prepare async routes for Job monitoring
 - Think about cron jobs not terminated but still here sessions ?
   - K8S stateless compatibility too be-careful ⚠️

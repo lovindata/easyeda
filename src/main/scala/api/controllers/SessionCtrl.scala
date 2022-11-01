@@ -4,8 +4,8 @@ package api.controllers
 import api.dto.output.SessionStatusDtoOut
 import api.helpers.AppLayerException
 import api.helpers.AppLayerException._
-import com.ilovedatajjia.api.models.SessionStateEnum._
 import api.models.SessionMod
+import api.models.SessionStateEnum._
 import api.services.SessionSvc
 import cats.data._
 import cats.effect.IO
@@ -43,9 +43,8 @@ object SessionCtrl {
                                    statusCodeServer = Status.BadRequest))
                              case x                                               =>
                                Left(
-                                 ControllerLayerException(msgServer =
-                                                            s"Expecting `Token` credentials but got `${x.getClass}` credentials",
-                                                          statusCodeServer = Status.BadRequest))
+                                 ControllerLayerException(s"Expecting `Token` credentials but got `${x.getClass}` credentials",
+                                                          Status.BadRequest))
                            }
   } yield authToken
 

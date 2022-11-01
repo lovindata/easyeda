@@ -15,7 +15,7 @@ import scala.language.implicitConversions
  * [[AsyncFreeSpec]] scala test spec with [[cats.effect.testing]] matchers & runtime and [[SparkSession]] (will start
  * only if at least one of your test needs it).
  */
-trait CatsEffectSparkMockitoSpec extends AsyncFreeSpec with AsyncIOSpec with Matchers { // with AsyncMockitoSugar {
+trait CatsEffectSparkSpec extends AsyncFreeSpec with AsyncIOSpec with Matchers {
 
   // Global thread pool
   override implicit val executionContext: ExecutionContext = compute

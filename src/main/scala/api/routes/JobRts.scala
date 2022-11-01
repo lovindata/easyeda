@@ -31,14 +31,20 @@ object JobRts {
         .mapN((_, _, _))
         .fold(
           // If failing query parameters
-          parseFailures => RouteLayerException(msgServer = parseFailures.toList.mkString("\n")).toResponseIO,
+          parseFailures => RouteLayerException(parseFailures.toList.mkString("\n")).toResponseIO,
 
           // Else request with file upload and its parameters
           { case (nbRowsParsed, minColIdxParsed, maxColIdxParsed) =>
             req.req.withJSONAndFileBytesMultipart("fileImportOpt", "fileImport") {
               (fileImportOpt: Json, fileImport: Stream[IO, Byte], fileName: String) =>
                 JobCtrl
-                  .computePreview(session, fileImportOpt, fileImport, fileName, nbRowsParsed, minColIdxParsed, maxColIdxParsed)
+                  .computePreview(session,
+                                  fileImportOpt,
+                                  fileImport,
+                                  fileName,
+                                  nbRowsParsed,
+                                  minColIdxParsed,
+                                  maxColIdxParsed)
                   .toResponse(Status.Ok)
             }
           }

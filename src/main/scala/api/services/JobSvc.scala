@@ -13,7 +13,6 @@ import api.helpers.NormTypeEnum._
 import api.models.JobMod
 import cats.data.EitherT
 import cats.effect.IO
-import cats.effect.implicits._
 import cats.implicits._
 import fs2.Stream
 import fs2.text
@@ -93,8 +92,8 @@ object JobSvc {
                    }).compile.toList.attemptE.leftMap(x =>
                      ServiceLayerException(
                        "Not compilable stream or issue occurring when pooling the file binaries in RAM",
-                       Some(x),
-                       Status.UnprocessableEntity))
+                       Status.UnprocessableEntity,
+                       Some(x)))
 
     // Build the DataFrame
     output      <- IO.interruptibleMany {
@@ -115,7 +114,7 @@ object JobSvc {
                      spark.read.options(readOptions).csv(inputDS).withNormTypes
                    }.attemptE
                      .leftMap(x =>
-                       ServiceLayerException("Not processable csv file into DataFrame", Some(x), Status.UnprocessableEntity))
+                       ServiceLayerException("Not processable csv file into DataFrame", Status.UnprocessableEntity, Some(x)))
   } yield output
 
   /**
@@ -138,8 +137,8 @@ object JobSvc {
                     else fileImport.through(byteArrayParser)).compile.toList.attemptE.leftMap(x =>
                      ServiceLayerException(
                        "Not compilable stream or issue occurring when pooling the file binaries in RAM",
-                       Some(x),
-                       Status.UnprocessableEntity))
+                       Status.UnprocessableEntity,
+                       Some(x)))
 
     // Build the DataFrame
     output      <- IO.interruptibleMany {
@@ -157,8 +156,8 @@ object JobSvc {
                    }.attemptE
                      .leftMap[AppLayerException](x =>
                        ServiceLayerException("Not processable json file into DataFrame",
-                                             Some(x),
-                                             Status.UnprocessableEntity))
+                                             Status.UnprocessableEntity,
+                                             Some(x)))
   } yield output
 
   /**
@@ -171,7 +170,7 @@ object JobSvc {
    *   Number of rows wanted for the preview (`-1` means read all stream otherwise `nbRowsPreviewValidated` > 0)
    * @return
    *   Spark [[DataFrame]] OR
-   *   - [[ServiceLayerException]] if timed out computation
+   *   - [[ServiceLayerException]] if unknown file options
    *   - exception from [[readStreamCsv]]
    *   - exception from [[readStreamJson]]
    */
@@ -186,7 +185,7 @@ object JobSvc {
       EitherT.left[DataFrame](
         IO(
           ServiceLayerException("File options correctly received but will handled in the next version",
-                                statusCodeServer = Status.BadRequest)))
+                                Status.BadRequest)))
   }
 
   /**
@@ -213,7 +212,7 @@ object JobSvc {
                           case CustomColSchema(natIdx, _, _)                                    =>
                             Left(
                               ServiceLayerException(s"Out of bound column index `$natIdx` not in `[1 $nbCols]`",
-                                                    statusCodeServer = Status.UnprocessableEntity))
+                                                    Status.UnprocessableEntity))
                         }
                       })
 
@@ -235,7 +234,7 @@ object JobSvc {
             case (natColName, _, _)                                                                  =>
               Left(
                 ServiceLayerException(s"Incoherent defined custom type for the column `$natColName`",
-                                      statusCodeServer = Status.UnprocessableEntity))
+                                      Status.UnprocessableEntity))
           }
         })
     } yield input.select(inputOutCols: _*)
@@ -312,8 +311,8 @@ object JobSvc {
                                    (inputValues, scalaSchema)
                                  }.attemptE.leftMap(x =>
                                    ServiceLayerException("Not compilable built DataFrame to start computing preview or schema",
-                                                         Some(x),
-                                                         Status.UnprocessableEntity))
+                                                         Status.UnprocessableEntity,
+                                                         Some(x)))
     (inputValues, scalaSchema) = intermediateOut
 
     // Retrieve the sample values

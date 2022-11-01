@@ -2,6 +2,7 @@ package com.ilovedatajjia
 package api.routes.utils
 
 import api.dto.output.AppFatalThrowableDtoOut
+import api.dto.output.AppUnhandledExceptionDtoOut
 import api.helpers.AppLayerException
 import api.helpers.AppLayerException._
 import api.helpers.Http4sExtension._
@@ -37,11 +38,8 @@ object Response {
     def toResponse(statusCode: Status)(implicit w: EntityEncoder[IO, A]): IO[Response[IO]] = x.redeemWith(
       // Unexpected cases
       {
-        case e: Exception =>
-          RouteLayerException(msgServer = "Not handled exception at the moment it will be in next releases",
-                              overHandledException = Some(e),
-                              statusCodeServer = Status.NotExtended).toResponseIO
-        case t: Throwable => InternalServerError(AppFatalThrowableDtoOut(overHandledThrowable = t.toString))
+        case e: Exception => InternalServerError(AppUnhandledExceptionDtoOut(e))
+        case t: Throwable => InternalServerError(AppFatalThrowableDtoOut(t))
       },
 
       // Expected case
@@ -72,11 +70,8 @@ object Response {
     def toResponse(statusCode: Status)(implicit w: EntityEncoder[IO, A]): IO[Response[IO]] = x.value.redeemWith(
       // Unexpected cases
       {
-        case e: Exception =>
-          RouteLayerException(msgServer = "Not handled exception at the moment it will be in next releases",
-                              overHandledException = Some(e),
-                              statusCodeServer = Status.NotExtended).toResponseIO
-        case t: Throwable => InternalServerError(AppFatalThrowableDtoOut(overHandledThrowable = t.toString))
+        case e: Exception => InternalServerError(AppUnhandledExceptionDtoOut(e))
+        case t: Throwable => InternalServerError(AppFatalThrowableDtoOut(t))
       },
 
       // Expected cases

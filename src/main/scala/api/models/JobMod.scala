@@ -62,25 +62,25 @@ case class JobMod(id: Long,
       EitherT(redisDriver.use(x =>
         IO.blocking {
           // Terminate the job by updating the values in database
-          val (outputJson, jobStatus)       = output match {
-            case Left(x)  => (x, encJobStatus(Failed).noSpaces)
-            case Right(x) => (x, encJobStatus(Succeeded).noSpaces)
+          val (outputJson, jobStatus): (Json, Json) = output match {
+            case Left(x)  => (x, encJobStatus(Failed))
+            case Right(x) => (x, encJobStatus(Succeeded))
           }
-          val repUpdateJobStatus: String    =
-            x.jsonSet(dataKey(id), new Path("jobStatus"), jobStatus, new JsonSetParams().xx)
-          val repUpdateTerminatedAt: String =
+          val repUpdateJobStatus: String            =
+            x.jsonSetWithPlainString(dataKey(id), new Path("jobStatus"), jobStatus.noSpaces)
+          val repSetTerminatedAt: String            =
             x.jsonSet(dataKey(id), new Path("terminatedAt"), nowTimestamp, new JsonSetParams().nx)
-          val repUpdateOutputs: String      =
-            x.jsonSet(dataKey(id), new Path("outputs"), outputJson.noSpaces, new JsonSetParams().nx)
+          val repSetOutputs: String                 =
+            x.jsonSetWithPlainString(dataKey(id), new Path("outputs"), outputJson.noSpaces)
 
           // Verify coherence
-          (repUpdateJobStatus, repUpdateTerminatedAt, repUpdateOutputs) match {
+          (repUpdateJobStatus, repSetTerminatedAt, repSetOutputs) match {
             case ("OK", "OK", "OK") => Right(())
             case _                  =>
               Left(
                 ModelLayerException(
                   s"Job `$id` corrupted, at least one of the fields was not `OK` when updating" +
-                    s" (`(jobStatus, terminatedAt, outputs) == ($repUpdateJobStatus, $repUpdateTerminatedAt, $repUpdateOutputs)`",
+                    s" (`(jobStatus, terminatedAt, outputs) == ($repUpdateJobStatus, $repSetTerminatedAt, $repSetOutputs)`",
                   statusCodeServer = Status.BadGateway
                 ))
           }
@@ -139,8 +139,10 @@ object JobMod {
     // Run & Get the created job
     id           <- redisDriver.use(x => IO.blocking(x.incr(autoIdIncKey)))
     newCreatedJob = JobMod(id, sessionId, Running, inputs, None, nowTimestamp, None)
-    _            <- redisDriver.use(x =>
-                      IO.blocking(x.jsonSetWithPlainString(dataKey(id), Path.ROOT_PATH, encJobMod(newCreatedJob).noSpaces)))
+    _            <-
+      redisDriver.use(x =>
+        IO.blocking(
+          x.jsonSetWithPlainString(dataKey(id), Path.ROOT_PATH, encJobMod(newCreatedJob).deepDropNullValues.noSpaces)))
   } yield newCreatedJob
 
   /**
