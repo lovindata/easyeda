@@ -3,7 +3,7 @@ package api.services
 
 import api.dto.input.FileImportOptDtoIn
 import api.dto.input.FileImportOptDtoIn._
-import api.dto.output.AppLayerExceptionDtoOut
+import api.dto.output._
 import api.dto.output.DataPreviewDtoOut
 import api.dto.output.DataPreviewDtoOut._
 import api.helpers.AppLayerException
@@ -16,10 +16,13 @@ import cats.effect.IO
 import cats.implicits._
 import fs2.Stream
 import fs2.text
-import io.circe.Encoder
-import io.circe.Json
+import io.circe._
 import io.circe.fs2.byteArrayParser
-import org.apache.spark.sql._
+import io.circe.syntax._
+import org.apache.spark.sql.Column
+import org.apache.spark.sql.DataFrame
+import org.apache.spark.sql.Dataset
+import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types._
 import org.http4s.Status
@@ -33,7 +36,7 @@ import scala.reflect.ClassTag
 object JobSvc {
 
   /**
-   * Wrapper for auto-starting & auto-closing a [[JobMod]] state. ([[EitherT]] version)
+   * Wrapper for auto-starting & auto-closing a [[JobMod]] state.
    * @param sessionId
    *   Session ID
    * @param inputs
@@ -51,18 +54,36 @@ object JobSvc {
       f: EitherT[IO, AppLayerException, A])(implicit
       encOutFailed: Encoder[AppLayerExceptionDtoOut],
       encOutSucceeded: Encoder[A]): EitherT[IO, AppLayerException, A] = EitherT(for {
+    // Prepare the job
     jobInRunning <- JobMod(sessionId, inputs)
-    output       <- timeout match {
+    outputIO      = timeout match {
                       case None          => f.value
                       case Some(timeout) =>
                         f.value.timeoutTo(
                           timeout,
-                          IO(Left(ServiceLayerException(
+                          IO(ServiceLayerException(
                             s"Exceeded timeout `$timeout` for job `${jobInRunning.id}`, data or options need to be restrained",
-                            statusCodeServer = Status.BadRequest)))
+                            statusCodeServer = Status.BadRequest).asLeft)
                         )
                     }
-    outputJson    = output.bimap(x => encOutFailed(x.toDtoOut), x => encOutSucceeded(x))
+
+    // Run the job and handle failure cases
+    output       <- outputIO.redeemWith(
+                      {
+                        case e: Exception =>
+                          IO.raiseError {
+                            jobInRunning.terminate(AppUnhandledExceptionDtoOut(e).asJson.asLeft)
+                            e
+                          }
+                        case t: Throwable =>
+                          IO.raiseError {
+                            jobInRunning.terminate(AppFatalThrowableDtoOut(t).asJson.asLeft)
+                            t
+                          }
+                      },
+                      (result: Either[AppLayerException, A]) => IO(result)
+                    )
+    outputJson    = output.bimap(_.toDtoOut.asJson, _.asJson)
     _            <- jobInRunning.terminate(outputJson).value
   } yield output)
 

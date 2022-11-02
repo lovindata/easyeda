@@ -32,7 +32,7 @@ It means none of your source data are saved somewhere and everything are done on
 - Finalize 
   - Rework the already in-place UTs
     - Issue with combined AsyncFreeSpec + `withObjectMocked => Unit` (PAUSED)
-  - Job will stay on "Running" it error handling need to be on overall `withJob` (😼 HERE AT THE MOMENT 😼)
+  - Job will stay on "Running" it error handling need to be on overall `withJob` => Done need to test (😼 HERE AT THE MOMENT 😼)
 - Migrate to Redis
   - Setup AOF every sec mode (😼 HERE AT THE MOMENT 😼)
 - Start learning event streams & prepare async routes for Job monitoring
