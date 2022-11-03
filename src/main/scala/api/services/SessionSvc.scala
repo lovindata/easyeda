@@ -43,9 +43,9 @@ object SessionSvc {
    */
   def verifyAuthorization(authTokenToVerify: String): EitherT[IO, AppLayerException, SessionMod] = for {
     session         <- SessionMod.getWithAuthToken(authTokenToVerify)
-    upToDateSession <- session.terminatedAt match {
+    upToDateSession <- session.terminatedAt match { // Refresh only if not terminated
                          case Some(_) => EitherT.right[AppLayerException](IO(session))
-                         case None    => session.refreshStatus // Refresh only if not terminated
+                         case None    => session.refreshStatus
                        }
   } yield upToDateSession
 

@@ -201,7 +201,15 @@ object SessionMod {
    *   - exception from [[getWithId]]
    */
   def getWithAuthToken(authToken: String): EitherT[IO, AppLayerException, SessionMod] = for {
-    sessionId <- EitherT.right(redisDriver.use(x => IO.blocking(x.hget(idsKey, authToken.toSha1Hex))))
+    sessionId <-
+      EitherT(
+        redisDriver.use(x =>
+          IO.blocking(
+            Option(x.hget(idsKey, authToken.toSha1Hex)) match { // Using `Option` to manage `null` value from `_.hget`
+              case None                 =>
+                Left(ModelLayerException("Authentication token provided incorrect, no corresponding session ID found"))
+              case Some(sessionIdFound) => Right(sessionIdFound)
+            })))
     session   <- getWithId(sessionId.toLong)
   } yield session
 

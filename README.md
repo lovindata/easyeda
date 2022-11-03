@@ -29,19 +29,18 @@ It means none of your source data are saved somewhere and everything are done on
 
 # Logbook (🙏😣 Work still in progress...)
 
-- Finalize 
+- Finalize migration
   - Rework the already in-place UTs
     - Issue with combined AsyncFreeSpec + `withObjectMocked => Unit` (PAUSED)
-  - Job will stay on "Running" it error handling need to be on overall `withJob` => Done need to test (😼 HERE AT THE MOMENT 😼)
-- Migrate to Redis
-  - Setup AOF every sec mode (😼 HERE AT THE MOMENT 😼)
-- Start learning event streams & prepare async routes for Job monitoring
+  - Job will stay on "Running" it error handling need to be on overall `withJob` => Done need to test
 - Think about cron jobs not terminated but still here sessions ?
   - K8S stateless compatibility too be-careful ⚠️
     - The implementation of "not-continue"
+- Start learning ReactJs & FrontEnd dev (😼 HERE AT THE MOMENT 😼)
+- Start learning event streams & prepare async routes for Job monitoring
+- Start trying Tapir for embedding routes
 - Work on Logging (Spark logs annoying + No app logging)
 - Continue DEV on basic statistics
-- Start learning ReactJs & FrontEnd dev
 - Start DEV on Spark NLP Service
   - Introduce the type `Sentence`
 - Reach decent overall coverage for UTs

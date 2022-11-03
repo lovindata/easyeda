@@ -1,9 +1,11 @@
 package com.ilovedatajjia
 package api.controllers
 
+import api.dto.output.AppLayerExceptionDtoOut._
 import api.dto.output.SessionStatusDtoOut
 import api.helpers.AppLayerException
 import api.helpers.AppLayerException._
+import api.helpers.Http4sExtension._
 import api.models.SessionMod
 import api.models.SessionStateEnum._
 import api.services.SessionSvc
@@ -61,16 +63,17 @@ object SessionCtrl {
         val validatedAuthToken: Either[AppLayerException, String] = authBearerFmtValidator(request)
 
         // Do session verification & Return
-        val validatedSession: IO[Either[AppLayerException, SessionMod]] =
-          validatedAuthToken.flatTraverse(x =>
-            SessionSvc
-              .verifyAuthorization(x)
-              .value) // The two `Either` are merged by the `_.flatten` after the `_.traverse`
+        val validatedSession = validatedAuthToken.flatTraverse(
+          SessionSvc
+            .verifyAuthorization(_)
+            .value
+        ) // The two `Either` are merged by the `_.flatten` after the `_.traverse`
         validatedSession
       })
 
     // Define the error if failure
-    val onFailure: AuthedRoutes[AppLayerException, IO] = Kleisli(req => OptionT.liftF { req.context.toResponseIO })
+    val onFailure: AuthedRoutes[AppLayerException, IO] =
+      Kleisli(req => OptionT.liftF { Status.Forbidden.toResponseIOWithDtoOut(req.context.toDtoOut) })
 
     // Return
     AuthMiddleware(sessionAuthPolicy, onFailure)

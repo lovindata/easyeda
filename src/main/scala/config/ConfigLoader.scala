@@ -9,7 +9,7 @@ import scala.concurrent.duration._
  */
 object ConfigLoader {
 
-  // Main services conf(s)
+  // Main servers conf(s)
   val appPort: Port       = {
     val parsedPost: Int = sys.env.getOrElse("EASYEDA_PORT", default = "8080").toInt
     case class PortOutOfRangeException(msgException: String) extends Exception
@@ -27,7 +27,8 @@ object ConfigLoader {
     val parsedSeconds: Long = sys.env.getOrElse("EASYEDA_MAX_SESSION_INACTIVITY_SECONDS", default = "3600").toLong
     FiniteDuration(parsedSeconds, SECONDS)
   }
-  val continueExistingSessions: Boolean =
-    sys.env.getOrElse("EASYEDA_CONTINUE_EXISTING_SESSIONS", default = "true").toBoolean
+  val continueExistingSessions: Boolean = sys.env
+    .getOrElse("EASYEDA_CONTINUE_EXISTING_SESSIONS", default = "true")
+    .toBoolean // ⚠ `false` is not supported in case of cluster replicas deployment
 
 }
