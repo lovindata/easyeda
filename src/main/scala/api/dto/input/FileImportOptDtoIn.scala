@@ -52,7 +52,7 @@ object FileImportOptDtoIn {
    * @param newColName
    *   Optional new column name
    */
-  case class CustomColSchema(natColIdx: Int, newColType: Option[CustomColType], newColName: Option[String])
+  case class CustomColSchema(natColIdx: Int, newColType: Option[CustomColType], newColNameeee: Option[String])
 
   /**
    * CSV file options.
