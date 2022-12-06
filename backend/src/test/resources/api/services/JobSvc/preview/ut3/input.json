@@ -1,0 +1,19 @@
+[{},
+  {
+    "some_col0": "UTFailedIfInOutput",
+    "some_col1": "UTFailedIfInOutput",
+    "col0": 0,
+    "col1": "str0",
+    "col2": "2023-01-01",
+    "col3": "2023-01-01 00:00:00.000001",
+    "some_col2_UTSucceedIfInOutput": "UTSucceedIfInOutput",
+    "some_col3_UTSucceedIfInOutput": "UTSucceedIfInOutput",
+    "some_col4_UTSucceedIfInOutput": "UTSucceedIfInOutput"
+  },
+  {
+    "some_col0": "UTFailedIfInOutput"
+  },
+  {
+    "some_col0": "UTFailedIfInOutput"
+  }
+]

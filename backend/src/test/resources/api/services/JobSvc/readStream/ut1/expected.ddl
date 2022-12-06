@@ -1,0 +1,4 @@
+`_c0` DOUBLE,
+`_c1` STRING,
+`_c2` TIMESTAMP,
+`_c3` TIMESTAMP

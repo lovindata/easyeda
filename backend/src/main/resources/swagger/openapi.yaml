@@ -1,0 +1,352 @@
+openapi: 3.0.3
+info:
+  title: Swagger EasyEDA - OpenAPI 3.0
+  description: |-
+    📊😌 EasyEDA is a REST API for doing common exploratory data analysis.
+    It is powered by Typelevel microservice stack http4s and Doobie (with Cats IO)
+    plus Spark providing fast asynchronous parallel request processing and in-memory data manipulation.
+    It means none of your source data are saved somewhere plus everything are done on the fly 🚀🤩!
+    
+    _If you're looking for the source codes of this API, it is open source and directly on [iLoveDataJjia GitHub](https://github.com/iLoveDataJjia)!_
+    
+    Some useful links:
+    - [Open source on GitHub](https://github.com/iLoveDataJjia)
+    - [Source code of ths documentation](https://github.com/iLoveDataJjia/learning-http4s/blob/main/src/main/resources/swagger/openapi.yaml)
+  termsOfService: https://github.com/iLoveDataJjia/learning-http4s/blob/main/LICENSE
+  contact:
+    email: ilovedata.jjia@gmail.com
+  license:
+    name: GNU General Public License v3.0
+    url: https://github.com/iLoveDataJjia/learning-http4s/blob/main/LICENSE
+  version: 0.0.0
+externalDocs:
+  description: Find out more about Swagger
+  url: https://swagger.io/
+servers:
+  - url: http://localhost:8080/api
+    description: Local development or integration
+  - url: https://<deploymentDomain>/api
+tags:
+  - name: session
+    description: Everything about your API Session
+  - name: job
+    description: Job you can launch via your API Session
+paths:
+  /session/create:
+    post:
+      tags:
+        - session
+      summary: Create a new session
+      description: Will generate an unique identifier session ID and corresponding bearer token
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SessionAuthDtoOut"
+        "500":
+          description: Internal server error please re-try in a few minutes
+  /session/status:
+    get:
+      tags:
+        - session
+      summary: Get your session status
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SessionStatusDtoOut"
+        "500":
+          description: Internal server error please re-try in a few minutes
+  /session/terminate:
+    post:
+      tags:
+        - session
+      summary: Terminate your session
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SessionStatusDtoOut"
+              example:
+                id: 1
+                createdAt: 2022-08-27 18:31:04.696
+                updatedAt: 2022-08-27 18:31:04.697
+                terminatedAt: 2022-08-27 18:31:04.698
+        "500":
+          description: Internal server error please re-try in a few minutes
+  /session/listing:
+    get:
+      tags:
+        - session
+      summary: Get all active sessions according their status
+      parameters:
+        - name: state
+          in: query
+          description: Filtering according the state
+          required: true
+          schema:
+            $ref: "#/components/schemas/SessionState"
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/SessionStatusDtoOut"
+        "500":
+          description: Internal server error please re-try in a few minutes
+  /job/preview:
+    post:
+      tags: [job]
+      summary: Submit partial preview job
+      parameters:
+        - name: nbRows
+          in: query
+          description: Number of rows in the preview (`-1` for all rows)
+          required: true
+          schema:
+            $ref: "#/components/schemas/Int32MinusOneToMax"
+        - name: minColIdx
+          in: query
+          description: Included border minimum index column (Starts from `1` or equal `-1` for no columns)
+          required: true
+          schema:
+            $ref: "#/components/schemas/Int32MinusOneToMaxZeroExcluded"
+        - name: maxColIdx
+          in: query
+          description: Included border maximum index column (Higher or equal than `minColIdx` or `-1`)
+          required: true
+          schema:
+            $ref: "#/components/schemas/Int32MinusOneToMaxZeroExcluded"
+      requestBody:
+        description: Importing file with options
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [fileImportOpt, fileImport]
+              properties:
+                fileImportOpt:
+                  description: File import options (please directly see `CsvImportOptDtoIn` or `JsonImportOptDtoIn` all down below 👇 in `Schemas` section)
+                  type: object
+                  oneOf:
+                    - $ref: "#/components/schemas/CsvImportOptDtoIn"
+                    - $ref: "#/components/schemas/JsonImportOptDtoIn"
+                fileImport:
+                  description: File binaries
+                  type: string
+                  format: binary
+            encoding:
+              fileImportOpt: 
+               contentType: application/json
+              fileImport:
+                contentType: text/csv, application/json
+      responses:
+        "200":
+          description: Successful submitted preview job
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DataPreviewDtoOut"
+        "500":
+          description: Internal server error please re-try in a few minutes
+components:
+  schemas:
+    SessionAuthDtoOut:
+      type: object
+      required:
+        - id
+        - authToken
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1
+        authToken:
+          type: string
+          example: OTgwZDMzOGYtZmNhMi00YzIwLTk3MWUtMTdkNTMzZGU0ODE2OjI2NjI5NDk0ODg1MjUwMCBuYW5vc2Vjb25kcw==
+    SessionStatusDtoOut:
+      type: object
+      required:
+        - id
+        - createdAt
+        - updatedAt
+        - terminatedAt
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1
+        createdAt:
+          type: string
+          example: 2022-08-27 18:31:04.696
+        updatedAt:
+          type: string
+          example: 2022-08-27 18:31:31.587
+        terminatedAt:
+          type: string
+          example: null
+    SessionState:
+      type: string
+      default: ALL
+      enum: [ALL, ACTIVE_ONLY, TERMINATED_ONLY]
+    DataPreviewDtoOut:
+      type: object
+      required:
+        - dataConf
+        - dataSchema
+        - dataValues
+      properties:
+        dataConf:
+          type: object
+          required: [nbRows, nbCols]
+          properties:
+            nbRows:
+              type: integer
+              format: int64
+            nbCols:
+              type: integer
+              format: int64
+        dataSchema:
+          type: array
+          items:
+            type: object
+            required: [colName, colType]
+            properties:
+              colName:
+                type: string
+              colType:
+                $ref: "#/components/schemas/ColType"
+        dataValues:
+          type: array
+          items:
+            type: array
+            items:
+              type: string
+              example: <cellVal>
+    ColType:
+      type: string
+      enum: [Numerical, Categorical, Date, Timestamp]
+      example: Numerical
+    Int32OneToMax:
+      description: "`1` to `IntMaxValue`"
+      type: integer
+      format: int32
+    Int32MinusOneToMax:
+      description: "`-1` to `IntMaxValue`"
+      type: integer
+      format: int32
+    Int32MinusOneToMaxZeroExcluded:
+      description: "`-1` to `IntMaxValue` without `0`"
+      type: integer
+      format: int32
+    CustomColType:
+      oneOf:
+        - type: object
+          required: [nameType]
+          properties:
+            nameType:
+              type: string
+              enum: [Numerical, Categorical]
+              example: Numerical
+        - type: object
+          required: [nameType, dateFormat]
+          properties:
+            nameType:
+              type: string
+              enum: [Date]
+            dateFormat:
+              description: In case of `Date`, mask to use for infering the column as `Date` (please all tags possible [here](https://spark.apache.org/docs/latest/sql-ref-datetime-pattern.html))
+              type: string
+              default: yyyy-MM-dd
+        - type: object
+          required: [nameType, timestampFormat]
+          properties:
+            nameType:
+              type: string
+              enum: [Timestamp]
+            timestampFormat:
+              description: In case of `Timestamp`, mask to use for infering the column as `Timestamp` (please all tags possible [here](https://spark.apache.org/docs/latest/sql-ref-datetime-pattern.html))
+              type: string
+              default: yyyy-MM-dd HH:mm:ss.SSSSSS
+    CustomColSchema:
+      type: object
+      required: [natColIdx]
+      properties:
+        natColIdx:
+          $ref: "#/components/schemas/Int32OneToMax"
+        newColType:
+          $ref: "#/components/schemas/CustomColType"
+        newColName:
+          description: Optional new column name
+          type: string
+    CsvImportOptDtoIn:
+      required: [sep, quote, escape, header, inferSchema]
+      properties:
+        sep:
+          description: Character for CSV column separation
+          type: string
+          minLength: 1
+          maxLength: 1
+          default: ","
+        quote:
+          description: Character for CSV cell bordering
+          type: string
+          minLength: 1
+          maxLength: 1
+          default: '"'
+        escape:
+          description: Character prefix to consider the next character as character
+          type: string
+          minLength: 1
+          maxLength: 1
+          default: \
+        header:
+          type: boolean
+          default: true
+        inferSchema:
+          type: boolean
+          default: true
+        customSchema:
+          type: array
+          items:
+            $ref: "#/components/schemas/CustomColSchema"
+    JsonImportOptDtoIn:
+      required: [inferSchema]
+      properties:
+        inferSchema:
+          type: boolean
+          default: true
+        customSchema:
+          type: array
+          items:
+            $ref: "#/components/schemas/CustomColSchema"
+    FileImportWithOpt:
+      type: object
+      required: [fileImportOpt, fileImport]
+      properties:
+        fileImportOpt:
+          description: File import options (please directly see `CsvImportOptDtoIn` or `JsonImportOptDtoIn` all down below 👇 in `Schemas` section)
+          type: object
+          oneOf:
+            - $ref: "#/components/schemas/CsvImportOptDtoIn"
+            - $ref: "#/components/schemas/JsonImportOptDtoIn"
+        fileImport:
+          description: File binaries
+          type: string
+          format: binary
+  securitySchemes:
+    sessionBearerAuth:
+      description: Bearer token to session
+      type: http
+      scheme: bearer
+security:
+  - sessionBearerAuth: []

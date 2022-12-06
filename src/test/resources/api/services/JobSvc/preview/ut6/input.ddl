@@ -1,1 +1,0 @@
-`col0` DOUBLE
