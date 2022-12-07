@@ -10,7 +10,7 @@ lazy val root = (project in file(".")).settings(name := "backend", idePackagePre
  */
 // CatsEffect
 // https://mvnrepository.com/artifact/org.typelevel/cats-effect
-libraryDependencies += "org.typelevel" %% "cats-effect"    % "3.3.14"
+libraryDependencies += "org.typelevel" %% "cats-effect"    % "3.4.1"
 // https://mvnrepository.com/artifact/org.typelevel/log4cats-core
 libraryDependencies += "org.typelevel" %% "log4cats-core"  % "2.5.0"
 // https://mvnrepository.com/artifact/org.typelevel/log4cats-slf4j
@@ -26,7 +26,7 @@ libraryDependencies += "org.http4s"    %% "http4s-circe"        % "0.23.16"
 // https://mvnrepository.com/artifact/org.http4s/http4s-dsl
 libraryDependencies += "org.http4s"    %% "http4s-dsl"          % "0.23.16"
 // https://mvnrepository.com/artifact/ch.qos.logback/logback-classic
-libraryDependencies += "ch.qos.logback" % "logback-classic"     % "1.4.4" % Runtime // Needed otherwise SLF4J will failed
+libraryDependencies += "ch.qos.logback" % "logback-classic"     % "1.4.5" % Runtime // Needed otherwise SLF4J will failed
 
 // Circe
 // https://mvnrepository.com/artifact/io.circe/circe-parser
