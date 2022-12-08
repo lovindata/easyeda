@@ -4,9 +4,9 @@ import "./App.css";
 
 function App() {
   return (
-    <div className="App flex bg-slate-900">
+    <div className="App flex bg-gray-700">
       <SideBar />
-      <div className="flex-1 flex flex-col"></div>
+      <div className="flex flex-1 flex-col"></div>
     </div>
   );
 }
