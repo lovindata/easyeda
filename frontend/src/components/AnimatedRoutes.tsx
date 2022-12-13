@@ -1,6 +1,6 @@
 import { Routes, Route, useLocation } from "react-router-dom";
 import { DataFrames } from "../pages/DataFrames";
-import { Operators } from "../pages/Operators";
+import { Ranks } from "../pages/Ranks";
 import { AnimatePresence } from "framer-motion";
 
 // Routes
@@ -13,7 +13,7 @@ export const AnimatedRoutes = () => {
     <AnimatePresence>
       <Routes location={location} key={location.pathname}>
         <Route path="/dataframes" element={<DataFrames />} />
-        <Route path="/operators" element={<Operators />} />
+        <Route path="/ranks" element={<Ranks />} />
       </Routes>
     </AnimatePresence>
   );
