@@ -6,9 +6,11 @@ import { Link } from "react-router-dom";
 export const SideBar = () => {
   // Render
   return (
-    <div className="flex h-screen w-14 flex-col items-center justify-center bg-gray-900 drop-shadow">
-      <Icon svg={DataFramesSvg} description={"DataFrames"} href={"/dataframes"} />
-      <Icon svg={RanksSvg} description={"Ranks"} href={"/ranks"} />
+    <div className="flex h-screen w-14">
+      <div className="fixed flex h-screen w-14 flex-col items-center justify-center bg-gray-900 drop-shadow">
+        <Icon svg={DataFramesSvg} description={"DataFrames"} href={"/dataframes"} />
+        <Icon svg={RanksSvg} description={"Ranks"} href={"/ranks"} />
+      </div>
     </div>
   );
 };

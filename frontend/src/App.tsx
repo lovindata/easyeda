@@ -15,10 +15,13 @@ function App() {
 
         {/* Page */}
         <div className="flex flex-1 flex-col">
-          <div className="flex justify-around p-10">
+          {/* Header */}
+          <div className="flex items-center justify-around p-10">
             <Connectors />
             <Profil />
           </div>
+
+          {/* Content */}
           <AnimatedRoutes />
         </div>
       </BrowserRouter>

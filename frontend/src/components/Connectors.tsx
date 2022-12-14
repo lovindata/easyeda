@@ -31,8 +31,8 @@ const Connector = (props: ConnectorProps) => {
   // Render
   return (
     <button
-      className="flex h-24 w-32 items-center justify-center rounded-xl bg-gray-900 fill-rose-500 p-7 drop-shadow transition-all
-  duration-200 ease-linear hover:bg-rose-500 hover:fill-white"
+      className="flex h-24 w-32 items-center justify-center rounded-xl bg-gray-900 fill-rose-500 p-7
+      drop-shadow transition-all duration-200 ease-linear hover:bg-rose-500 hover:fill-white"
       onClick={() => {}}>
       <props.svg className="h-auto w-auto" />
     </button>
