@@ -5,7 +5,7 @@ export const DataFrames = () => {
   // Render
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-      DataFrames
+      DataFrames to build UI...
     </motion.div>
   );
 };

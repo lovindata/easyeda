@@ -1,7 +1,8 @@
 import { Routes, Route, useLocation } from "react-router-dom";
 import { DataFrames } from "../pages/DataFrames";
-import { Ranks } from "../pages/Ranks";
+import { Ranking } from "../pages/Ranking";
 import { AnimatePresence } from "framer-motion";
+import { Profil } from "../pages/Profil";
 
 // Routes
 export const AnimatedRoutes = () => {
@@ -13,7 +14,8 @@ export const AnimatedRoutes = () => {
     <AnimatePresence>
       <Routes location={location} key={location.pathname}>
         <Route path="/dataframes" element={<DataFrames />} />
-        <Route path="/ranks" element={<Ranks />} />
+        <Route path="/ranking" element={<Ranking />} />
+        <Route path="/profil" element={<Profil />} />
       </Routes>
     </AnimatePresence>
   );

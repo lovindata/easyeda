@@ -3,12 +3,12 @@ import "./App.css";
 import { BrowserRouter } from "react-router-dom";
 import { AnimatedRoutes } from "./components/AnimatedRoutes";
 import { Connectors } from "./components/Connectors";
-import { Profil } from "./components/Profil";
+import { ProfilInfo } from "./components/ProfilInfo";
 
 function App() {
   // Render
   return (
-    <div className="App flex bg-gray-700">
+    <div className="App flex bg-gray-800">
       <BrowserRouter>
         {/* SideBar */}
         <SideBar />
@@ -18,7 +18,7 @@ function App() {
           {/* Header */}
           <div className="flex items-center justify-around p-10">
             <Connectors />
-            <Profil />
+            <ProfilInfo />
           </div>
 
           {/* Content */}
