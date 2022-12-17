@@ -1314,8 +1314,8 @@
     },
     {
       "type": "text",
-      "version": 427,
-      "versionNonce": 134587749,
+      "version": 431,
+      "versionNonce": 643998823,
       "isDeleted": false,
       "id": "ddCoQf4vuBXIknXk6tVxC",
       "fillStyle": "hachure",
@@ -1328,7 +1328,7 @@
       "y": 425.8509581520797,
       "strokeColor": "#000000",
       "backgroundColor": "transparent",
-      "width": 231,
+      "width": 260,
       "height": 40,
       "seed": 1999746392,
       "groupIds": [
@@ -1336,17 +1336,17 @@
       ],
       "roundness": null,
       "boundElements": [],
-      "updated": 1671170660495,
+      "updated": 1671289519557,
       "link": null,
       "locked": false,
       "fontSize": 31.067126442434905,
       "fontFamily": 1,
-      "text": "fileSize: 2.3MB",
+      "text": "dataSize: 2.3MB",
       "baseline": 28,
       "textAlign": "left",
       "verticalAlign": "top",
       "containerId": null,
-      "originalText": "fileSize: 2.3MB"
+      "originalText": "dataSize: 2.3MB"
     },
     {
       "type": "rectangle",

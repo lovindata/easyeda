@@ -6,8 +6,8 @@ import { Link } from "react-router-dom";
 export const SideBar = () => {
   // Render
   return (
-    <div className="flex h-screen w-14 bg-gray-900 drop-shadow-md">
-      <div className="fixed flex h-screen w-14 flex-col items-center justify-center">
+    <div className="flex h-screen w-14 drop-shadow-md">
+      <div className="fixed flex h-screen w-14 flex-col items-center justify-center bg-gray-900">
         <Icon svg={DataFramesSvg} description={"DataFrames"} href={"/dataframes"} />
         <Icon svg={RanksSvg} description={"Ranks"} href={"/ranking"} />
       </div>
