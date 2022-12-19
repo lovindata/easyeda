@@ -8,7 +8,7 @@ import { ProfilInfo } from "./components/ProfilInfo";
 function App() {
   // Render
   return (
-    <div className="App flex bg-gray-800">
+    <div className="App flex bg-gray-700">
       <BrowserRouter>
         {/* SideBar */}
         <SideBar />
