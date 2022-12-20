@@ -1,3 +1,9 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer components {
+  .transition-effect {
+    @apply transition-all duration-200 ease-linear;
+  }
+}

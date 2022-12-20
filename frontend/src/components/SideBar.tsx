@@ -30,17 +30,15 @@ const Icon = (props: IconProps) => {
   return (
     <Link
       to={props.href}
-      className="group m-2 flex h-11 w-11 items-center
-      justify-center rounded-3xl fill-green-500 p-2 transition-all duration-200 ease-linear
-      hover:rounded-xl hover:bg-green-500 hover:fill-white">
+      className="transition-effect group m-2 flex h-11 w-11
+      items-center justify-center rounded-3xl fill-green-500 p-2 hover:rounded-xl hover:bg-green-500 hover:fill-white">
       {/* Icon */}
       <props.svg className="h-auto w-auto" />
 
       {/* Tips */}
       <span
-        className="pointer-events-none absolute left-14 m-2 min-w-max origin-left scale-0 select-none rounded-xl
-        bg-gray-900 p-2 text-xs font-bold text-white transition-all duration-200
-        ease-linear group-hover:scale-100">
+        className="transition-effect pointer-events-none absolute left-14 m-2 min-w-max origin-left scale-0 select-none
+        rounded-xl bg-gray-900 p-2 text-xs font-bold text-white group-hover:scale-100">
         {props.description}
       </span>
     </Link>

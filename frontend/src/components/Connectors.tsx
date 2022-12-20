@@ -40,10 +40,8 @@ const Connector = (props: ConnectorProps) => {
   // Render
   return (
     <button
-      className="flex h-24 w-32 items-center justify-center rounded-xl bg-gray-900 fill-green-500
-      p-7 drop-shadow-md
-      transition-all duration-200 ease-linear 
-      hover:bg-green-500 hover:fill-white"
+      className="transition-effect flex h-24 w-32 items-center justify-center rounded-xl bg-gray-900
+      fill-green-500 p-7 drop-shadow-md hover:bg-green-500 hover:fill-white"
       onClick={() => {}}>
       <props.svg className="h-auto w-auto" />
     </button>
