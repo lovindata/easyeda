@@ -20,7 +20,7 @@ export const DataFrameInfo = () => {
     connector: EConnector.PostgreSQL,
     nbRows: 12311,
     nbCols: 103,
-    dataSizeInBytes: 2300000000,
+    dataSizeInBytes: 2347121666,
     createdAtInUnixSecs: 1671291416,
     downloadCount: 1313,
     startCount: 43,
@@ -49,7 +49,7 @@ export const DataFrameInfo = () => {
 
   // Render
   return (
-    <div className="flex h-28 w-96 select-none rounded-xl bg-gray-900 drop-shadow-md">
+    <div className="flex h-32 w-96 select-none rounded-xl bg-gray-900 drop-shadow-md">
       {/* Connector */}
       {<div className="flex h-full fill-green-500 px-3 py-6">{connImg()}</div>}
 
@@ -64,7 +64,7 @@ export const DataFrameInfo = () => {
         {/* Remove button */}
         <button
           className="transition-effect absolute right-2 rounded-md bg-gray-900 fill-rose-500 p-1
-          text-xl font-bold hover:bg-rose-500 hover:fill-white"
+          text-xl font-bold hover:bg-rose-500 hover:fill-white hover:shadow-md"
           onClick={() => {}}>
           <RemoveCrossSvg className="h-3 w-3" />
         </button>
@@ -76,7 +76,7 @@ export const DataFrameInfo = () => {
         </div>
 
         {/* Content */}
-        <div className="flex items-center justify-evenly">
+        <div className="mx-2 flex items-center justify-between">
           {/* General DataFrame Info */}
           <div className="flex space-x-1 text-xs font-semibold text-green-500">
             <div className="flex flex-col">
@@ -92,7 +92,23 @@ export const DataFrameInfo = () => {
           </div>
 
           {/* DataFrame state */}
-          <div></div>
+          <div className="flex space-x-2">
+            <button
+              className="transition-effect rounded-3xl fill-green-500 hover:rounded-md hover:bg-green-500 hover:fill-white hover:shadow-md"
+              onClick={() => {}}>
+              <ConnectIconSvg className="h-9 w-9 p-1.5" />
+            </button>
+            <button
+              className="transition-effect rounded-3xl fill-green-500 hover:rounded-md hover:bg-green-500 hover:fill-white hover:shadow-md"
+              onClick={() => {}}>
+              <OperatorsSvg className="h-9 w-9 p-1.5" />
+            </button>
+            <button
+              className="transition-effect rounded-3xl fill-green-500 hover:rounded-md hover:bg-green-500 hover:fill-white hover:shadow-md"
+              onClick={() => {}}>
+              <StatsIcon className="h-9 w-9 p-1.5" />
+            </button>
+          </div>
         </div>
 
         {/* Footer */}
