@@ -29,22 +29,15 @@ export const ProfilInfo = () => {
       <div className="flex flex-1 justify-evenly py-4">
         {/* Profil info */}
         <div className="flex flex-col justify-between">
-          {/* Identifier & Name */}
-          <div className="group/idname flex flex-col">
-            <div className="flex">
-              <Link
-                to="/profil"
-                className="transition-effect text-xs text-green-500 opacity-75 group-hover/idname:text-white">
-                {`#${profil.id}`}
-              </Link>
-            </div>
-            <div className="flex">
-              <Link
-                to="/profil"
-                className="transition-effect -mt-1 text-2xl font-bold text-green-500 group-hover/idname:text-white">
-                {profil.name}
-              </Link>
-            </div>
+          <div className="group flex w-fit flex-col">
+            <Link to="/profil" className="transition-effect text-xs text-green-700 group-hover:text-white">
+              {`#${profil.id}`}
+            </Link>
+            <Link
+              to="/profil"
+              className="transition-effect -mt-1 text-2xl font-bold text-green-500 group-hover:text-white">
+              {profil.name}
+            </Link>
           </div>
 
           {/* Downloads & Stars */}

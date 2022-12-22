@@ -56,7 +56,7 @@ export const DataFrameInfo = () => {
       {/* Infos */}
       <div className="relative flex flex-1 flex-col justify-between p-2">
         {/* AuthorId */}
-        <div className="absolute left-2 text-xs italic text-green-500 opacity-50">
+        <div className="absolute left-2 text-xs italic text-green-700 opacity-50">
           <div>#{profil.id}</div>
           {profil.name}
         </div>
@@ -72,7 +72,7 @@ export const DataFrameInfo = () => {
         {/* Title */}
         <div className="relative mx-auto flex">
           <div className="text-xl font-bold text-green-500">{dataframe.name}</div>
-          <div className="absolute -right-4 text-xs italic text-green-500 opacity-50">#{dataframe.id}</div>
+          <div className="absolute -right-4 text-xs italic text-green-700">#{dataframe.id}</div>
         </div>
 
         {/* Content */}
@@ -114,7 +114,7 @@ export const DataFrameInfo = () => {
         {/* Footer */}
         <div className="flex items-center justify-between">
           {/* Updated since */}
-          <div className="bottom-2 left-2 text-xs italic text-green-500 opacity-50">
+          <div className="bottom-2 left-2 text-xs italic text-green-700 opacity-50">
             {unixTimestampFormatter(dataframe.createdAtInUnixSecs)}
           </div>
 
