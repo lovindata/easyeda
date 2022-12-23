@@ -5,8 +5,13 @@ import { AnimatedRoutes } from "./components/AnimatedRoutes";
 import { Connectors } from "./components/Connectors";
 import { ProfilInfo } from "./components/ProfilInfo";
 import { DataFrameModal } from "./components/DataFrameModal";
+import { useState } from "react";
 
 function App() {
+  // Modal logic
+  const [isDataFrameModal, setDataFrameModal] = useState(false);
+  const isAnyModal = isDataFrameModal;
+
   // Render
   return (
     <div className="App flex bg-gray-700">
@@ -18,7 +23,7 @@ function App() {
         <div className="relative flex flex-1 flex-col">
           {/* Header */}
           <div className="flex items-center justify-around p-10">
-            <Connectors />
+            <Connectors modalSetter={setDataFrameModal} />
             <ProfilInfo />
           </div>
 
@@ -26,11 +31,13 @@ function App() {
           <AnimatedRoutes />
 
           {/* Modal */}
-          <div className="absolute inset-0 m-auto h-5/6 w-5/6 rounded-xl bg-gray-900 bg-opacity-90 drop-shadow-md">
-            <div className="flex flex-1 flex-col">
-              <DataFrameModal />
+          {isAnyModal && (
+            <div className="absolute inset-0 m-auto h-5/6 w-5/6 rounded-xl bg-gray-900 bg-opacity-90 drop-shadow-md">
+              <div className="flex flex-1 flex-col">
+                {isDataFrameModal && <DataFrameModal modalSetter={setDataFrameModal} />}
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </BrowserRouter>
     </div>

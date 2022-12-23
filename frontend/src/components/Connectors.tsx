@@ -14,15 +14,18 @@ export enum EConnector {
 }
 
 // Connectors
-export const Connectors = () => {
+interface ConnectorsProps {
+  modalSetter: React.Dispatch<React.SetStateAction<boolean>>;
+}
+export const Connectors = (props: ConnectorsProps) => {
   // Render
   return (
     <div className="flex space-x-7">
-      <Connector connType={EConnector.S3} svg={S3ConnectSvg} />
-      <Connector connType={EConnector.PostgreSQL} svg={PostgreSQLSvg} />
-      <Connector connType={EConnector.MySQL} svg={MySQLSvg} />
-      <Connector connType={EConnector.MariaDB} svg={MariaDBSvg} />
-      <Connector connType={EConnector.MongoDB} svg={MongoDBSvg} />
+      <Connector connType={EConnector.S3} svg={S3ConnectSvg} modalSetter={props.modalSetter} />
+      <Connector connType={EConnector.PostgreSQL} svg={PostgreSQLSvg} modalSetter={props.modalSetter} />
+      <Connector connType={EConnector.MySQL} svg={MySQLSvg} modalSetter={props.modalSetter} />
+      <Connector connType={EConnector.MariaDB} svg={MariaDBSvg} modalSetter={props.modalSetter} />
+      <Connector connType={EConnector.MongoDB} svg={MongoDBSvg} modalSetter={props.modalSetter} />
     </div>
   );
 };
@@ -35,6 +38,7 @@ interface ConnectorProps {
       title?: string | undefined;
     }
   >;
+  modalSetter: React.Dispatch<React.SetStateAction<boolean>>;
 }
 const Connector = (props: ConnectorProps) => {
   // Render
@@ -42,7 +46,7 @@ const Connector = (props: ConnectorProps) => {
     <button
       className="transition-effect flex h-24 w-32 items-center justify-center rounded-xl bg-gray-900
       fill-green-500 p-7 drop-shadow-md hover:bg-green-500 hover:fill-white"
-      onClick={() => {}}>
+      onClick={() => props.modalSetter(true)}>
       <props.svg className="h-auto w-auto" />
     </button>
   );

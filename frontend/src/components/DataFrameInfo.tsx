@@ -4,7 +4,7 @@ import { ReactComponent as PostgreSQLSvg } from "../assets/connectors/postgreSQL
 import { ReactComponent as MySQLSvg } from "../assets/connectors/mySQL.svg";
 import { ReactComponent as MariaDBSvg } from "../assets/connectors/mariaDB.svg";
 import { ReactComponent as MongoDBSvg } from "../assets/connectors/mongoDB.svg";
-import { ReactComponent as RemoveCrossSvg } from "../assets/interacts/removeCross.svg";
+import { CloseButton } from "./helpers/InteractsComp";
 import { numberFormatter, unixTimestampFormatter, bytesToSizeFormatter } from "../utils/stringFormatter";
 import { DownloadCount, StarCount } from "./helpers/CountsComp";
 import { ReactComponent as ConnectIconSvg } from "../assets/connectIcon.svg";
@@ -56,18 +56,15 @@ export const DataFrameInfo = () => {
       {/* Infos */}
       <div className="relative flex flex-1 flex-col justify-between p-2">
         {/* AuthorId */}
-        <div className="absolute left-2 text-xs italic text-green-700 opacity-50">
+        <div className="absolute left-2 text-xs italic text-green-700">
           <div>#{profil.id}</div>
           {profil.name}
         </div>
 
         {/* Remove button */}
-        <button
-          className="transition-effect absolute right-2 rounded-md bg-gray-900 fill-rose-500 p-1
-          text-xl font-bold hover:bg-rose-500 hover:fill-white hover:shadow-md"
-          onClick={() => {}}>
-          <RemoveCrossSvg className="h-3 w-3" />
-        </button>
+        <div className="absolute right-2">
+          <CloseButton onClick={() => {}} />
+        </div>
 
         {/* Title */}
         <div className="relative mx-auto flex">
@@ -114,7 +111,7 @@ export const DataFrameInfo = () => {
         {/* Footer */}
         <div className="flex items-center justify-between">
           {/* Updated since */}
-          <div className="bottom-2 left-2 text-xs italic text-green-700 opacity-50">
+          <div className="bottom-2 left-2 text-xs italic text-green-700">
             {unixTimestampFormatter(dataframe.createdAtInUnixSecs)}
           </div>
 
