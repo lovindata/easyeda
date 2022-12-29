@@ -31,8 +31,8 @@ const Icon = (props: IconProps) => {
     <Link
       to={props.href}
       className="transition-effect group m-2 flex h-11 w-11
-      items-center justify-center rounded-3xl fill-green-500 p-2
-      hover:rounded-xl hover:bg-green-500 hover:fill-white hover:shadow-md">
+      items-center justify-center rounded-3xl fill-emerald-500 p-2
+      hover:rounded-xl hover:bg-emerald-500 hover:fill-white hover:shadow-md">
       {/* Icon */}
       <props.svg className="h-auto w-auto" />
 

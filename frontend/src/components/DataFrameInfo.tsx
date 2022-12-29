@@ -51,12 +51,12 @@ export const DataFrameInfo = () => {
   return (
     <div className="flex h-32 w-96 select-none rounded-xl bg-gray-900 drop-shadow-md">
       {/* Connector */}
-      {<div className="flex h-full fill-green-500 px-3 py-6">{connImg()}</div>}
+      {<div className="flex h-full fill-emerald-500 px-3 py-6">{connImg()}</div>}
 
       {/* Infos */}
       <div className="relative flex flex-1 flex-col justify-between p-2">
         {/* AuthorId */}
-        <div className="absolute left-2 text-xs italic text-green-700">
+        <div className="absolute left-2 text-xs italic text-emerald-700">
           <div>#{profil.id}</div>
           {profil.name}
         </div>
@@ -68,14 +68,14 @@ export const DataFrameInfo = () => {
 
         {/* Title */}
         <div className="relative mx-auto flex">
-          <div className="text-xl font-bold text-green-500">{dataframe.name}</div>
-          <div className="absolute -right-4 text-xs italic text-green-700">#{dataframe.id}</div>
+          <div className="text-xl font-bold text-emerald-500">{dataframe.name}</div>
+          <div className="absolute -right-4 text-xs italic text-emerald-700">#{dataframe.id}</div>
         </div>
 
         {/* Content */}
         <div className="mx-2 flex items-center justify-between">
           {/* General DataFrame Info */}
-          <div className="flex space-x-1 text-xs font-semibold text-green-500">
+          <div className="flex space-x-1 text-xs font-semibold text-emerald-500">
             <div className="flex flex-col">
               <div>{numberFormatter(dataframe.nbRows)}</div>
               <div>{numberFormatter(dataframe.nbCols)}</div>
@@ -91,17 +91,17 @@ export const DataFrameInfo = () => {
           {/* DataFrame state */}
           <div className="flex space-x-2">
             <button
-              className="transition-effect rounded-3xl fill-green-500 hover:rounded-md hover:bg-green-500 hover:fill-white hover:shadow-md"
+              className="transition-effect rounded-3xl fill-emerald-500 hover:rounded-md hover:bg-emerald-500 hover:fill-white hover:shadow-md"
               onClick={() => {}}>
               <ConnectIconSvg className="h-9 w-9 p-1.5" />
             </button>
             <button
-              className="transition-effect rounded-3xl fill-green-500 hover:rounded-md hover:bg-green-500 hover:fill-white hover:shadow-md"
+              className="transition-effect rounded-3xl fill-emerald-500 hover:rounded-md hover:bg-emerald-500 hover:fill-white hover:shadow-md"
               onClick={() => {}}>
               <OperatorsSvg className="h-9 w-9 p-1.5" />
             </button>
             <button
-              className="transition-effect rounded-3xl fill-green-500 hover:rounded-md hover:bg-green-500 hover:fill-white hover:shadow-md"
+              className="transition-effect rounded-3xl fill-emerald-500 hover:rounded-md hover:bg-emerald-500 hover:fill-white hover:shadow-md"
               onClick={() => {}}>
               <StatsIcon className="h-9 w-9 p-1.5" />
             </button>
@@ -111,7 +111,7 @@ export const DataFrameInfo = () => {
         {/* Footer */}
         <div className="flex items-center justify-between">
           {/* Updated since */}
-          <div className="bottom-2 left-2 text-xs italic text-green-700">
+          <div className="bottom-2 left-2 text-xs italic text-emerald-700">
             {unixTimestampFormatter(dataframe.createdAtInUnixSecs)}
           </div>
 

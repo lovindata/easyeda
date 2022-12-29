@@ -45,7 +45,7 @@ const Connector = (props: ConnectorProps) => {
   return (
     <button
       className="transition-effect flex h-24 w-32 items-center justify-center rounded-xl bg-gray-900
-      fill-green-500 p-7 drop-shadow-md hover:bg-green-500 hover:fill-white"
+      fill-emerald-500 p-7 drop-shadow-md hover:bg-emerald-500 hover:fill-white"
       onClick={() => props.modalSetter(true)}>
       <props.svg className="h-auto w-auto" />
     </button>

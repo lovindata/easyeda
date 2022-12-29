@@ -30,12 +30,12 @@ export const ProfilInfo = () => {
         {/* Profil info */}
         <div className="flex flex-col justify-between">
           <div className="group flex w-fit flex-col">
-            <Link to="/profil" className="transition-effect text-xs text-green-700 group-hover:text-white">
+            <Link to="/profil" className="transition-effect text-xs text-emerald-700 group-hover:text-white">
               {`#${profil.id}`}
             </Link>
             <Link
               to="/profil"
-              className="transition-effect -mt-1 text-2xl font-bold text-green-500 group-hover:text-white">
+              className="transition-effect -mt-1 text-2xl font-bold text-emerald-500 group-hover:text-white">
               {profil.name}
             </Link>
           </div>
@@ -54,13 +54,13 @@ export const ProfilInfo = () => {
         {/* Social media info */}
         <div className="flex flex-col items-center justify-between">
           <a href={profil.linkedinHref} target="_blank" rel="noreferrer">
-            <LinkedInSvg className="transition-effect h-4 w-4 fill-green-500 hover:fill-white" />
+            <LinkedInSvg className="transition-effect h-4 w-4 fill-emerald-500 hover:fill-white" />
           </a>
           <a href={profil.githubHref} target="_blank" rel="noreferrer">
-            <GithubSvg className="transition-effect h-4 w-4 fill-green-500 hover:fill-white" />
+            <GithubSvg className="transition-effect h-4 w-4 fill-emerald-500 hover:fill-white" />
           </a>
           <a href={profil.kaggleHref} target="_blank" rel="noreferrer">
-            <KaggleSvg className="transition-effect h-4 w-4 fill-green-500 hover:fill-white" />
+            <KaggleSvg className="transition-effect h-4 w-4 fill-emerald-500 hover:fill-white" />
           </a>
         </div>
       </div>
