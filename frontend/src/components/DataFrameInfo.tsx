@@ -49,7 +49,7 @@ export const DataFrameInfo = () => {
 
   // Render
   return (
-    <div className="flex h-32 w-96 select-none rounded-xl bg-gray-900 drop-shadow-md">
+    <div className="flex h-32 w-96 rounded-xl bg-gray-900 drop-shadow-md">
       {/* Connector */}
       {<div className="flex h-full fill-emerald-500 px-3 py-6">{connImg()}</div>}
 

@@ -1,5 +1,43 @@
 import { CloseButton } from "./helpers/InteractsComp";
 import { DownloadCount, StarCount } from "./helpers/CountsComp";
+import { numberFormatter } from "../utils/stringFormatter";
+import { ReactComponent as ConnectIconSvg } from "../assets/connectIcon.svg";
+import { useState } from "react";
+
+// Connection form
+const ConnectionForm = () => {
+  return <div className="absolute inset-x-1/2 bottom-10 h-1/4 w-1/3 bg-white bg-opacity-90"></div>;
+};
+
+// Connection modal
+const ConnectionModal = () => {
+  // Define hooks
+  const [isInConfig, switchIsInConfig] = useState(false);
+
+  // Render
+  return (
+    <>
+      {/* Icon */}
+      <div className="absolute inset-x-1/2 -bottom-14">
+        <button
+          className={
+            "rounded-xl " +
+            (isInConfig
+              ? "bg-emerald-500 fill-white shadow-md"
+              : "transition-effect bg-gray-900 fill-emerald-500 hover:bg-emerald-500 hover:fill-white hover:shadow-md")
+          }
+          onClick={() => {
+            switchIsInConfig(!isInConfig);
+          }}>
+          <ConnectIconSvg className="h-9 w-9 p-1.5" />
+        </button>
+      </div>
+
+      {/* Form */}
+      {isInConfig && <ConnectionForm />}
+    </>
+  );
+};
 
 // DataFrame preview modal
 interface DataFrameModalProps {
@@ -267,7 +305,7 @@ export const DataFrameModal = (props: DataFrameModalProps) => {
 
   // Render
   return (
-    <div className="flex h-full w-full flex-col">
+    <div className="relative flex h-full w-full flex-col">
       {/* Remove button */}
       <div className="absolute top-2 right-2">
         <CloseButton onClick={() => props.modalSetter(false)} />
@@ -299,35 +337,54 @@ export const DataFrameModal = (props: DataFrameModalProps) => {
       </div>
 
       {/* Data preview */}
-      <div className="no-scrollbar overflow-auto scroll-smooth">
+      <div className="overflow-overlay scroll-smooth">
         <table className="table-auto">
           {/* Data prev header */}
           <thead className="bg-gray-800">
             <tr>
-              <th></th>
-              {dataPrev.dataSchema.map(({ colName, colType }, index) => (
-                <th className="relative p-2 text-left tracking-wide text-emerald-500">
-                  <div className="text-xs font-thin italic text-emerald-700">#{index + 1}</div>
-                  <div className="text-sm font-bold">{colName}</div>
-                  <div className="text-xs font-light">{colType}</div>
-                </th>
-              ))}
+              <th key="col#0"></th>
+              {dataPrev.dataSchema.map(({ colName, colType }, idxCol) => {
+                const idxColStartAtOne = idxCol + 1;
+                return (
+                  <th className="relative p-2 text-left tracking-wide text-emerald-500" key={`col#${idxColStartAtOne}`}>
+                    <div className="text-xs font-thin italic text-emerald-700">#{idxColStartAtOne}</div>
+                    <div className="text-sm font-bold">{colName}</div>
+                    <div className="text-xs font-light">{colType}</div>
+                  </th>
+                );
+              })}
             </tr>
           </thead>
 
           {/* Data prev body */}
           <tbody>
-            {dataPrev.dataValues.map((rowValues, index) => (
-              <tr className={index % 2 ? `bg-gray-800` : `bg-gray-900`}>
-                <td className="p-2 text-xs font-thin italic tracking-wide text-emerald-700">#{index + 1}</td>
-                {rowValues.map((value, _) => (
-                  <td className="p-2 text-xs font-medium tracking-wide text-emerald-500">{value}</td>
-                ))}
-              </tr>
-            ))}
+            {dataPrev.dataValues.map((rowValues, idxRow) => {
+              const idxRowStartAtOne = idxRow + 1;
+              return (
+                <tr className={idxRow % 2 ? `bg-gray-800` : `bg-gray-900`} key={`row#${idxRowStartAtOne}`}>
+                  <td className="p-2 text-xs font-thin italic tracking-wide text-emerald-700" key="col#0">
+                    #{idxRowStartAtOne}
+                  </td>
+                  {rowValues.map((value, idxCol) => (
+                    <td className="p-2 text-xs font-medium tracking-wide text-emerald-500" key={`col#${idxCol + 1}`}>
+                      {value}
+                    </td>
+                  ))}
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>
+
+      {/* Footer */}
+      <div className="flex justify-around p-2 text-xs italic text-emerald-700">
+        <div>{`10/${numberFormatter(12311)} rows`}</div>
+        <div>{`21/${numberFormatter(103)} columns`}</div>
+      </div>
+
+      {/* Modals */}
+      <ConnectionModal />
     </div>
   );
 };

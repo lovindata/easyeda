@@ -14,7 +14,7 @@ function App() {
 
   // Render
   return (
-    <div className="App flex bg-gray-800">
+    <div className="App flex select-none bg-gray-800">
       <BrowserRouter>
         {/* SideBar */}
         <SideBar />
@@ -32,7 +32,7 @@ function App() {
 
           {/* Modal */}
           {isAnyModal && (
-            <div className="absolute inset-0 m-auto h-5/6 w-5/6 bg-gray-900 bg-opacity-90 drop-shadow-md">
+            <div className="absolute inset-0 m-auto h-5/6 w-5/6 rounded-lg bg-gray-900 drop-shadow-md">
               {isDataFrameModal && <DataFrameModal modalSetter={setDataFrameModal} />}
             </div>
           )}

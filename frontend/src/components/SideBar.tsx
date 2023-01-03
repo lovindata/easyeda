@@ -38,7 +38,7 @@ const Icon = (props: IconProps) => {
 
       {/* Tips */}
       <span
-        className="transition-effect pointer-events-none absolute left-14 m-2 min-w-max origin-left scale-0 select-none
+        className="transition-effect pointer-events-none absolute left-14 m-2 min-w-max origin-left scale-0
         rounded-xl bg-gray-900 p-2 text-xs font-bold text-white group-hover:scale-100">
         {props.description}
       </span>

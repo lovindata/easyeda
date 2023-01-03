@@ -21,7 +21,7 @@ export const ProfilInfo = () => {
 
   // Render
   return (
-    <div className="flex h-24 w-72 select-none rounded-xl bg-gray-900 drop-shadow-md">
+    <div className="flex h-24 w-72 rounded-xl bg-gray-900 drop-shadow-md">
       {/* Photo */}
       <Link to="/profil">{profil.img}</Link>
 
