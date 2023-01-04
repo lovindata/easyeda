@@ -10,6 +10,8 @@ import org.http4s._
 import org.http4s.ember.server._
 import org.http4s.implicits._
 import org.http4s.server.Router
+import org.http4s.server.staticcontent.FileService
+import org.http4s.server.staticcontent.fileService
 import org.http4s.server.staticcontent.resourceServiceBuilder
 
 /**
@@ -19,13 +21,14 @@ object AppServer {
 
   // Build SwaggerUI route (it allows rendering of all files in `swagger` resource folder at server URL path `/`)
   val swaggerIURts: HttpRoutes[IO] = resourceServiceBuilder[IO]("swagger").toRoutes
+  val reactAppRts: HttpRoutes[IO]  =
+    fileService[IO](FileService.Config("D:\\prog\\proj\\easyeda\\frontend\\build")) // TODO
 
   // Retrieve all api route(s)
   val apiRts: HttpRoutes[IO] = Router("/session" -> SessionRts.routes, "/job" -> JobRts.routes)
 
   // Combine all route(s)
-  val combinedRts: HttpApp[IO] =
-    Router("/swagger" -> swaggerIURts, "/api" -> apiRts).orNotFound
+  val combinedRts: HttpApp[IO] = Router("/swagger" -> swaggerIURts, "/api" -> apiRts, "/" -> reactAppRts).orNotFound
 
   /**
    * Build & Run the HTTP4s server.

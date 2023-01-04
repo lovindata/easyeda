@@ -13,19 +13,17 @@
 ![stackUsed](docs/stackUsed.png)
 
 📊😌 **EasyEDA** is a REST API for doing common exploratory data analysis.
-It is powered by Typelevel stack **[http4s](https://http4s.org/v0.23/docs/quickstart.html)** with 
+It is powered by Typelevel stack **[http4s](https://http4s.org/v0.23/docs/quickstart.html)** with
 **[Cats Effect](https://typelevel.org/cats-effect/)**, **[Spark](https://spark.apache.org/docs/3.3.3/)**
 and **[Redis](https://redis.io/)** providing fully vertically scaled parallel request processing
 and extremely fast **in-memory** non-persistent data manipulation & computation.
 It means none of your source data are saved somewhere and everything are done on the fly 🚀🤩!
-
 
 # Want to contribute ? 😉
 
 - [Stack used image](docs/stackUsed.png) can be directly modified via [draw.io](https://app.diagrams.net/)
 - [IntelliJ IDEA CE](https://www.jetbrains.com/idea/) was used to build the source code
 - This [VSCode extension](https://marketplace.visualstudio.com/items?itemName=42Crunch.vscode-openapi) was used to edit the [OpenAPI documentation](src/main/resources/swagger/openapi.yaml)
-
 
 # Logbook (🙏😣 Work still in progress...)
 
@@ -36,7 +34,8 @@ It means none of your source data are saved somewhere and everything are done on
 - Think about cron jobs not terminated but still here sessions ?
   - K8S stateless compatibility too be-careful ⚠️
     - The implementation of "not-continue"
-- Start learning ReactJs & FrontEnd dev (😼 HERE AT THE MOMENT 😼)
+- Start learning ReactJs & FrontEnd dev
+  - Continue "on all in-one container" with ReactApp served by HTTP4s / Tapir (😼 HERE AT THE MOMENT 😼)
 - Start learning event streams & prepare async routes for Job monitoring
 - Start trying Tapir for embedding routes
 - Work on Logging (Spark logs annoying + No app logging)
@@ -46,7 +45,6 @@ It means none of your source data are saved somewhere and everything are done on
 - Reach decent overall coverage for UTs
   - Needs to test redis functions for models objects
   - Setup coverage CI/CD
-
 
 # Notes
 
