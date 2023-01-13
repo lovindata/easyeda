@@ -91,17 +91,17 @@ export const DataFrameInfo = () => {
           {/* DataFrame state */}
           <div className="flex space-x-2">
             <button
-              className="transition-effect rounded-3xl fill-emerald-500 hover:rounded-md hover:bg-emerald-500 hover:fill-white hover:shadow-md"
+              className="transition-effect rounded-3xl fill-emerald-500 hover:rounded-xl hover:bg-emerald-500 hover:fill-white hover:shadow-md"
               onClick={() => {}}>
               <ConnectIconSvg className="h-9 w-9 p-1.5" />
             </button>
             <button
-              className="transition-effect rounded-3xl fill-emerald-500 hover:rounded-md hover:bg-emerald-500 hover:fill-white hover:shadow-md"
+              className="transition-effect rounded-3xl fill-emerald-500 hover:rounded-xl hover:bg-emerald-500 hover:fill-white hover:shadow-md"
               onClick={() => {}}>
               <OperatorsSvg className="h-9 w-9 p-1.5" />
             </button>
             <button
-              className="transition-effect rounded-3xl fill-emerald-500 hover:rounded-md hover:bg-emerald-500 hover:fill-white hover:shadow-md"
+              className="transition-effect rounded-3xl fill-emerald-500 hover:rounded-xl hover:bg-emerald-500 hover:fill-white hover:shadow-md"
               onClick={() => {}}>
               <StatsIcon className="h-9 w-9 p-1.5" />
             </button>

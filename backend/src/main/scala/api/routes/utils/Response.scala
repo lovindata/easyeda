@@ -4,7 +4,6 @@ package api.routes.utils
 import api.dto.output.AppFatalThrowableDtoOut
 import api.dto.output.AppUnhandledExceptionDtoOut
 import api.helpers.AppLayerException
-import api.helpers.AppLayerException._
 import api.helpers.Http4sExtension._
 import cats.data.EitherT
 import cats.effect.IO
@@ -13,7 +12,7 @@ import org.http4s.circe.CirceEntityCodec.circeEntityEncoder
 import org.http4s.dsl.io._
 
 /**
- * Containing rich class related to responses.
+ * Utils for response.
  */
 object Response {
 

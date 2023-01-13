@@ -3,6 +3,7 @@ package api.controllers
 
 import api.dto.output.AppLayerExceptionDtoOut._
 import api.dto.output.SessionStatusDtoOut
+import api.dto.output.UserStatusDtoOut
 import api.helpers.AppLayerException
 import api.helpers.AppLayerException._
 import api.helpers.Http4sExtension._
@@ -12,14 +13,24 @@ import api.services.SessionSvc
 import cats.data._
 import cats.effect.IO
 import cats.implicits._
+import com.ilovedatajjia.api.dto.input.CreateUserFormDtoIn
 import org.http4s._
 import org.http4s.headers.Authorization
 import org.http4s.server.AuthMiddleware
 
 /**
- * Controller for sessions logic.
+ * Controller for user logic.
  */
-object SessionCtrl {
+object UserCtrl {
+
+  /**
+   * Validate form and create the user.
+   * @param createUserFormDtoIn
+   *   Form to validate
+   * @return
+   *   User status
+   */
+  def createUserAccount(createUserFormDtoIn: CreateUserFormDtoIn): IO[UserStatusDtoOut] = ??? // TODO
 
   /**
    * Validate bearer authorization from a request.

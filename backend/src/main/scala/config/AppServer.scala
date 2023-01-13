@@ -1,45 +1,60 @@
 package com.ilovedatajjia
 package config
 
-import ConfigLoader.appPort
-import api.routes.JobRts
-import api.routes.SessionRts
 import cats.effect.IO
-import com.comcast.ip4s._
-import org.http4s._
-import org.http4s.ember.server._
+import cats.implicits._
+import com.comcast.ip4s.IpLiteralSyntax
+import config.ConfigLoader._
+import org.http4s.HttpRoutes
+import org.http4s.ember.server.EmberServerBuilder
 import org.http4s.implicits._
-import org.http4s.server.Router
-import org.http4s.server.staticcontent.FileService
-import org.http4s.server.staticcontent.fileService
-import org.http4s.server.staticcontent.resourceServiceBuilder
+import sttp.tapir._
+import sttp.tapir.server.ServerEndpoint
+import sttp.tapir.server.http4s.Http4sServerInterpreter
+import sttp.tapir.swagger.bundle.SwaggerInterpreter
 
 /**
  * Application server.
  */
 object AppServer {
 
-  // Build SwaggerUI route (it allows rendering of all files in `swagger` resource folder at server URL path `/`)
-  val swaggerIURts: HttpRoutes[IO] = resourceServiceBuilder[IO]("swagger").toRoutes
-  val reactAppRts: HttpRoutes[IO]  =
-    fileService[IO](FileService.Config("D:\\prog\\proj\\easyeda\\frontend\\build")) // TODO
+  // FrontEnd routes
+  private val indexHTMLRts: HttpRoutes[IO] = // "index.html" on "/*"
+    Http4sServerInterpreter[IO]().toRoutes(fileGetServerEndpoint[IO](emptyInput)(s"$frontEndResourcePath/index.html"))
+  private val staticFilesRts: HttpRoutes[
+    IO
+  ] = // Static files on "/view" (⚠️ It supposes frontend will never user "/view" as client-side route)
+    Http4sServerInterpreter[IO]().toRoutes(filesServerEndpoints[IO]("view")(frontEndResourcePath))
+  private val frontEndRts: HttpRoutes[IO]  = staticFilesRts <+> indexHTMLRts
 
-  // Retrieve all api route(s)
-  val apiRts: HttpRoutes[IO] = Router("/session" -> SessionRts.routes, "/job" -> JobRts.routes)
-
-  // Combine all route(s)
-  val combinedRts: HttpApp[IO] = Router("/swagger" -> swaggerIURts, "/api" -> apiRts, "/" -> reactAppRts).orNotFound
+  // BackEnd routes
+  private val docsEndpoint: List[ServerEndpoint[Any, IO]] =
+    SwaggerInterpreter().fromEndpoints[IO](List(???), "EloData_AppServer", "1.0") // On "/docs"
+  private val docsRts: HttpRoutes[IO]    = Http4sServerInterpreter[IO]().toRoutes(docsEndpoint)
+  private val backEndRts: HttpRoutes[IO] = docsRts <+> ???
 
   /**
-   * Build & Run the HTTP4s server.
+   * Start the HTTP servers.
    */
-  def run: IO[Unit] = EmberServerBuilder
-    .default[IO]
-    .withHost(ipv4"127.0.0.1") // localhost equivalent
-    .withPort(appPort)
-    .withHttpApp(combinedRts)
-    .build
-    .use(_ => IO.never)
-    .void
+  def run: IO[Unit] = for {
+    // FrontEnd server
+    _ <- EmberServerBuilder
+           .default[IO]
+           .withHost(ipv4"127.0.0.1") // Localhost equivalent
+           .withPort(port"$frontEndPort")
+           .withHttpApp(frontEndRts.orNotFound)
+           .build
+           .use(_ => IO.never)
+           .start
+
+    // BackEnd server
+    _ <- EmberServerBuilder
+           .default[IO]
+           .withHost(ipv4"127.0.0.1") // Localhost equivalent
+           .withPort(port"$backEndPort")
+           .withHttpApp(backEndRts.orNotFound)
+           .build
+           .use(_ => IO.never)
+  } yield ()
 
 }

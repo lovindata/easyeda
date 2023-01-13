@@ -27,6 +27,9 @@ It means none of your source data are saved somewhere and everything are done on
 
 # Logbook (🙏😣 Work still in progress...)
 
+- Setup database and start coding for EloData authentication (😼 HERE AT THE MOMENT 😼)
+  - See TODO on controller
+
 - Finalize migration
   - Rework the already in-place UTs
     - Issue with combined AsyncFreeSpec + `withObjectMocked => Unit` (PAUSED)
@@ -42,9 +45,7 @@ It means none of your source data are saved somewhere and everything are done on
 - Continue DEV on basic statistics
 - Start DEV on Spark NLP Service
   - Introduce the type `Sentence`
-- Reach decent overall coverage for UTs
-  - Needs to test redis functions for models objects
-  - Setup coverage CI/CD
+- SCoverage & CI/CD
 
 # Notes
 

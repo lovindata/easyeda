@@ -1,8 +1,11 @@
+# For Scala project
 .metals
 .vscode
 *.class
 *.log
 .bsp
 .idea
+
+# For others
 target
 draft

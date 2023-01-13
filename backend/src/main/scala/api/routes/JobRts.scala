@@ -2,7 +2,7 @@ package com.ilovedatajjia
 package api.routes
 
 import api.controllers.JobCtrl
-import api.controllers.SessionCtrl.withAuth
+import api.controllers.UserCtrl.withAuth
 import api.helpers.AppLayerException.RouteLayerException
 import api.models.SessionMod
 import api.routes.utils.Request._
