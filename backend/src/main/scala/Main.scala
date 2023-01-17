@@ -1,6 +1,6 @@
 package com.ilovedatajjia
 
-import api.services.SessionSvc
+import api.services.UserSvc
 import cats.effect.IO
 import cats.effect.IOApp
 import config.AppServer

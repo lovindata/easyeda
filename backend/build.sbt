@@ -28,7 +28,7 @@ libraryDependencies += "org.apache.spark" %% "spark-mllib" % "3.3.1" % "provided
 
 // Cats Effect & Scala extensions
 // https://mvnrepository.com/artifact/org.typelevel/cats-effect
-libraryDependencies += "org.typelevel"              %% "cats-effect" % "3.4.4"
+libraryDependencies += "org.typelevel"              %% "cats-effect" % "3.4.5"
 // https://mvnrepository.com/artifact/com.softwaremill.quicklens/quicklens
 libraryDependencies += "com.softwaremill.quicklens" %% "quicklens"   % "1.9.0"
 
@@ -55,6 +55,8 @@ libraryDependencies += "io.circe" %% "circe-parser"         % "0.14.3"
 libraryDependencies += "io.circe" %% "circe-generic"        % "0.14.3"
 // https://mvnrepository.com/artifact/io.circe/circe-generic-extras
 libraryDependencies += "io.circe" %% "circe-generic-extras" % "0.14.3"
+// https://mvnrepository.com/artifact/io.circe/circe-literal
+libraryDependencies += "io.circe" %% "circe-literal"        % "0.14.3"
 // https://mvnrepository.com/artifact/io.circe/circe-fs2
 libraryDependencies += "io.circe" %% "circe-fs2"            % "0.14.0"
 

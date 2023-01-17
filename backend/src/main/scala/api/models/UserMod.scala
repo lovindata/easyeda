@@ -1,42 +1,70 @@
 package com.ilovedatajjia
 package api.models
 
+import cats.effect.std.Random
 import api.helpers.AppLayerException
 import api.helpers.AppLayerException.ModelLayerException
 import api.helpers.CatsEffectExtension._
 import api.helpers.CodecExtension._
-import api.models.SessionMod._
 import api.models.SessionStateEnum._
 import api.models.SessionStateEnum.SessionStateType
+import api.models.UserMod._
 import cats.data.EitherT
 import cats.effect.Clock
 import cats.effect.IO
+import com.ilovedatajjia.api.dto.input.CreateUserFormDtoIn
 import config.ConfigLoader.maxInactivity
 import config.DBDriver.redisDriver
 import io.circe._
 import io.circe.generic.semiauto._
 import java.sql.Timestamp
 import org.http4s.Status
-import redis.clients.jedis.UnifiedJedis
-import redis.clients.jedis.json._
-import redis.clients.jedis.search._
-import redis.clients.jedis.search.IndexDefinition.Type
 import scala.concurrent.duration.FiniteDuration
 import scala.jdk.CollectionConverters._
 import scala.util.Try
 
 /**
- * DB representation of a session.
+ * DB representation of a user.
  * @param id
- *   Session ID
+ *   User id
+ * @param email
+ *   User email
+ * @param username
+ *   Pseudo
+ * @param pwd
+ *   Argon2 hashed password with salt and pepper
+ * @param pwdSalt
+ *   Salt used in argon2 hash
+ * @param dayBirth
+ *   Day of birth
+ * @param monthBirth
+ *   Month of birth
+ * @param yearBirth
+ *   Year of birth
+ * @param img
+ *   Image bytes
  * @param createdAt
- *   Session creation timestamp
+ *   User created at
+ * @param validatedAt
+ *   User validated at
  * @param updatedAt
- *   Session update timestamp
- * @param terminatedAt
- *   Session termination timestamp
+ *   User updated at
+ * @param activeAt
+ *   User active at
  */
-case class SessionMod(id: Long, createdAt: Timestamp, updatedAt: Timestamp, terminatedAt: Option[Timestamp]) {
+case class UserMod(id: Long,
+                   email: String,
+                   username: String,
+                   pwd: String,
+                   pwdSalt: String,
+                   dayBirth: Int,
+                   monthBirth: Int,
+                   yearBirth: Int,
+                   img: Array[Byte],
+                   createdAt: Timestamp,
+                   validatedAt: Option[Timestamp],
+                   updatedAt: Timestamp,
+                   activeAt: Timestamp) {
 
   /**
    * Launch the cron job checking inactivity status. If session inactive the cron job will terminate & updated in the
@@ -51,15 +79,15 @@ case class SessionMod(id: Long, createdAt: Timestamp, updatedAt: Timestamp, term
       _ <- IO.sleep(maxInactivity)
 
       // Retrieve the actual session state from the database
-      sessionOrError <- SessionMod.getWithId(id).value
+      sessionOrError <- UserMod.getWithId(id).value
 
       // Update the cron job & session according the inactivity
       nowTimestamp <- Clock[IO].realTime.map(_.toMillis)
       _            <- sessionOrError match {
-                        case Right(SessionMod(_, _, sessionUpdatedAt, None))
+                        case Right(UserMod(_, _, sessionUpdatedAt, None))
                             if nowTimestamp - sessionUpdatedAt.getTime < maxInactivity.toMillis =>
                           startCronJobInactivityCheck() // Continue cron job if still active session
-                        case Right(SessionMod(_, _, sessionUpdatedAt, None))
+                        case Right(UserMod(_, _, sessionUpdatedAt, None))
                             if nowTimestamp - sessionUpdatedAt.getTime >= maxInactivity.toMillis =>
                           this.terminate.value.void // Terminate the session
                         case _ =>
@@ -78,7 +106,7 @@ case class SessionMod(id: Long, createdAt: Timestamp, updatedAt: Timestamp, term
    *   - [[ModelLayerException]] missing field [[updatedAt]]
    *   - exception from [[getWithId]]
    */
-  def refreshStatus: EitherT[IO, AppLayerException, SessionMod] = for {
+  def refreshStatus: EitherT[IO, AppLayerException, UserMod] = for {
     nowTimestamp    <- EitherT.right(Clock[IO].realTime.map(_.toMillis))
     _               <- EitherT(redisDriver.use(x =>
                          IO {
@@ -102,7 +130,7 @@ case class SessionMod(id: Long, createdAt: Timestamp, updatedAt: Timestamp, term
    *   - [[ModelLayerException]] if already terminated session
    *   - exception from [[getWithId]]
    */
-  def terminate: EitherT[IO, AppLayerException, SessionMod] = for {
+  def terminate: EitherT[IO, AppLayerException, UserMod] = for {
     nowTimestamp    <- EitherT.right(Clock[IO].realTime.map(_.toMillis))
     _               <-
       EitherT(redisDriver.use(x =>
@@ -121,9 +149,9 @@ case class SessionMod(id: Long, createdAt: Timestamp, updatedAt: Timestamp, term
 }
 
 /**
- * Additional [[SessionMod]] functions.
+ * Additional [[UserMod]] functions.
  */
-object SessionMod {
+object UserMod {
 
   // Global fixed variable(s)
   private val rootName: String        = "SessionMod"
@@ -149,25 +177,25 @@ object SessionMod {
   // JSON (de)serializers (`Timestamp` saved as `Long` == Unix timestamp)
   private implicit val encTimestamp: Encoder[Timestamp] = Encoder.instance(x => Json.fromLong(x.getTime))
   private implicit val decTimestamp: Decoder[Timestamp] = Decoder.instance(_.as[Long].map(x => new Timestamp(x)))
-  implicit val encSessionMod: Encoder[SessionMod]       = deriveEncoder
-  implicit val decSessionMod: Decoder[SessionMod]       = deriveDecoder
+  implicit val encSessionMod: Encoder[UserMod]          = deriveEncoder
+  implicit val decSessionMod: Decoder[UserMod]          = deriveDecoder
 
   /**
-   * Constructor of [[SessionMod]].
-   * @param authToken
-   *   Brut authorization token that will be hashed to SHA-1 hexadecimal string
+   * Constructor of [[UserMod]].
+   * @param createUserFormDtoIn
+   *   User creation form
    * @return
-   *   A new created session
+   *   A new created user
    */
-  def apply(authToken: String): IO[SessionMod] = for {
+  def apply(createUserFormDtoIn: CreateUserFormDtoIn): IO[UserMod] = for {
     // Prepare the query
     nowTimestamp         <- Clock[IO].realTime.map(x => new Timestamp(x.toMillis))
-    authTokenSha1: String = authToken.toSha1Hex // Hash with SHA1 the authorization token
+    salt <- Random[IO].nextPrintableChar // TODO
 
     // Run & Get the created session
     id        <- redisDriver.use(x => IO.blocking(x.incr(autoIdIncKey)))
     _         <- redisDriver.use(x => IO.blocking(x.hset(idsKey, authTokenSha1, id.toString)))
-    newSession = SessionMod(id, nowTimestamp, nowTimestamp, None)
+    newSession = UserMod(id, nowTimestamp, nowTimestamp, None)
     _         <-
       redisDriver.use(x =>
         IO.blocking(
@@ -182,9 +210,9 @@ object SessionMod {
    *   The corresponding Session OR
    *   - [[ModelLayerException]] if non retrievable session with provided ID
    */
-  private def getWithId(id: Long): EitherT[IO, AppLayerException, SessionMod] = for {
+  private def getWithId(id: Long): EitherT[IO, AppLayerException, UserMod] = for {
     sessionStr <- EitherT.right(redisDriver.use(x => IO.blocking(x.jsonGetAsPlainString(dataKey(id), Path.ROOT_PATH))))
-    session    <- EitherT(IO(parser.parse(sessionStr).flatMap(_.as[SessionMod]))).leftMap(e =>
+    session    <- EitherT(IO(parser.parse(sessionStr).flatMap(_.as[UserMod]))).leftMap(e =>
                     ModelLayerException(
                       msgServer = s"Session not retrievable or parsable into model object with the implicitly provided ID",
                       overHandledException = Some(e),
@@ -200,7 +228,7 @@ object SessionMod {
    *   The corresponding Session OR
    *   - exception from [[getWithId]]
    */
-  def getWithAuthToken(authToken: String): EitherT[IO, AppLayerException, SessionMod] = for {
+  def getWithAuthToken(authToken: String): EitherT[IO, AppLayerException, UserMod] = for {
     sessionId <-
       EitherT(
         redisDriver.use(x =>
@@ -220,7 +248,7 @@ object SessionMod {
    * @return
    *   List of sessions
    */
-  def listSessions(sessionState: Option[SessionStateType]): IO[List[SessionMod]] = for {
+  def listSessions(sessionState: Option[SessionStateType]): IO[List[UserMod]] = for {
     // Create if necessary the index
     terminatedAtIndexName <- redisDriver.use(terminatedAtIndex)
 
@@ -246,7 +274,7 @@ object SessionMod {
         ))
 
     // Keep only the parsable
-    sessionsParsed = sessions.map(x => parser.parse(x).flatMap(_.as[SessionMod])).collect { case Right(x) => x }.toList
+    sessionsParsed = sessions.map(x => parser.parse(x).flatMap(_.as[UserMod])).collect { case Right(x) => x }.toList
   } yield sessionsParsed
 
 }

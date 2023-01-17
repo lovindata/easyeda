@@ -4,7 +4,7 @@ package api.routes
 import api.controllers.JobCtrl
 import api.controllers.UserCtrl.withAuth
 import api.helpers.AppLayerException.RouteLayerException
-import api.models.SessionMod
+import api.models.UserMod
 import api.routes.utils.Request._
 import api.routes.utils.Response._
 import cats.effect.IO
@@ -25,7 +25,7 @@ object JobRts {
   private object MaxColIdx extends ValidatingQueryParamDecoderMatcher[Int]("maxColIdx")
 
   // Define preview route
-  private val previewRoute: AuthedRoutes[SessionMod, IO] = AuthedRoutes.of {
+  private val previewRoute: AuthedRoutes[UserMod, IO] = AuthedRoutes.of {
     case req @ POST -> Root / "preview" :? NbRows(nbRows) :? MinColIdx(minColIdx) :? MaxColIdx(maxColIdx) as session =>
       (nbRows, minColIdx, maxColIdx)
         .mapN((_, _, _))

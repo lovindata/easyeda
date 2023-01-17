@@ -1,25 +1,29 @@
 package com.ilovedatajjia
 package api.controllers
 
+import api.dto.input.CreateUserFormDtoIn
 import api.dto.output.AppLayerExceptionDtoOut._
 import api.dto.output.SessionStatusDtoOut
 import api.dto.output.UserStatusDtoOut
+import api.helpers.AppException
 import api.helpers.AppLayerException
 import api.helpers.AppLayerException._
 import api.helpers.Http4sExtension._
-import api.models.SessionMod
+import api.helpers.StringExtension._
 import api.models.SessionStateEnum._
-import api.services.SessionSvc
+import api.models.UserMod
+import api.services.UserSvc
 import cats.data._
+import cats.effect.Clock
 import cats.effect.IO
 import cats.implicits._
-import com.ilovedatajjia.api.dto.input.CreateUserFormDtoIn
+import java.sql.Timestamp
 import org.http4s._
 import org.http4s.headers.Authorization
 import org.http4s.server.AuthMiddleware
 
 /**
- * Controller for user logic.
+ * Controller layer for user.
  */
 object UserCtrl {
 
@@ -30,7 +34,29 @@ object UserCtrl {
    * @return
    *   User status
    */
-  def createUserAccount(createUserFormDtoIn: CreateUserFormDtoIn): IO[UserStatusDtoOut] = ??? // TODO
+  def createUser(createUserFormDtoIn: CreateUserFormDtoIn): IO[UserStatusDtoOut] = for {
+    // Validate email, username and password
+    _              <- IO.raiseUnless(createUserFormDtoIn.email.isValidEmail)(AppException("Email format invalid"))
+    _              <- IO.raiseUnless("[a-zA-Z0-9]{2,32}".r.matches(createUserFormDtoIn.username))(
+                        AppException("Username must contains 2 to 32 alphanumerical characters"))
+    _              <-
+      IO.raiseUnless(createUserFormDtoIn.password.isValidPwd)(AppException(
+        "Password must contains 8 to 32 characters, an uppercase and lowercase letter, a number and a special character"))
+
+    // Validate birth day
+    nowTimestamp   <- Clock[IO].realTime.map(_.toMillis)
+    birthTimestamp <-
+      IO(
+        Timestamp
+          .valueOf(
+            s"${createUserFormDtoIn.yearBirth}-${createUserFormDtoIn.monthBirth}-${createUserFormDtoIn.dayBirth}")
+          .getTime)
+    _              <- IO.raiseUnless(nowTimestamp - birthTimestamp <= 378683112)(
+                        AppException("Being at least 12 years old is required"))
+
+    // Create
+    dtoOut         <- UserSvc.createUser(createUserFormDtoIn)
+  } yield dtoOut
 
   /**
    * Validate bearer authorization from a request.
@@ -66,16 +92,16 @@ object UserCtrl {
    * @return
    *   Middleware with session auth defined
    */
-  def withAuth: AuthMiddleware[IO, SessionMod] = {
+  def withAuth: AuthMiddleware[IO, UserMod] = {
     // Lambda verify bearer token & session
-    val sessionAuthPolicy: Kleisli[IO, Request[IO], Either[AppLayerException, SessionMod]] =
+    val sessionAuthPolicy: Kleisli[IO, Request[IO], Either[AppLayerException, UserMod]] =
       Kleisli({ request: Request[IO] =>
         // Check valid header `Authorization` & Prepare the `authToken` for session verification
         val validatedAuthToken: Either[AppLayerException, String] = authBearerFmtValidator(request)
 
         // Do session verification & Return
         val validatedSession = validatedAuthToken.flatTraverse(
-          SessionSvc
+          UserSvc
             .verifyAuthorization(_)
             .value
         ) // The two `Either` are merged by the `_.flatten` after the `_.traverse`
@@ -113,7 +139,7 @@ object UserCtrl {
       }))
 
     // Starting listing
-    sessions    <- EitherT.right(SessionSvc.listSessions(filterState))
+    sessions    <- EitherT.right(UserSvc.listSessions(filterState))
   } yield sessions
 
 }

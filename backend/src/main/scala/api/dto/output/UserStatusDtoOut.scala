@@ -7,6 +7,8 @@ import sttp.tapir.Schema
 
 /**
  * User status.
+ * @param id
+ *   User id
  * @param email
  *   E-mail unique identifier of the account
  * @param username
@@ -20,7 +22,8 @@ import sttp.tapir.Schema
  * @param activeAt
  *   Account latest activity at
  */
-case class UserStatusDtoOut(email: String,
+case class UserStatusDtoOut(id: Long,
+                            email: String,
                             username: String,
                             createdAt: String,
                             validatedAt: Option[String],

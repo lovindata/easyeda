@@ -6,7 +6,7 @@ import api.dto.input.FileImportOptDtoIn._
 import api.dto.output.DataPreviewDtoOut
 import api.helpers.AppLayerException
 import api.helpers.AppLayerException.ControllerLayerException
-import api.models.SessionMod
+import api.models.UserMod
 import api.services.JobSvc
 import cats.data.EitherT
 import cats.effect.IO
@@ -46,7 +46,7 @@ object JobCtrl {
    *   - exception from [[JobSvc.passCustomSchema]]
    *   - exception from [[JobSvc.preview]]
    */
-  def computePreview(validatedSession: SessionMod,
+  def computePreview(validatedSession: UserMod,
                      fileImportOpt: Json,
                      fileImport: Stream[IO, Byte],
                      fileName: String,

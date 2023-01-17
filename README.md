@@ -28,7 +28,7 @@ It means none of your source data are saved somewhere and everything are done on
 # Logbook (🙏😣 Work still in progress...)
 
 - Setup database and start coding for EloData authentication (😼 HERE AT THE MOMENT 😼)
-  - See TODO on controller
+  - See TODO on UserMod + Password only ASCII characters
 
 - Finalize migration
   - Rework the already in-place UTs

@@ -7,9 +7,9 @@ import api.dto.output.SessionStatusDtoOut
 import api.dto.output.UserStatusDtoOut
 import api.helpers.AppException
 import api.helpers.AppException._
-import api.models.SessionMod
+import api.models.UserMod
 import api.routes.utils.Response._
-import api.services.SessionSvc
+import api.services.UserSvc
 import cats.effect.IO
 import cats.implicits._
 import org.http4s._
@@ -26,7 +26,7 @@ import sttp.tapir.server.http4s.Http4sServerInterpreter
  */
 object UserRts {
 
-  // Create user account
+  // Create user
   private val createEndpoint: PublicEndpoint[CreateUserFormDtoIn, AppException, UserStatusDtoOut, Any] = endpoint
     .summary("Create user account")
     .post
@@ -35,10 +35,10 @@ object UserRts {
     .out(jsonBody[UserStatusDtoOut])
     .errorOut(statusCode(StatusCode.BadRequest).and(jsonBody[AppException]))
   private val createRts: HttpRoutes[IO]                                                                =
-    Http4sServerInterpreter[IO]().toRoutes(createEndpoint.serverLogic(createUserAccount(_).toErrHandled))
+    Http4sServerInterpreter[IO]().toRoutes(createEndpoint.serverLogic(createUser(_).toErrHandled))
 
   // Define retrieve session status, terminate session & list all active sessions routes
-  private val otherRoutes: AuthedRoutes[SessionMod, IO] = AuthedRoutes.of {
+  private val otherRoutes: AuthedRoutes[UserMod, IO] = AuthedRoutes.of {
     case GET -> Root / "status" as session                                   =>
       Ok(
         SessionStatusDtoOut(session.id,
@@ -46,7 +46,7 @@ object UserRts {
                             session.updatedAt.toString,
                             session.terminatedAt.map(_.toString)))
     case POST -> Root / "terminate" as session                               =>
-      SessionSvc.terminateSession(session).toResponse(Status.Ok)
+      UserSvc.terminateSession(session).toResponse(Status.Ok)
     case GET -> Root / "listing" :? StateQueryParamMatcher(state) as session =>
       UserCtrl.listSessions(state).toResponse(Status.Ok)
   }

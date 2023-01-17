@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS elodata_sch."user" (
 	day_birth smallint NOT NULL,
 	month_birth smallint NOT NULL,
 	year_birth smallint NOT NULL,
-	profil_img bytea NULL,
+	img bytea NULL,
 	created_at timestamptz(3) NOT NULL,
 	validated_at timestamptz(3) NULL,
 	updated_at timestamptz(3) NOT NULL,
