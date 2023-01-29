@@ -1,11 +1,14 @@
-# For Scala project
-.metals
+# For project
 .vscode
-*.class
-*.log
-.bsp
 .idea
 
-# For others
+# For Scala
+.metals
+.bsp
+*.class
+*.log
 target
+
+# For others
 draft
+draft.*

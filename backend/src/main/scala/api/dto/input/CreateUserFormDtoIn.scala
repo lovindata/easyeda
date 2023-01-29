@@ -11,7 +11,7 @@ import sttp.tapir.Schema
  *   E-mail unique identifier of the account
  * @param username
  *   Name displayed on the account
- * @param password
+ * @param pwd
  *   Password defined
  * @param dayBirth
  *   Day of birth
@@ -22,10 +22,10 @@ import sttp.tapir.Schema
  */
 case class CreateUserFormDtoIn(email: String,
                                username: String,
-                               password: String,
-                               dayBirth: Int,
-                               monthBirth: Int,
-                               yearBirth: Int)
+                               pwd: String,
+                               dayBirth: Short,
+                               monthBirth: Short,
+                               yearBirth: Short)
 
 /**
  * [[CreateUserFormDtoIn]] companion.

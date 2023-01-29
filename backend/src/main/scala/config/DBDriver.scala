@@ -17,11 +17,11 @@ object DBDriver {
   private val transactor: Resource[IO, HikariTransactor[IO]] = for {
     ce <- ExecutionContexts.fixedThreadPool[IO](32) // our connect EC
     xa <- HikariTransactor.newHikariTransactor[IO](
-            "org.postgresql.Driver",                                        // driver classname
-            s"jdbc:postgresql://$dbIp:$dbPort/$dbDbName;DB_CLOSE_DELAY=-1", // connect URL
-            s"$dbUser",                                                     // username
-            s"$dbPwd",                                                      // password
-            ce                                                              // await connection here
+            "org.postgresql.Driver",                      // driver classname
+            s"jdbc:postgresql://$dbIp:$dbPort/$dbDbName", // connect URL
+            s"$dbUser",                                   // username
+            s"$dbPwd",                                    // password
+            ce                                            // await connection here
           )
   } yield xa
 
@@ -35,6 +35,6 @@ object DBDriver {
    * @return
    *   Output from [[doobie]] query
    */
-  def run[A](query: doobie.ConnectionIO[A]): IO[A] = transactor.use(query.transact)
+  def run[A](query: doobie.ConnectionIO[A]): IO[A] = transactor.use(query.transact[IO])
 
 }

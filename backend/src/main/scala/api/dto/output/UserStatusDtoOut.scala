@@ -1,8 +1,11 @@
 package com.ilovedatajjia
 package api.dto.output
 
+import api.helpers.CirceUtils._ // Needed import
+import api.helpers.TapirUtils._ // Needed import
 import io.circe._
 import io.circe.generic.semiauto._
+import java.sql.Timestamp
 import sttp.tapir.Schema
 
 /**
@@ -25,10 +28,10 @@ import sttp.tapir.Schema
 case class UserStatusDtoOut(id: Long,
                             email: String,
                             username: String,
-                            createdAt: String,
-                            validatedAt: Option[String],
-                            updatedAt: String,
-                            activeAt: String)
+                            createdAt: Timestamp,
+                            validatedAt: Option[Timestamp],
+                            updatedAt: Timestamp,
+                            activeAt: Timestamp)
 
 /**
  * [[UserStatusDtoOut]] companion.

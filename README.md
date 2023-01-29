@@ -28,7 +28,9 @@ It means none of your source data are saved somewhere and everything are done on
 # Logbook (🙏😣 Work still in progress...)
 
 - Setup database and start coding for EloData authentication (😼 HERE AT THE MOMENT 😼)
-  - See TODO on UserMod + Password only ASCII characters
+  - Give up email verification directly go like Snowflake style (SaaS)
+  - Understand OAuth2 and see if it's applicable in your case
+  - Solve compilation issue with doobie
 
 - Finalize migration
   - Rework the already in-place UTs

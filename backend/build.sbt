@@ -34,19 +34,19 @@ libraryDependencies += "com.softwaremill.quicklens" %% "quicklens"   % "1.9.0"
 
 // Tapir
 // https://mvnrepository.com/artifact/com.softwaremill.sttp.tapir/tapir-http4s-server
-libraryDependencies += "com.softwaremill.sttp.tapir" %% "tapir-http4s-server"     % "1.2.5"
+libraryDependencies += "com.softwaremill.sttp.tapir" %% "tapir-http4s-server"     % "1.2.7"
 // https://mvnrepository.com/artifact/com.softwaremill.sttp.tapir/tapir-json-circe
-libraryDependencies += "com.softwaremill.sttp.tapir" %% "tapir-json-circe"        % "1.2.5"
+libraryDependencies += "com.softwaremill.sttp.tapir" %% "tapir-json-circe"        % "1.2.7"
 // https://mvnrepository.com/artifact/com.softwaremill.sttp.tapir/tapir-swagger-ui-bundle
-libraryDependencies += "com.softwaremill.sttp.tapir" %% "tapir-swagger-ui-bundle" % "1.2.5"
+libraryDependencies += "com.softwaremill.sttp.tapir" %% "tapir-swagger-ui-bundle" % "1.2.7"
 
 // Http4s
 // https://mvnrepository.com/artifact/org.http4s/http4s-ember-server
-libraryDependencies += "org.http4s" %% "http4s-ember-server" % "0.23.17"
+libraryDependencies += "org.http4s" %% "http4s-ember-server" % "0.23.18"
 // https://mvnrepository.com/artifact/org.http4s/http4s-circe
-libraryDependencies += "org.http4s" %% "http4s-circe"        % "0.23.17"
+libraryDependencies += "org.http4s" %% "http4s-circe"        % "0.23.18"
 // https://mvnrepository.com/artifact/org.http4s/http4s-dsl
-libraryDependencies += "org.http4s" %% "http4s-dsl"          % "0.23.17"
+libraryDependencies += "org.http4s" %% "http4s-dsl"          % "0.23.18"
 
 // Circe
 // https://mvnrepository.com/artifact/io.circe/circe-parser

@@ -1,21 +1,17 @@
 package com.ilovedatajjia
 package api.routes
 
-import api.controllers.UserCtrl._
+import api.controllers.UserCtrl
 import api.dto.input.CreateUserFormDtoIn
-import api.dto.output.SessionStatusDtoOut
+import api.dto.input.LoginUserFormDtoIn
+import api.dto.output.TokenDtoOut
 import api.dto.output.UserStatusDtoOut
 import api.helpers.AppException
 import api.helpers.AppException._
-import api.models.UserMod
-import api.routes.utils.Response._
 import api.services.UserSvc
 import cats.effect.IO
 import cats.implicits._
-import org.http4s._
 import org.http4s.HttpRoutes
-import org.http4s.circe.CirceEntityCodec.circeEntityEncoder
-import org.http4s.dsl.io._
 import sttp.model.StatusCode
 import sttp.tapir._
 import sttp.tapir.json.circe._
@@ -27,31 +23,39 @@ import sttp.tapir.server.http4s.Http4sServerInterpreter
 object UserRts {
 
   // Create user
-  private val createEndpoint: PublicEndpoint[CreateUserFormDtoIn, AppException, UserStatusDtoOut, Any] = endpoint
+  private val createEpt: PublicEndpoint[CreateUserFormDtoIn, AppException, UserStatusDtoOut, Any] = endpoint
     .summary("Create user account")
     .post
     .in("user" / "create")
     .in(jsonBody[CreateUserFormDtoIn])
     .out(jsonBody[UserStatusDtoOut])
     .errorOut(statusCode(StatusCode.BadRequest).and(jsonBody[AppException]))
-  private val createRts: HttpRoutes[IO]                                                                =
-    Http4sServerInterpreter[IO]().toRoutes(createEndpoint.serverLogic(createUser(_).toErrHandled))
+  private val createRts: HttpRoutes[IO]                                                           =
+    Http4sServerInterpreter[IO]().toRoutes(createEpt.serverLogic(UserCtrl.createUser(_).toErrHandled))
 
-  // Define retrieve session status, terminate session & list all active sessions routes
-  private val otherRoutes: AuthedRoutes[UserMod, IO] = AuthedRoutes.of {
-    case GET -> Root / "status" as session                                   =>
-      Ok(
-        SessionStatusDtoOut(session.id,
-                            session.createdAt.toString,
-                            session.updatedAt.toString,
-                            session.terminatedAt.map(_.toString)))
-    case POST -> Root / "terminate" as session                               =>
-      UserSvc.terminateSession(session).toResponse(Status.Ok)
-    case GET -> Root / "listing" :? StateQueryParamMatcher(state) as session =>
-      UserCtrl.listSessions(state).toResponse(Status.Ok)
-  }
+  // Login user
+  private val loginEpt: PublicEndpoint[LoginUserFormDtoIn, AppException, TokenDtoOut, Any] = endpoint
+    .summary("Login user account")
+    .post
+    .in("user" / "login")
+    .in(jsonBody[LoginUserFormDtoIn])
+    .out(jsonBody[TokenDtoOut])
+    .errorOut(statusCode(StatusCode.BadRequest).and(jsonBody[AppException]))
+  private val loginRts: HttpRoutes[IO]                                                     =
+    Http4sServerInterpreter[IO]().toRoutes(loginEpt.serverLogic(UserSvc.loginUser(_).toErrHandled))
 
-  // Merge all routes
-  val routes: HttpRoutes[IO] = createRts <+> withAuth(otherRoutes) // Always the non-auth routes first
+  /**
+   * Get all endpoints.
+   * @return
+   *   Concatenated endpoints
+   */
+  def docEpt: List[AnyEndpoint] = List(createEpt, loginEpt)
+
+  /**
+   * Get all applicative routes.
+   * @return
+   *   Concatenated routes
+   */
+  def appRts: HttpRoutes[IO] = createRts <+> loginRts
 
 }

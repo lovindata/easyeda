@@ -2,7 +2,7 @@
 CREATE SCHEMA IF NOT EXISTS elodata_sch;
 
 -- Create user table
-CREATE TABLE IF NOT EXISTS elodata_sch."user" (
+CREATE TABLE IF NOT EXISTS elodata.elodata_sch."user" (
 	id bigserial NOT NULL,
 	email text NOT NULL,
 	username text NOT NULL,
@@ -18,4 +18,15 @@ CREATE TABLE IF NOT EXISTS elodata_sch."user" (
 	active_at timestamptz(3) NOT NULL,
 	PRIMARY KEY (id),
 	UNIQUE (email)
+);
+
+-- Create token table
+CREATE TABLE IF NOT EXISTS elodata.elodata_sch."token" (
+	id bigserial NOT NULL,
+	id_user bigint NOT NULL,
+	token text NOT NULL,
+	expire_at timestamptz(3) NOT NULL,
+	refresh_token text NOT NULL,
+	PRIMARY KEY (id),
+	UNIQUE (id_user)
 );
