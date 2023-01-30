@@ -9,7 +9,7 @@ import sttp.tapir.Schema
  */
 object TapirUtils {
 
-
+  // Schema
   implicit val timestampSch: Schema[Timestamp] = Schema.string
 
 }

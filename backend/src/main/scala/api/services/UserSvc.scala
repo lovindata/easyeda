@@ -8,7 +8,6 @@ import api.helpers.AppException
 import api.helpers.StringUtils._
 import api.models.TokenMod
 import api.models.UserMod
-import api.models.UserMod._
 import cats.effect._
 import doobie.implicits._
 
@@ -16,6 +15,22 @@ import doobie.implicits._
  * Service layer for user.
  */
 object UserSvc {
+
+  /**
+   * Convert [[UserMod]] to DTO.
+   * @param user
+   *   User to display
+   * @return
+   *   [[UserStatusDtoOut]]
+   */
+  def toDto(user: UserMod): IO[UserStatusDtoOut] = IO(
+    UserStatusDtoOut(user.id,
+                     user.email,
+                     user.username,
+                     user.createdAt,
+                     user.validatedAt,
+                     user.updatedAt,
+                     user.activeAt))
 
   /**
    * Create the user.
@@ -28,13 +43,8 @@ object UserSvc {
     pwdSalt <- genString(32)
     pwd     <- s"$pwdSalt${createUserFormDtoIn.pwd}".toSHA3_512
     user    <- UserMod(createUserFormDtoIn, pwd, pwdSalt)
-  } yield UserStatusDtoOut(user.id,
-                           user.email,
-                           user.username,
-                           user.createdAt,
-                           user.validatedAt,
-                           user.updatedAt,
-                           user.activeAt)
+    userDto <- this.toDto(user)
+  } yield userDto
 
   /**
    * Verify provided login.
@@ -46,7 +56,7 @@ object UserSvc {
    */
   def loginUser(form: LoginUserFormDtoIn): IO[TokenDtoOut] = for {
     // Verify login
-    potUsers      <- select(fr"email = ${form.email}")
+    potUsers      <- UserMod.select(fr"email = ${form.email}")
     validatedUser <- potUsers match {
                        case List(user) =>
                          for {
@@ -63,5 +73,25 @@ object UserSvc {
     // Generate token
     token         <- TokenMod(validatedUser.id)
   } yield TokenDtoOut(token.accessToken, token.expireAt, token.refreshToken)
+
+  /**
+   * Validate access token.
+   * @param token
+   *   Access token
+   * @return
+   *   [[UserMod]]
+   */
+  def grantAccess(token: String): IO[UserMod] = for {
+    potTokens <- TokenMod.select(fr"access_token = $token")
+    user      <- potTokens match {
+                   case List(token) =>
+                     for {
+                       nowTimestamp <- Clock[IO].realTime.map(_.toMillis)
+                       user         <- if (nowTimestamp < token.expireAt.getTime) UserMod.select(token.userId)
+                                       else IO.raiseError(AppException("Expired token provided. Please reconnect your account."))
+                     } yield user
+                   case _           => IO.raiseError(AppException("Invalid token provided. Please reconnect your account."))
+                 }
+  } yield user
 
 }

@@ -4,15 +4,17 @@ package api.models
 import api.helpers.AppException
 import api.helpers.StringUtils._
 import cats.effect.IO
+import cats.implicits._
 import config.ConfigLoader
 import config.DBDriver
 import doobie._
 import doobie.implicits._
-import doobie.implicits.javasql._             // Needed imports
-import doobie.postgres.circe.json.implicits._ // Needed imports
-import doobie.postgres.implicits._            // Needed imports
+import doobie.implicits.javasql._
+import doobie.postgres.circe.json.implicits._
+import doobie.postgres.implicits._
 import io.circe.Json
 import java.sql.Timestamp
+import scala.annotation.tailrec
 
 /**
  * Repository to extends on the companion object for DB methods. Requirements are
@@ -36,12 +38,10 @@ import java.sql.Timestamp
  */
 trait GenericMod[A <: Product] {
 
-  /**
-   * Necessary implicit.
-   * @return
-   *   [[Read]]
-   */
-  implicit def read: Read[A] = Read[A]
+  // TODO
+  implicit def fromGetOption[A](implicit ev: Get[A]): Read[Option[A]] =
+    new Read(List((ev, Nullable)), ev.unsafeGetNullable)
+  implicit def fromReadOption[A: Read]: Read[Option[A]]               = Read[A].map(Some(_)) // Read[A].map(Option(_))
 
   /**
    * Build table DB path [[Fragment]].
@@ -56,11 +56,13 @@ trait GenericMod[A <: Product] {
 
   /**
    * Convert [[Any]] to [[Fragment]].
+   *
    * @param x
    *   Applied on
    * @return
    *   [[Fragment]]
    */
+  @tailrec
   private def anyToFrag(x: Any): Fragment = x match {
     case x: Short       => fr0"$x"
     case x: Long        => fr0"$x"
@@ -68,7 +70,9 @@ trait GenericMod[A <: Product] {
     case x: Array[Byte] => fr0"$x"
     case x: Timestamp   => fr0"$x"
     case x: Json        => fr0"$x"
-    case _              => throw AppException(s"Fragment impossible for type `${x.getClass.getTypeName}`")
+    case Some(x)        => anyToFrag(x)
+    case None           => Fragment.const0("null")
+    case _              => throw AppException(s"Implementation error, fragment impossible for type `${x.getClass.getTypeName}`.")
   }
 
   /**

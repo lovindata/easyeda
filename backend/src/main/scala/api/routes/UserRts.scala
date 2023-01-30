@@ -8,54 +8,62 @@ import api.dto.output.TokenDtoOut
 import api.dto.output.UserStatusDtoOut
 import api.helpers.AppException
 import api.helpers.AppException._
+import api.models.UserMod
 import api.services.UserSvc
 import cats.effect.IO
 import cats.implicits._
 import org.http4s.HttpRoutes
-import sttp.model.StatusCode
 import sttp.tapir._
 import sttp.tapir.json.circe._
+import sttp.tapir.server.PartialServerEndpoint
 import sttp.tapir.server.http4s.Http4sServerInterpreter
 
 /**
  * Routes for users management.
  */
-object UserRts {
+object UserRts extends GenericRts {
 
   // Create user
-  private val createEpt: PublicEndpoint[CreateUserFormDtoIn, AppException, UserStatusDtoOut, Any] = endpoint
+  private val createEpt: PublicEndpoint[CreateUserFormDtoIn, AppException, UserStatusDtoOut, Any] = errHandledEpt
     .summary("Create user account")
     .post
     .in("user" / "create")
     .in(jsonBody[CreateUserFormDtoIn])
     .out(jsonBody[UserStatusDtoOut])
-    .errorOut(statusCode(StatusCode.BadRequest).and(jsonBody[AppException]))
   private val createRts: HttpRoutes[IO]                                                           =
     Http4sServerInterpreter[IO]().toRoutes(createEpt.serverLogic(UserCtrl.createUser(_).toErrHandled))
 
   // Login user
-  private val loginEpt: PublicEndpoint[LoginUserFormDtoIn, AppException, TokenDtoOut, Any] = endpoint
+  private val loginEpt: PublicEndpoint[LoginUserFormDtoIn, AppException, TokenDtoOut, Any] = errHandledEpt
     .summary("Login user account")
     .post
     .in("user" / "login")
     .in(jsonBody[LoginUserFormDtoIn])
     .out(jsonBody[TokenDtoOut])
-    .errorOut(statusCode(StatusCode.BadRequest).and(jsonBody[AppException]))
   private val loginRts: HttpRoutes[IO]                                                     =
     Http4sServerInterpreter[IO]().toRoutes(loginEpt.serverLogic(UserSvc.loginUser(_).toErrHandled))
+
+  // Retrieve user
+  private val getEpt: PartialServerEndpoint[String, UserMod, Unit, AppException, UserStatusDtoOut, Any, IO] = authEpt
+    .summary("Retrieve user account info")
+    .get
+    .in("user" / "retrieve")
+    .out(jsonBody[UserStatusDtoOut])
+  private val getRts: HttpRoutes[IO]                                                                        =
+    Http4sServerInterpreter[IO]().toRoutes(getEpt.serverLogic(user => _ => UserSvc.toDto(user).toErrHandled))
 
   /**
    * Get all endpoints.
    * @return
    *   Concatenated endpoints
    */
-  def docEpt: List[AnyEndpoint] = List(createEpt, loginEpt)
+  override def docEpt: List[AnyEndpoint] = List(createEpt, loginEpt) ++ List(getEpt).map(_.endpoint)
 
   /**
    * Get all applicative routes.
    * @return
    *   Concatenated routes
    */
-  def appRts: HttpRoutes[IO] = createRts <+> loginRts
+  override def appRts: HttpRoutes[IO] = createRts <+> loginRts <+> getRts
 
 }

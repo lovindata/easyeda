@@ -2,8 +2,11 @@ package com.ilovedatajjia
 package api.models
 
 import api.dto.input.CreateUserFormDtoIn
+
 import cats.effect._
 import cats.implicits._
+import doobie.Read
+
 import java.sql.Timestamp
 
 /**
@@ -15,15 +18,15 @@ import java.sql.Timestamp
  * @param username
  *   Pseudo
  * @param pwd
- *   Argon2 hashed password with salt and pepper
+ *   Hashed password with salt
  * @param pwdSalt
  *   Salt used in argon2 hash
+ * @param yearBirth
+ *   Year of birth
  * @param dayBirth
  *   Day of birth
  * @param monthBirth
  *   Month of birth
- * @param yearBirth
- *   Year of birth
  * @param img
  *   Image bytes
  * @param createdAt
@@ -40,9 +43,9 @@ case class UserMod(id: Long,
                    username: String,
                    pwd: String,
                    pwdSalt: String,
-                   dayBirth: Short,
-                   monthBirth: Short,
                    yearBirth: Short,
+                   monthBirth: Short,
+                   dayBirth: Short,
                    img: Option[Array[Byte]],
                    createdAt: Timestamp,
                    validatedAt: Option[Timestamp],
@@ -74,9 +77,9 @@ object UserMod extends GenericMod[UserMod] {
                         createUserFormDtoIn.username,
                         pwd,
                         pwdSalt,
-                        createUserFormDtoIn.dayBirth,
-                        createUserFormDtoIn.monthBirth,
                         createUserFormDtoIn.yearBirth,
+                        createUserFormDtoIn.monthBirth,
+                        createUserFormDtoIn.dayBirth,
                         none,
                         nowTimestamp,
                         none,

@@ -30,7 +30,7 @@ object AppServer {
 
   // BackEnd routes
   private val docsEpt: List[ServerEndpoint[Any, IO]] =
-    SwaggerInterpreter().fromEndpoints[IO](UserRts.docEpt, "EloData_AppServer", "1.0") // On "/docs"
+    SwaggerInterpreter().fromEndpoints[IO](UserRts.docEpt, "AppServer", "1.0") // On "/docs"
   private val docsRts: HttpRoutes[IO]    = Http4sServerInterpreter[IO]().toRoutes(docsEpt)
   private val backEndRts: HttpRoutes[IO] = docsRts <+> UserRts.appRts
 

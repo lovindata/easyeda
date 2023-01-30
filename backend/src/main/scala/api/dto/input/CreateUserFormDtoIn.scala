@@ -23,9 +23,9 @@ import sttp.tapir.Schema
 case class CreateUserFormDtoIn(email: String,
                                username: String,
                                pwd: String,
-                               dayBirth: Short,
+                               yearBirth: Short,
                                monthBirth: Short,
-                               yearBirth: Short)
+                               dayBirth: Short)
 
 /**
  * [[CreateUserFormDtoIn]] companion.

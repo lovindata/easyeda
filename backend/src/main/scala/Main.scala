@@ -14,6 +14,6 @@ object Main extends IOApp.Simple {
   /**
    * Run all the required requisites.
    */
-  override def run: IO[Unit] = SparkServer.run >> AppServer.run
+  override def run: IO[Unit] = AppServer.run
 
 }

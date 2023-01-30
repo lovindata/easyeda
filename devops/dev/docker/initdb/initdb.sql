@@ -8,9 +8,9 @@ CREATE TABLE IF NOT EXISTS elodata.elodata_sch."user" (
 	username text NOT NULL,
 	pwd text NOT NULL,
 	pwd_salt text NOT NULL,
-	day_birth smallint NOT NULL,
-	month_birth smallint NOT NULL,
 	year_birth smallint NOT NULL,
+	month_birth smallint NOT NULL,
+	day_birth smallint NOT NULL,
 	img bytea NULL,
 	created_at timestamptz(3) NOT NULL,
 	validated_at timestamptz(3) NULL,
@@ -23,10 +23,11 @@ CREATE TABLE IF NOT EXISTS elodata.elodata_sch."user" (
 -- Create token table
 CREATE TABLE IF NOT EXISTS elodata.elodata_sch."token" (
 	id bigserial NOT NULL,
-	id_user bigint NOT NULL,
+	user_id bigint NOT NULL,
 	token text NOT NULL,
 	expire_at timestamptz(3) NOT NULL,
 	refresh_token text NOT NULL,
 	PRIMARY KEY (id),
-	UNIQUE (id_user)
+	FOREIGN KEY (user_id) REFERENCES elodata.elodata_sch."user",
+	UNIQUE (user_id)
 );

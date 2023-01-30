@@ -70,8 +70,7 @@ object StringUtils {
      *   See 32-126 ASCII characters [[https://en.wikipedia.org/wiki/ASCII#Printable_characters here]].
      */
     def isValidPwd: Boolean =
-      "^[\\x20-\\x7E]{8,32}$".r.matches(x) && "^[A-Z]+$".r.matches(x) && "^[a-z]+$".r.matches(x) && "^[0-9]+$".r
-        .matches(x) && "^[^A-Za-z0-9]+$".r.matches(x)
+      "^[\\x20-\\x7E]{8,32}$".r.matches(x) && "([A-Z]+|[a-z]+|[0-9]+|[^A-Za-z0-9]+)".r.findFirstMatchIn(x).isDefined
 
     /**
      * Convert [[x]] to hashed with SHA3-512.

@@ -1,4 +1,0 @@
-`_c0` DOUBLE,
-`_c1` STRING,
-`_c2` STRING,
-`_c3` STRING
