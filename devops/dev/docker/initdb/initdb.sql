@@ -24,7 +24,7 @@ CREATE TABLE IF NOT EXISTS elodata.elodata_sch."user" (
 CREATE TABLE IF NOT EXISTS elodata.elodata_sch."token" (
 	id bigserial NOT NULL,
 	user_id bigint NOT NULL,
-	token text NOT NULL,
+	access_token text NOT NULL,
 	expire_at timestamptz(3) NOT NULL,
 	refresh_token text NOT NULL,
 	PRIMARY KEY (id),

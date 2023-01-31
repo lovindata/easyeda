@@ -4,14 +4,13 @@ package api.models
 import api.helpers.AppException
 import api.helpers.StringUtils._
 import cats.effect.IO
-import cats.implicits._
 import config.ConfigLoader
 import config.DBDriver
 import doobie._
 import doobie.implicits._
-import doobie.implicits.javasql._
-import doobie.postgres.circe.json.implicits._
-import doobie.postgres.implicits._
+import doobie.implicits.javasql._             // Needed import for Meta mapping
+import doobie.postgres.circe.json.implicits._ // Needed import for Meta mapping
+import doobie.postgres.implicits._            // Needed import for Meta mapping
 import io.circe.Json
 import java.sql.Timestamp
 import scala.annotation.tailrec
@@ -31,17 +30,17 @@ import scala.annotation.tailrec
  *   // - Column "id" and "name"
  *
  *   // Then
+ *   import doobie._
+ *   import doobie.implicits._                     // Needed import for Fragment
+ *   import doobie.implicits.javasql._             // Needed import for Meta mapping
+ *   import doobie.postgres.circe.json.implicits._ // Needed import for Meta mapping
+ *   import doobie.postgres.implicits._            // Needed import for Meta mapping
  *   case class PersonMod(id: Long, name: String)
  *   object PersonMod extends GenericRep[PersonMod]
  *   PersonMod.insert(PersonMod(-1, "Elorine"))
  *   }}}
  */
 trait GenericMod[A <: Product] {
-
-  // TODO
-  implicit def fromGetOption[A](implicit ev: Get[A]): Read[Option[A]] =
-    new Read(List((ev, Nullable)), ev.unsafeGetNullable)
-  implicit def fromReadOption[A: Read]: Read[Option[A]]               = Read[A].map(Some(_)) // Read[A].map(Option(_))
 
   /**
    * Build table DB path [[Fragment]].
@@ -56,7 +55,6 @@ trait GenericMod[A <: Product] {
 
   /**
    * Convert [[Any]] to [[Fragment]].
-   *
    * @param x
    *   Applied on
    * @return
@@ -82,7 +80,7 @@ trait GenericMod[A <: Product] {
    * @return
    *   Up-to-date entity
    */
-  def insert(entity: A): IO[A] = DBDriver.run {
+  def insert(entity: A)(implicit read: Read[A]): IO[A] = DBDriver.run {
     // Prepare fragments
     val attributesName: Fragment  =
       Fragment.const(entity.productElementNames.drop(1).map(_.toSnakeCase).mkString("(", ", ", ")"))
@@ -103,7 +101,7 @@ trait GenericMod[A <: Product] {
    * @return
    *   Up-to-date entity
    */
-  def select(id: Long): IO[A] = DBDriver.run {
+  def select(id: Long)(implicit read: Read[A]): IO[A] = DBDriver.run {
     val idValue: Fragment = anyToFrag(id)
     (fr"select * from" ++ tableFrag ++ fr"where id =" ++ idValue).query[A].unique
   }
@@ -124,7 +122,7 @@ trait GenericMod[A <: Product] {
    *   Person.select(fr"id = ${1}")   // List[PersonMod]
    *   }}}
    */
-  def select(condition: Fragment): IO[List[A]] = DBDriver.run {
+  def select(condition: Fragment)(implicit read: Read[A]): IO[List[A]] = DBDriver.run {
     (fr"select * from" ++ tableFrag ++ fr"where" ++ condition).query[A].to[List]
   }
 
@@ -135,7 +133,7 @@ trait GenericMod[A <: Product] {
    * @return
    *   Up-to-date entity
    */
-  def update(entity: A): IO[A] = DBDriver.run {
+  def update(entity: A)(implicit read: Read[A]): IO[A] = DBDriver.run {
     // Prepare fragments
     val idValue: Fragment                   = anyToFrag(entity.productIterator.next())
     val attributesName: Iterator[Fragment]  =

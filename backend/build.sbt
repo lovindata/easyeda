@@ -58,7 +58,7 @@ libraryDependencies += "io.circe" %% "circe-generic-extras" % "0.14.3"
 // https://mvnrepository.com/artifact/io.circe/circe-literal
 libraryDependencies += "io.circe" %% "circe-literal"        % "0.14.3"
 // https://mvnrepository.com/artifact/io.circe/circe-fs2
-libraryDependencies += "io.circe" %% "circe-fs2"            % "0.14.0"
+libraryDependencies += "io.circe" %% "circe-fs2"            % "0.14.1"
 
 // Doobie
 // https://mvnrepository.com/artifact/org.tpolecat/doobie-core

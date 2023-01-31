@@ -9,7 +9,13 @@ import api.helpers.StringUtils._
 import api.models.TokenMod
 import api.models.UserMod
 import cats.effect._
+import config.ConfigLoader
+import com.softwaremill.quicklens._
 import doobie.implicits._
+import doobie.implicits.javasql._
+import doobie.postgres.circe.json.implicits._
+import doobie.postgres.implicits._
+import java.sql.Timestamp // Needed import for Meta mapping
 
 /**
  * Service layer for user.
@@ -56,22 +62,37 @@ object UserSvc {
    */
   def loginUser(form: LoginUserFormDtoIn): IO[TokenDtoOut] = for {
     // Verify login
-    potUsers      <- UserMod.select(fr"email = ${form.email}")
-    validatedUser <- potUsers match {
-                       case List(user) =>
-                         for {
-                           isValidCred <- s"${user.pwdSalt}${form.pwd}".eqSHA3_512(user.pwd)
-                           _           <- IO.raiseUnless(isValidCred)(
-                                            AppException(
-                                              "Invalid username or password. Please check your credentials and try again."))
-                         } yield user
-                       case _          =>
-                         IO.raiseError(
-                           AppException("Invalid username or password. Please check your credentials and try again."))
-                     }
+    potUsers        <- UserMod.select(fr"email = ${form.email}")
+    validatedUser   <- potUsers match {
+                         case List(user) =>
+                           for {
+                             isValidCred <- s"${user.pwdSalt}${form.pwd}".eqSHA3_512(user.pwd)
+                             _           <- IO.raiseUnless(isValidCred)(
+                                              AppException(
+                                                "Invalid username or password. Please check your credentials and try again."))
+                           } yield user
+                         case _          =>
+                           IO.raiseError(
+                             AppException("Invalid username or password. Please check your credentials and try again."))
+                       }
 
-    // Generate token
-    token         <- TokenMod(validatedUser.id)
+    // Check if existing valid token then provide a valid one
+    genAccessToken  <- genString(64)
+    genExpireAt     <- Clock[IO].realTime.map(x => new Timestamp(x.toMillis + (ConfigLoader.tokenDuration.toLong * 1000)))
+    genRefreshToken <- genString(64)
+    inDBToken       <- TokenMod.select(fr"user_id = ${validatedUser.id}")
+    token           <- inDBToken match {
+                         case List(token) =>
+                           TokenMod.update(
+                             token
+                               .modify(_.accessToken)
+                               .setTo(genAccessToken)
+                               .modify(_.expireAt)
+                               .setTo(genExpireAt)
+                               .modify(_.refreshToken)
+                               .setTo(genRefreshToken))
+                         case _           => TokenMod(validatedUser.id, genAccessToken, genExpireAt, genRefreshToken)
+                       }
   } yield TokenDtoOut(token.accessToken, token.expireAt, token.refreshToken)
 
   /**
@@ -82,13 +103,13 @@ object UserSvc {
    *   [[UserMod]]
    */
   def grantAccess(token: String): IO[UserMod] = for {
-    potTokens <- TokenMod.select(fr"access_token = $token")
+    potTokens <- TokenMod.select(fr"access_token = $token") // TODO fix bug here
     user      <- potTokens match {
                    case List(token) =>
                      for {
                        nowTimestamp <- Clock[IO].realTime.map(_.toMillis)
                        user         <- if (nowTimestamp < token.expireAt.getTime) UserMod.select(token.userId)
-                                       else IO.raiseError(AppException("Expired token provided. Please reconnect your account."))
+                                       else IO.raiseError(AppException("Expired token provided. Please refresh your token."))
                      } yield user
                    case _           => IO.raiseError(AppException("Invalid token provided. Please reconnect your account."))
                  }

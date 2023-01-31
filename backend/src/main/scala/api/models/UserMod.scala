@@ -2,11 +2,12 @@ package com.ilovedatajjia
 package api.models
 
 import api.dto.input.CreateUserFormDtoIn
-
 import cats.effect._
 import cats.implicits._
-import doobie.Read
-
+import doobie.implicits._                     // Needed import for Fragment
+import doobie.implicits.javasql._             // Needed import for Meta mapping
+import doobie.postgres.circe.json.implicits._ // Needed import for Meta mapping
+import doobie.postgres.implicits._            // Needed import for Meta mapping
 import java.sql.Timestamp
 
 /**
