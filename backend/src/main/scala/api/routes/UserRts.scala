@@ -43,6 +43,16 @@ object UserRts extends GenericRts {
   private val loginRts: HttpRoutes[IO]                                                     =
     Http4sServerInterpreter[IO]().toRoutes(loginEpt.serverLogic(UserSvc.loginUser(_).toErrHandled))
 
+  // Refresh user token
+  private val refreshEpt: PublicEndpoint[String, AppException, TokenDtoOut, Any] = errHandledEpt
+    .summary("Refresh user tokens")
+    .post
+    .in(auth.bearer[String]())
+    .in("user" / "refresh")
+    .out(jsonBody[TokenDtoOut])
+  private val refreshRts: HttpRoutes[IO]                                         =
+    Http4sServerInterpreter[IO]().toRoutes(refreshEpt.serverLogic(UserSvc.grantToken(_).toErrHandled))
+
   // Retrieve user
   private val getEpt: PartialServerEndpoint[String, UserMod, Unit, AppException, UserStatusDtoOut, Any, IO] = authEpt
     .summary("Retrieve user account info")
@@ -57,13 +67,13 @@ object UserRts extends GenericRts {
    * @return
    *   Concatenated endpoints
    */
-  override def docEpt: List[AnyEndpoint] = List(createEpt, loginEpt) ++ List(getEpt).map(_.endpoint)
+  override def docEpt: List[AnyEndpoint] = List(createEpt, loginEpt, refreshEpt) ++ List(getEpt).map(_.endpoint)
 
   /**
    * Get all applicative routes.
    * @return
    *   Concatenated routes
    */
-  override def appRts: HttpRoutes[IO] = createRts <+> loginRts <+> getRts
+  override def appRts: HttpRoutes[IO] = createRts <+> loginRts <+> refreshRts <+> getRts
 
 }

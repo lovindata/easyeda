@@ -10,6 +10,8 @@ import scala.util.Random
 
 /**
  * Utils for [[String]].
+ * @note
+ *   See 32-126 ASCII characters [[https://en.wikipedia.org/wiki/ASCII#Printable_characters here]].
  */
 object StringUtils {
 
@@ -18,13 +20,13 @@ object StringUtils {
    * @param length
    *   String length
    * @param chars
-   *   Characters possible (default are printable characters ASCII 32 to 126)
+   *   Characters possible (default are printable characters ASCII 32 to 126, except the character `"`)
    * @return
    *   Generated [[String]]
    */
   def genString(length: Int,
                 chars: String =
-                  " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[]^_`abcdefghijklmnopqrstuvwxyz{|}~")
+                  " !#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[]^_`abcdefghijklmnopqrstuvwxyz{|}~")
       : IO[String] = for {
     random <- IO(new Random())
     idx     = (1 to length).map(_ => random.between(0, chars.length))
@@ -66,11 +68,11 @@ object StringUtils {
      *   - One special character
      * @return
      *   Valid password or not
-     * @note
-     *   See 32-126 ASCII characters [[https://en.wikipedia.org/wiki/ASCII#Printable_characters here]].
      */
     def isValidPwd: Boolean =
-      "^[\\x20-\\x7E]{8,32}$".r.matches(x) && "([A-Z]+|[a-z]+|[0-9]+|[^A-Za-z0-9]+)".r.findFirstMatchIn(x).isDefined
+      "^[\\x20-\\x7E]{8,32}$".r.matches(x) && "[A-Z]+".r.findFirstMatchIn(x).isDefined && "[a-z]+".r
+        .findFirstMatchIn(x)
+        .isDefined && "[0-9]+".r.findFirstMatchIn(x).isDefined && "[^A-Za-z0-9]+".r.findFirstMatchIn(x).isDefined
 
     /**
      * Convert [[x]] to hashed with SHA3-512.

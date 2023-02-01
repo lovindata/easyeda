@@ -9,8 +9,8 @@ import api.helpers.StringUtils._
 import api.models.TokenMod
 import api.models.UserMod
 import cats.effect._
-import config.ConfigLoader
 import com.softwaremill.quicklens._
+import config.ConfigLoader
 import doobie.implicits._
 import doobie.implicits.javasql._
 import doobie.postgres.circe.json.implicits._
@@ -97,22 +97,58 @@ object UserSvc {
 
   /**
    * Validate access token.
-   * @param token
+   * @param accessToken
    *   Access token
    * @return
    *   [[UserMod]]
    */
-  def grantAccess(token: String): IO[UserMod] = for {
-    potTokens <- TokenMod.select(fr"access_token = $token") // TODO fix bug here
-    user      <- potTokens match {
+  def grantAccess(accessToken: String): IO[UserMod] = for {
+    nowTimestamp <- Clock[IO].realTime.map(_.toMillis)
+    potTokens    <- TokenMod.select(fr"access_token = $accessToken")
+    user         <- potTokens match {
+                      case List(token) =>
+                        if (nowTimestamp < token.expireAt.getTime) UserMod.select(token.userId)
+                        else IO.raiseError(AppException("Expired token provided. Please refresh your token."))
+                      case _           => IO.raiseError(AppException("Invalid token provided. Please reconnect your account."))
+                    }
+    userUpToDate <- UserMod.update(user.modify(_.activeAt).setTo(new Timestamp(nowTimestamp)))
+  } yield userUpToDate
+
+  /**
+   * Validate refresh token.
+   * @param refreshToken
+   *   Refresh token
+   * @return
+   *   New refreshed [[TokenMod]]
+   */
+  def grantToken(refreshToken: String): IO[TokenDtoOut] = for {
+    // Pre-requisite
+    nowTimestamp <- Clock[IO].realTime.map(_.toMillis)
+
+    // Refresh token
+    potTokens <- TokenMod.select(fr"refresh_token = $refreshToken")
+    outToken  <- potTokens match {
                    case List(token) =>
                      for {
-                       nowTimestamp <- Clock[IO].realTime.map(_.toMillis)
-                       user         <- if (nowTimestamp < token.expireAt.getTime) UserMod.select(token.userId)
-                                       else IO.raiseError(AppException("Expired token provided. Please refresh your token."))
-                     } yield user
-                   case _           => IO.raiseError(AppException("Invalid token provided. Please reconnect your account."))
+                       genAccessToken  <- genString(64)
+                       genExpireAt      = new Timestamp(nowTimestamp + (ConfigLoader.tokenDuration.toLong * 1000))
+                       genRefreshToken <- genString(64)
+                       out             <- TokenMod.update(
+                                            token
+                                              .modify(_.accessToken)
+                                              .setTo(genAccessToken)
+                                              .modify(_.expireAt)
+                                              .setTo(genExpireAt)
+                                              .modify(_.refreshToken)
+                                              .setTo(genRefreshToken))
+                     } yield out
+                   case _           =>
+                     IO.raiseError(AppException("Invalid refresh token provided. Please reconnect your account."))
                  }
-  } yield user
+
+    // Update user activity
+    user      <- UserMod.select(outToken.userId)
+    _         <- UserMod.update(user.modify(_.activeAt).setTo(new Timestamp(nowTimestamp)))
+  } yield TokenDtoOut(outToken.accessToken, outToken.expireAt, outToken.refreshToken)
 
 }

@@ -30,7 +30,6 @@ object TokenMod extends GenericMod[TokenMod] {
 
   /**
    * Constructor of [[TokenMod]].
-   *
    * @param userId
    *   Token for this [[UserMod]] id
    * @param accessToken
