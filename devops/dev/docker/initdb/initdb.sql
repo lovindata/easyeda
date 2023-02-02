@@ -29,5 +29,7 @@ CREATE TABLE IF NOT EXISTS elodata.elodata_sch."token" (
 	refresh_token text NOT NULL,
 	PRIMARY KEY (id),
 	FOREIGN KEY (user_id) REFERENCES elodata.elodata_sch."user",
-	UNIQUE (user_id)
+	UNIQUE (user_id),
+	UNIQUE (access_token),
+	UNIQUE (refresh_token)
 );

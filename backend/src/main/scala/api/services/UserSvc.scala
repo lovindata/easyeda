@@ -12,10 +12,10 @@ import cats.effect._
 import com.softwaremill.quicklens._
 import config.ConfigLoader
 import doobie.implicits._
-import doobie.implicits.javasql._
-import doobie.postgres.circe.json.implicits._
-import doobie.postgres.implicits._
-import java.sql.Timestamp // Needed import for Meta mapping
+import doobie.implicits.javasql._             // Needed import for Meta mapping
+import doobie.postgres.circe.json.implicits._ // Needed import for Meta mapping
+import doobie.postgres.implicits._            // Needed import for Meta mapping
+import java.sql.Timestamp
 
 /**
  * Service layer for user.
@@ -77,9 +77,9 @@ object UserSvc {
                        }
 
     // Check if existing valid token then provide a valid one
-    genAccessToken  <- genString(64)
+    genAccessToken  <- genString(100)
     genExpireAt     <- Clock[IO].realTime.map(x => new Timestamp(x.toMillis + (ConfigLoader.tokenDuration.toLong * 1000)))
-    genRefreshToken <- genString(64)
+    genRefreshToken <- genString(100)
     inDBToken       <- TokenMod.select(fr"user_id = ${validatedUser.id}")
     token           <- inDBToken match {
                          case List(token) =>
@@ -130,9 +130,9 @@ object UserSvc {
     outToken  <- potTokens match {
                    case List(token) =>
                      for {
-                       genAccessToken  <- genString(64)
+                       genAccessToken  <- genString(100)
                        genExpireAt      = new Timestamp(nowTimestamp + (ConfigLoader.tokenDuration.toLong * 1000))
-                       genRefreshToken <- genString(64)
+                       genRefreshToken <- genString(100)
                        out             <- TokenMod.update(
                                             token
                                               .modify(_.accessToken)
