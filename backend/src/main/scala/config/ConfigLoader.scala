@@ -10,7 +10,8 @@ object ConfigLoader {
   private val allEnvVar: Map[String, String] = sys.env
 
   // Main server conf
-  val frontEndResourcePath: String = allEnvVar.getOrElse("FRONTEND_RESOURCES", default = "./frontend/build")
+  val frontEndResourcePath: String =
+    allEnvVar.getOrElse("FRONTEND_RESOURCES", default = "./frontend_save/frontend/dist")
   val frontEndPort: String         = allEnvVar.getOrElse("FRONTEND_PORT", default = "8080")
   val backEndPort: String          = allEnvVar.getOrElse("BACKEND_PORT", default = "8081")
   val sparkUIPort: String          = allEnvVar.getOrElse("SPARK_UI_PORT", default = "4040")

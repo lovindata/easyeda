@@ -20,13 +20,11 @@ import sttp.tapir.swagger.bundle.SwaggerInterpreter
 object AppServer {
 
   // FrontEnd routes
-  private val indexHTMLRts: HttpRoutes[IO] = // "index.html" on "/*"
+  private val staticFilesRts: HttpRoutes[IO] = // Static files on "/assets"
+    Http4sServerInterpreter[IO]().toRoutes(filesServerEndpoints[IO]("assets")(s"$frontEndResourcePath/assets"))
+  private val indexHTMLRts: HttpRoutes[IO]   = // "index.html" on "/*"
     Http4sServerInterpreter[IO]().toRoutes(fileGetServerEndpoint[IO](emptyInput)(s"$frontEndResourcePath/index.html"))
-  private val staticFilesRts: HttpRoutes[
-    IO
-  ] = // Static files on "/view" (⚠️ It supposes frontend will never user "/view" as client-side route)
-    Http4sServerInterpreter[IO]().toRoutes(filesServerEndpoints[IO]("view")(frontEndResourcePath))
-  private val frontEndRts: HttpRoutes[IO]  = staticFilesRts <+> indexHTMLRts
+  private val frontEndRts: HttpRoutes[IO]    = staticFilesRts <+> indexHTMLRts
 
   // BackEnd routes
   private val docsEpt: List[ServerEndpoint[Any, IO]] =
