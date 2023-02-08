@@ -8,6 +8,7 @@ import doobie.implicits._                     // Needed import for Fragment
 import doobie.implicits.javasql._             // Needed import for Meta mapping
 import doobie.postgres.circe.json.implicits._ // Needed import for Meta mapping
 import doobie.postgres.implicits._            // Needed import for Meta mapping
+import java.sql.Date
 import java.sql.Timestamp
 
 /**
@@ -22,12 +23,8 @@ import java.sql.Timestamp
  *   Hashed password with salt
  * @param pwdSalt
  *   Salt used in argon2 hash
- * @param yearBirth
- *   Year of birth
- * @param dayBirth
- *   Day of birth
- * @param monthBirth
- *   Month of birth
+ * @param birthDate
+ *   Birth date
  * @param img
  *   Image bytes
  * @param createdAt
@@ -44,9 +41,7 @@ case class UserMod(id: Long,
                    username: String,
                    pwd: String,
                    pwdSalt: String,
-                   yearBirth: Short,
-                   monthBirth: Short,
-                   dayBirth: Short,
+                   birthDate: Date,
                    img: Option[Array[Byte]],
                    createdAt: Timestamp,
                    validatedAt: Option[Timestamp],
@@ -78,9 +73,7 @@ object UserMod extends GenericMod[UserMod] {
                         createUserFormDtoIn.username,
                         pwd,
                         pwdSalt,
-                        createUserFormDtoIn.yearBirth,
-                        createUserFormDtoIn.monthBirth,
-                        createUserFormDtoIn.dayBirth,
+                        createUserFormDtoIn.birthDate,
                         none,
                         nowTimestamp,
                         none,

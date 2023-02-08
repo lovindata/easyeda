@@ -8,10 +8,11 @@ import config.ConfigLoader
 import config.DBDriver
 import doobie._
 import doobie.implicits._
-import doobie.implicits.javasql._             // Needed import for Meta mapping
-import doobie.postgres.circe.json.implicits._ // Needed import for Meta mapping
-import doobie.postgres.implicits._            // Needed import for Meta mapping
+import doobie.implicits.javasql._
+import doobie.postgres.circe.json.implicits._
+import doobie.postgres.implicits._
 import io.circe.Json
+import java.sql.Date
 import java.sql.Timestamp
 import scala.annotation.tailrec
 
@@ -67,6 +68,7 @@ trait GenericMod[A <: Product] {
     case x: String      => fr0"$x"
     case x: Array[Byte] => fr0"$x"
     case x: Timestamp   => fr0"$x"
+    case x: Date        => fr0"$x"
     case x: Json        => fr0"$x"
     case Some(x)        => anyToFrag(x)
     case None           => Fragment.const0("null")
