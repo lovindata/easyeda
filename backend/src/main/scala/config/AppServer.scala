@@ -9,6 +9,7 @@ import config.ConfigLoader._
 import org.http4s.HttpRoutes
 import org.http4s.ember.server.EmberServerBuilder
 import org.http4s.implicits._
+import org.http4s.server.middleware.CORS
 import sttp.tapir._
 import sttp.tapir.server.ServerEndpoint
 import sttp.tapir.server.http4s.Http4sServerInterpreter
@@ -51,7 +52,7 @@ object AppServer {
            .default[IO]
            .withHost(ipv4"127.0.0.1") // Localhost equivalent
            .withPort(Port.fromString(backEndPort).get)
-           .withHttpApp(backEndRts.orNotFound)
+           .withHttpApp(CORS.policy.withAllowOriginAll(backEndRts).orNotFound)
            .build
            .use(_ => IO.never)
   } yield ()

@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { ButtonSubmit, DateInput, PwdInput, TextInput, Title } from "../../components/form/generic";
+import { ButtonSubmit, DateInput, PwdInput, TextInput, Title } from "../../components/form";
 import { useForm } from "react-hook-form";
 
 function RegisterForm() {
