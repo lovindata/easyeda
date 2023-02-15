@@ -39,10 +39,10 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
   }, [accessToken]);
   useEffect(() => {
     expireAt ? localStorage.setItem("expireAt", expireAt) : localStorage.removeItem("expireAt");
-  }, [accessToken]);
+  }, [expireAt]);
   useEffect(() => {
     refreshToken ? localStorage.setItem("refreshToken", refreshToken) : localStorage.removeItem("refreshToken");
-  }, [accessToken]);
+  }, [refreshToken]);
 
   // Render
   return (
