@@ -2,7 +2,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Login from "./pages/login";
 import Register from "./pages/register";
 import CtxProvider from "./context";
-import { HttpProvider } from "./hooks/HttpHk";
+import { HttpProvider } from "./hooks";
 
 function App() {
   return (

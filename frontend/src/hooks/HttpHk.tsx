@@ -5,24 +5,18 @@ import { AppException } from "../data/dto";
 /**
  * Post request hook.
  */
-export function usePost<A extends object>(subDirect: string, body: object) {
-  // Initialize
-  const bodyJsonified = {
-    method: "POST",
-    headers: {
-      "content-type": "application/json;charset=UTF-8",
-    },
-    body: JSON.stringify(body),
-  };
-
-  // Shot request & Return data
-  const { mutate, data, isLoading, isError } = useMutation(() =>
+export function usePost<A extends object>(subDirect: string, dtoOutKind: string) {
+  const {
+    mutate: post,
+    isLoading,
+    data,
+  } = useMutation((body: object) =>
     axios
-      .post(`http://${window.location.hostname}:8081${subDirect}`, bodyJsonified)
-      .then((res) => res as A)
-      .catch((err) => err as AppException)
+      .post(`http://${window.location.hostname}:8081${subDirect}`, body)
+      .then((res) => ({ kind: dtoOutKind, ...res.data } as A))
+      .catch((err) => ({ kind: "AppException", ...err.response.data } as AppException))
   );
-  return { data, isLoading, isError };
+  return { post, data, isLoading };
 }
 
 /**

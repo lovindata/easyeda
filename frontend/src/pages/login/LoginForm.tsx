@@ -1,57 +1,45 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { ButtonSubmit, PwdInput, TextInput, Title } from "../../components/form";
-import { AppException, TokenDtoOut } from "../../data/dto";
-import { useUser } from "../../hooks";
-import { useMutation } from "react-query";
-import axios from "axios";
+import { TokenDtoOut } from "../../data/dto";
+import { useUser, usePost } from "../../hooks";
+import { useEffect } from "react";
 
 /**
  * Login form.
  */
 function LoginForm() {
-  // Pre-requisites
+  // States
   const { register, handleSubmit } = useForm();
   const { setAccessToken, setExpireAt, setRefreshToken } = useUser();
   const navigate = useNavigate();
-  const {
-    mutate: doLogin,
-    isLoading,
-    data,
-  } = useMutation((body: { email: string; pwd: string }) =>
-    axios
-      .post(`http://${window.location.hostname}:8081/user/login`, body)
-      .then((res) => res.data as TokenDtoOut)
-      .catch((err) => err.data as AppException)
-  );
+  const { post, isLoading, data } = usePost<TokenDtoOut>("/user/login", "TokenDtoOut");
 
-  switch (data?.kind) {
-    case "TokenDtoOut":
-      setAccessToken(data.accessToken);
-      setExpireAt(data.expireAt);
-      setRefreshToken(data.refreshToken);
-      navigate("/register");
-      break;
-    case "AppException":
-      alert(data);
-      break;
-    case undefined:
-      break;
-  }
-
-  // Handler
-  // if (data) {
-  //   setAccessToken((data as TokenDtoOut).accessToken);
-  //   setExpireAt((data as TokenDtoOut).expireAt);
-  //   setRefreshToken((data as TokenDtoOut).refreshToken);
-  //   navigate("/register");
-  // }
+  // Effect running on `data` change
+  useEffect(() => {
+    switch (data?.kind) {
+      case "TokenDtoOut":
+        console.log(data);
+        setAccessToken(data.accessToken);
+        setExpireAt(data.expireAt);
+        setRefreshToken(data.refreshToken);
+        // navigate("/");
+        break;
+      case "AppException":
+      case undefined:
+        console.log(data);
+        setAccessToken(undefined);
+        setExpireAt(undefined);
+        setRefreshToken(undefined);
+        break;
+    }
+  }, [data]);
 
   // Render
   return (
     <form
       className="min-w-max flex flex-col bg-slate-700 p-8 space-y-5 rounded"
-      onSubmit={handleSubmit((data) => doLogin({ email: data.email, pwd: data.pwd }))}>
+      onSubmit={handleSubmit((data) => post({ email: data.email, pwd: data.pwd }))}>
       <Title title="Hey, welcome back!" desc="We're so excited to see you again!" />
       <TextInput header="E-MAIL" isRequired={true} registerKey={register("email")} />
       <PwdInput
