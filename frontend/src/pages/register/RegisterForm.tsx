@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { ButtonSubmit, DateInput, PwdInput, TextInput, Title } from "../../components/form";
+import { ButtonSubmit, DateInput, PwdInput, TextInput, Title } from "../../components";
 import { useForm } from "react-hook-form";
 
 function RegisterForm() {
@@ -37,6 +37,7 @@ function RegisterForm() {
       </div>
       <ButtonSubmit
         name="Continue"
+        isLoading={false}
         extra={
           <div className="text-sm text-white flex space-x-1">
             <p className="opacity-50">Already have an account?</p>

@@ -39,10 +39,13 @@ export function ToasterProvider({ children }: { children: React.ReactNode }) {
   const [toasts, setToasts] = useState<Toast[]>([]);
   const addToast = useCallback((toast: Toast) => setToasts([...toasts, toast]), [setToasts]);
 
-  // Effect on `toasts` (TODO here)
-  // useEffect(() => {
-  //   ???
-  // },[toasts])
+  // Effect on `toasts`
+  useEffect(() => {
+    if (toasts.length > 0) {
+      const remover = setTimeout(() => setToasts(toasts.slice(1)), 3000);
+      return () => clearTimeout(remover);
+    }
+  }, [toasts]);
 
   // Render
   return <ToasterContext.Provider value={{ toasts: toasts, addToast: addToast }}>{children}</ToasterContext.Provider>;

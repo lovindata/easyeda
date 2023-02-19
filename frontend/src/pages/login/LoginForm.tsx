@@ -1,9 +1,10 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
-import { ButtonSubmit, PwdInput, TextInput, Title } from "../../components/form";
-import { TokenDtoOut } from "../../data/dto";
-import { useUser, usePost } from "../../hooks";
+import { ButtonSubmit, PwdInput, TextInput, Title } from "../../components";
+import { TokenDtoOut } from "../../data";
+import { usePost } from "../../hooks";
 import { useEffect } from "react";
+import { useUser } from "../../context";
 
 /**
  * Login form.
@@ -54,7 +55,7 @@ function LoginForm() {
       />
       <ButtonSubmit
         name="Connexion"
-        isSubmitting={isLoading}
+        isLoading={isLoading}
         extra={
           <div className="text-sm text-white flex space-x-1">
             <p className="opacity-50">Need an account? </p>

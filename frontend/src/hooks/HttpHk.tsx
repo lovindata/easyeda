@@ -1,6 +1,6 @@
 import axios from "axios";
 import { useMutation, QueryClient, QueryClientProvider } from "react-query";
-import { AppException } from "../data/dto";
+import { AppException } from "../data";
 
 /**
  * Post request hook.

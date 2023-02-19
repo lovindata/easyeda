@@ -1,5 +1,5 @@
 import { useContext } from "react";
-import { UserContext, IUserContext } from "../context";
+import { UserContext, IUserContext } from "./UserCtx";
 
 /**
  * Use user hook.

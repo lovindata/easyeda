@@ -1,11 +1,9 @@
 import LoginForm from "./LoginForm";
 
-function Login() {
+export function LoginPg() {
   return (
     <div className="m-auto w-3/12">
       <LoginForm />
     </div>
   );
 }
-
-export default Login;
