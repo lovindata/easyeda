@@ -1,4 +1,5 @@
 import { useState, useEffect, createContext, useCallback } from "react";
+import { ToasterCpt } from "./ToasterCpt";
 
 /**
  * Toaster level.
@@ -15,6 +16,7 @@ export enum ToastLevelEnum {
  */
 export interface Toast {
   level: ToastLevelEnum;
+  header: string;
   message: string;
 }
 
@@ -48,5 +50,10 @@ export function ToasterProvider({ children }: { children: React.ReactNode }) {
   }, [toasts]);
 
   // Render
-  return <ToasterContext.Provider value={{ toasts: toasts, addToast: addToast }}>{children}</ToasterContext.Provider>;
+  return (
+    <ToasterContext.Provider value={{ toasts: toasts, addToast: addToast }}>
+      <ToasterCpt toasts={toasts} />
+      {children}
+    </ToasterContext.Provider>
+  );
 }

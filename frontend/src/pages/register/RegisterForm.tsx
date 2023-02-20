@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { ButtonSubmit, DateInput, PwdInput, TextInput, Title } from "../../components";
+import { ButtonSubmitCpt, DateInputCpt, PwdInputCpt, TextInputCpt, TitleCpt } from "../../components";
 import { useForm } from "react-hook-form";
 
 function RegisterForm() {
@@ -11,11 +11,11 @@ function RegisterForm() {
     <form
       className="min-w-max flex flex-col bg-slate-700 p-8 space-y-5 rounded"
       onSubmit={handleSubmit((data) => console.log(data))}>
-      <Title title="Create an account" desc="Just a few steps before joining the community!" />
-      <TextInput header="E-MAIL" isRequired={true} registerKey={register("email")} />
-      <TextInput header="USERNAME" isRequired={false} registerKey={register("username")} />
-      <PwdInput header="PASSWORD" isRequired={true} registerKey={register("pwd")} />
-      <DateInput header="BIRTH DATE" isRequired={true} registerKey={register("birthDate")} />
+      <TitleCpt title="Create an account" desc="Just a few steps before joining the community!" />
+      <TextInputCpt header="E-MAIL" isRequired={true} registerKey={register("email")} />
+      <TextInputCpt header="USERNAME" isRequired={false} registerKey={register("username")} />
+      <PwdInputCpt header="PASSWORD" isRequired={true} registerKey={register("pwd")} />
+      <DateInputCpt header="BIRTH DATE" isRequired={true} registerKey={register("birthDate")} />
       <div className="flex space-x-2 items-center">
         <input
           type="checkbox"
@@ -35,7 +35,7 @@ function RegisterForm() {
           <p className=" text-white">of DatapiU.</p>
         </label>
       </div>
-      <ButtonSubmit
+      <ButtonSubmitCpt
         name="Continue"
         isLoading={false}
         extra={

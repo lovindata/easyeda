@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
-import { ButtonSubmit, PwdInput, TextInput, Title } from "../../components";
+import { ButtonSubmitCpt, PwdInputCpt, TextInputCpt, TitleCpt } from "../../components";
 import { TokenDtoOut } from "../../data";
 import { usePost } from "../../hooks";
 import { useEffect } from "react";
@@ -41,9 +41,9 @@ function LoginForm() {
     <form
       className="min-w-max flex flex-col bg-slate-700 p-8 space-y-5 rounded"
       onSubmit={handleSubmit((data) => post({ email: data.email, pwd: data.pwd }))}>
-      <Title title="Hey, welcome back!" desc="We're so excited to see you again!" />
-      <TextInput header="E-MAIL" isRequired={true} registerKey={register("email")} />
-      <PwdInput
+      <TitleCpt title="Hey, welcome back!" desc="We're so excited to see you again!" />
+      <TextInputCpt header="E-MAIL" isRequired={true} registerKey={register("email")} />
+      <PwdInputCpt
         header="PASSWORD"
         isRequired={true}
         extra={
@@ -53,7 +53,7 @@ function LoginForm() {
         }
         registerKey={register("pwd")}
       />
-      <ButtonSubmit
+      <ButtonSubmitCpt
         name="Connexion"
         isLoading={isLoading}
         extra={
