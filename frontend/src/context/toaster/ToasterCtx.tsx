@@ -17,7 +17,7 @@ export enum ToastLevelEnum {
 export interface Toast {
   level: ToastLevelEnum;
   header: string;
-  message: string;
+  message?: string;
 }
 
 /**

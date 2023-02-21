@@ -8,7 +8,7 @@ import { HttpProvider } from "./hooks";
  */
 function App() {
   return (
-    <div className="bg-slate-900 min-h-screen shadow flex flex-col">
+    <div className="flex min-h-screen flex-col bg-slate-900 shadow">
       <HttpProvider>
         <CtxProvider>
           <BrowserRouter>
