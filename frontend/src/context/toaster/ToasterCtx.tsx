@@ -1,5 +1,4 @@
 import { useState, useEffect, createContext, useCallback } from "react";
-import { ToasterCpt } from "./ToasterCpt";
 
 /**
  * Toaster level.
@@ -39,7 +38,7 @@ export const ToasterContext = createContext<IToasterContext | undefined>(undefin
 export function ToasterProvider({ children }: { children: React.ReactNode }) {
   // States
   const [toasts, setToasts] = useState<Toast[]>([]);
-  const addToast = useCallback((toast: Toast) => setToasts([...toasts, toast]), [setToasts]);
+  const addToast = useCallback((toast: Toast) => setToasts([...toasts, toast]), [toasts]);
 
   // Effect on `toasts`
   useEffect(() => {
@@ -50,10 +49,5 @@ export function ToasterProvider({ children }: { children: React.ReactNode }) {
   }, [toasts]);
 
   // Render
-  return (
-    <ToasterContext.Provider value={{ toasts: toasts, addToast: addToast }}>
-      <ToasterCpt toasts={toasts} />
-      {children}
-    </ToasterContext.Provider>
-  );
+  return <ToasterContext.Provider value={{ toasts: toasts, addToast: addToast }}>{children}</ToasterContext.Provider>;
 }

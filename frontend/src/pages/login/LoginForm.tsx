@@ -4,7 +4,7 @@ import { ButtonSubmitCpt, PwdInputCpt, TextInputCpt, TitleCpt } from "../../comp
 import { TokenDtoOut } from "../../data";
 import { usePost } from "../../hooks";
 import { useEffect } from "react";
-import { useUser } from "../../context";
+import { useToaster, ToastLevelEnum, useUser } from "../../context";
 
 /**
  * Login form.
@@ -15,6 +15,7 @@ function LoginForm() {
   const { setAccessToken, setExpireAt, setRefreshToken } = useUser();
   const navigate = useNavigate();
   const { post, isLoading, data } = usePost<TokenDtoOut>("/user/login", "TokenDtoOut");
+  const { toasts, addToast } = useToaster();
 
   // Effect running on `data` change
   useEffect(() => {
@@ -27,8 +28,12 @@ function LoginForm() {
         // navigate("/");
         break;
       case "AppException":
+        addToast({ level: ToastLevelEnum.Error, header: "Oh no, false credentials!", message: data.message });
+        setAccessToken(undefined);
+        setExpireAt(undefined);
+        setRefreshToken(undefined);
+        break;
       case undefined:
-        console.log(data);
         setAccessToken(undefined);
         setExpireAt(undefined);
         setRefreshToken(undefined);
@@ -39,8 +44,9 @@ function LoginForm() {
   // Render
   return (
     <form
-      className="min-w-max flex flex-col bg-slate-700 p-8 space-y-5 rounded"
-      onSubmit={handleSubmit((data) => post({ email: data.email, pwd: data.pwd }))}>
+      className="flex min-w-max flex-col space-y-5 rounded bg-slate-700 p-8"
+      onSubmit={handleSubmit((data) => !isLoading && post({ email: data.email, pwd: data.pwd }))}
+    >
       <TitleCpt title="Hey, welcome back!" desc="We're so excited to see you again!" />
       <TextInputCpt header="E-MAIL" isRequired={true} registerKey={register("email")} />
       <PwdInputCpt
@@ -57,7 +63,7 @@ function LoginForm() {
         name="Connexion"
         isLoading={isLoading}
         extra={
-          <div className="text-sm text-white flex space-x-1">
+          <div className="flex space-x-1 text-sm text-white">
             <p className="opacity-50">Need an account? </p>
             <Link to="/register" className="text-sm text-sky-500 hover:underline">
               Sign up

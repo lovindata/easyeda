@@ -6,8 +6,13 @@ import { Spinner } from "../../assets";
 export function ButtonSubmitCpt(props: { name: string; isLoading: boolean; extra?: JSX.Element }) {
   return (
     <div className="flex flex-col space-y-2">
-      <button className="bg-emerald-500 p-2.5 rounded font-semibold text-white hover:bg-emerald-600 transition-all">
-        {props.isLoading ? <Spinner className="animate-spin invert h-6 w-6 mx-auto" /> : props.name}
+      <button
+        className={
+          "rounded bg-emerald-500 p-2.5 font-semibold text-white transition-all hover:bg-emerald-600" +
+          (props.isLoading && " cursor-not-allowed")
+        }
+      >
+        {props.isLoading ? <Spinner className="mx-auto h-6 w-6 animate-spin invert" /> : props.name}
       </button>
       {props.extra}
     </div>
