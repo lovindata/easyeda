@@ -1,4 +1,4 @@
-import { useState, useEffect, createContext, useCallback } from "react";
+import { useState, createContext } from "react";
 
 /**
  * Toaster level.
@@ -14,6 +14,7 @@ export enum ToastLevelEnum {
  * Toast type.
  */
 export interface Toast {
+  id: number;
   level: ToastLevelEnum;
   header: string;
   message?: string;
@@ -24,7 +25,8 @@ export interface Toast {
  */
 export interface IToasterContext {
   toasts: Toast[];
-  addToast: (toast: Toast) => void;
+  addToast: (level: ToastLevelEnum, header: string, message?: string) => void;
+  timeout: number;
 }
 
 /**
@@ -36,18 +38,24 @@ export const ToasterContext = createContext<IToasterContext | undefined>(undefin
  * Toaster provider.
  */
 export function ToasterProvider({ children }: { children: React.ReactNode }) {
+  // Initalize
+  const nbMax = 3;
+  const timeout = 10000;
+
   // States
   const [toasts, setToasts] = useState<Toast[]>([]);
-  const addToast = useCallback((toast: Toast) => setToasts([...toasts, toast]), [toasts]);
-
-  // Effect on `toasts`
-  useEffect(() => {
-    if (toasts.length > 0) {
-      const remover = setTimeout(() => setToasts(toasts.slice(1)), 3000);
-      return () => clearTimeout(remover);
-    }
-  }, [toasts]);
+  const [usableId, setUsableId] = useState(Number.MIN_SAFE_INTEGER);
+  const addToast = (level: ToastLevelEnum, header: string, message?: string) => {
+    const toastToAdd = { id: usableId, level: level, header: header, message: message };
+    setToasts(toasts.length == nbMax ? [...toasts.slice(1), toastToAdd] : [...toasts, toastToAdd]);
+    setTimeout(() => setToasts((currToasts) => currToasts.filter((x) => x.id != usableId)), timeout);
+    setUsableId(usableId + 1);
+  };
 
   // Render
-  return <ToasterContext.Provider value={{ toasts: toasts, addToast: addToast }}>{children}</ToasterContext.Provider>;
+  return (
+    <ToasterContext.Provider value={{ toasts: toasts, addToast: addToast, timeout: timeout }}>
+      {children}
+    </ToasterContext.Provider>
+  );
 }

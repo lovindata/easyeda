@@ -1,8 +1,8 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { ButtonSubmitCpt, PwdInputCpt, TextInputCpt, TitleCpt } from "../../components";
-import { TokenDtoOut } from "../../data";
-import { usePost } from "../../hooks";
+import { TokenDtoOut, UserStatusDtoOut } from "../../data";
+import { useGet, usePost } from "../../hooks";
 import { useEffect } from "react";
 import { useToaster, ToastLevelEnum, useUser } from "../../context";
 
@@ -10,36 +10,52 @@ import { useToaster, ToastLevelEnum, useUser } from "../../context";
  * Login form.
  */
 function LoginForm() {
-  // States
+  // Pre-requisites
   const { register, handleSubmit } = useForm();
   const { setAccessToken, setExpireAt, setRefreshToken } = useUser();
-  const navigate = useNavigate();
-  const { post, isLoading, data } = usePost<TokenDtoOut>("/user/login", "TokenDtoOut");
-  const { toasts, addToast } = useToaster();
 
-  // Effect running on `data` change
+  // Effect running on log in changes
+  const { post, isLoading, data } = usePost<TokenDtoOut>("/user/login", "TokenDtoOut");
+  const { addToast } = useToaster();
   useEffect(() => {
     switch (data?.kind) {
       case "TokenDtoOut":
-        console.log(data);
         setAccessToken(data.accessToken);
         setExpireAt(data.expireAt);
         setRefreshToken(data.refreshToken);
-        // navigate("/");
+        get({ Authorization: `Bearer ${data.accessToken}` });
         break;
       case "AppException":
-        addToast({ level: ToastLevelEnum.Error, header: "Oh no, false credentials!", message: data.message });
         setAccessToken(undefined);
         setExpireAt(undefined);
         setRefreshToken(undefined);
+        addToast(ToastLevelEnum.Error, "😧 Ooh uh, log in issue?", data.message);
         break;
-      case undefined:
+      default:
         setAccessToken(undefined);
         setExpireAt(undefined);
         setRefreshToken(undefined);
         break;
     }
   }, [data]);
+
+  // Effect running on get user info changes
+  const { get: get, data: dataUserInfo } = useGet<UserStatusDtoOut>("/user/retrieve", "UserStatusDtoOut");
+  const navigate = useNavigate();
+  useEffect(() => {
+    switch (dataUserInfo?.kind) {
+      case "UserStatusDtoOut":
+        addToast(
+          ToastLevelEnum.Success,
+          `🤗 Yay, welcome back ${dataUserInfo.username}!`,
+          `${dataUserInfo.email} successfully connected.`
+        );
+        navigate("/app");
+        break;
+      default:
+        break;
+    }
+  }, [dataUserInfo]);
 
   // Render
   return (
@@ -53,7 +69,17 @@ function LoginForm() {
         header="PASSWORD"
         isRequired={true}
         extra={
-          <Link to="/login" className="text-sm text-sky-500 hover:underline">
+          <Link
+            to="/login"
+            className="text-sm text-sky-500 hover:underline"
+            onClick={() =>
+              addToast(
+                ToastLevelEnum.Info,
+                "😣 Coming soon!",
+                "Admin related features will be available in next releases."
+              )
+            }
+          >
             Password forgotten?
           </Link>
         }

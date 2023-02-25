@@ -1,11 +1,8 @@
 package com.ilovedatajjia
 package api.dto.input
 
-import api.helpers.TapirUtils._
-import api.helpers.CirceUtils._
 import io.circe._
 import io.circe.generic.semiauto._
-import java.sql.Date
 import sttp.tapir.Schema
 
 /**
@@ -19,7 +16,7 @@ import sttp.tapir.Schema
  * @param birthDate
  *   Birth date
  */
-case class CreateUserFormDtoIn(email: String, username: String, pwd: String, birthDate: Date)
+case class CreateUserFormDtoIn(email: String, username: String, pwd: String, birthDate: String)
 
 /**
  * [[CreateUserFormDtoIn]] companion.

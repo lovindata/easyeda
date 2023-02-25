@@ -55,25 +55,29 @@ object UserMod extends GenericMod[UserMod] {
 
   /**
    * Constructor of [[UserMod]].
-   * @param createUserFormDtoIn
-   *   User creation form
+   * @param email
+   *   Email
+   * @param username
+   *   Username
    * @param pwd
    *   Password
    * @param pwdSalt
    *   Password salt
+   * @param birthDate
+   *   Birth date
    * @return
    *   A new created user
    */
-  def apply(createUserFormDtoIn: CreateUserFormDtoIn, pwd: String, pwdSalt: String): IO[UserMod] = for {
+  def apply(email: String, username: String, pwd: String, pwdSalt: String, birthDate: Date): IO[UserMod] = for {
     nowTimestamp <- Clock[IO].realTime.map(x => new Timestamp(x.toMillis))
     out          <- insert(
                       UserMod(
                         -1,
-                        createUserFormDtoIn.email,
-                        createUserFormDtoIn.username,
+                        email,
+                        username,
                         pwd,
                         pwdSalt,
-                        createUserFormDtoIn.birthDate,
+                        birthDate,
                         none,
                         nowTimestamp,
                         none,

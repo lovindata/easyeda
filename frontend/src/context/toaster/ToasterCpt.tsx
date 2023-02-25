@@ -10,35 +10,11 @@ export function ToasterCpt() {
   // Taosts state
   const { toasts } = useToaster();
 
-  // Testing toasts
-  // const toasts = [
-  //   {
-  //     level: ToastLevelEnum.Success,
-  //     header: "Yay! Everything worked!",
-  //     message: "Congrats on the internet loading your request.",
-  //   },
-  //   {
-  //     level: ToastLevelEnum.Info,
-  //     header: "Did you know?",
-  //     message:
-  //       "Here is something that you might like to know. It is a really really long description just to say nothing about what you already know.",
-  //   },
-  //   {
-  //     level: ToastLevelEnum.Warning,
-  //     header: "Uh oh, something went wrong. Is it because of your internet connection?",
-  //     message: "Sorry! There was a problem with your request.",
-  //   },
-  //   {
-  //     level: ToastLevelEnum.Error,
-  //     header: "Cannot process your request.",
-  //   },
-  // ];
-
   // Render
   return (
     <div className="absolute right-2 bottom-2 space-y-2">
-      {toasts.map((toast, idx) => (
-        <ToastCpt toast={toast} key={idx} />
+      {toasts.map((toast, _) => (
+        <ToastCpt toast={toast} key={toast.id} />
       ))}
     </div>
   );
@@ -89,20 +65,22 @@ function ToastCpt(props: { toast: Toast }) {
       break;
   }
 
-  // Mounting effect
-  const [isMounted, setIsMounted] = useState(false);
+  // Mounting effect (300 is duration of the effect)
+  const duration = 300;
+  const { timeout } = useToaster();
+  const [mounted, setMounted] = useState(false);
   useEffect(() => {
-    setTimeout(() => {
-      setIsMounted(true);
-    }, 250);
+    setTimeout(() => setMounted(true), duration);
+    setTimeout(() => setMounted(false), timeout - duration);
   }, []);
 
   // Render
   return (
     <div
       className={
-        "flex items-center space-x-3 rounded bg-transparent p-1.5 transition-all duration-300 ease-in-out hover:bg-slate-700" +
-        ` origin-right ${isMounted ? "scale-x-100" : "scale-x-0"}`
+        "flex items-center space-x-3 rounded bg-transparent p-1.5 hover:bg-slate-700" +
+        ` transition-all duration-${duration} ease-in-out` +
+        ` origin-right ${mounted ? "scale-x-100" : "scale-x-0"}`
       }
     >
       {VBarCpt}

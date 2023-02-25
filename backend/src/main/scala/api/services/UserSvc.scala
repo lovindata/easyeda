@@ -1,7 +1,6 @@
 package com.ilovedatajjia
 package api.services
 
-import api.dto.input.CreateUserFormDtoIn
 import api.dto.input.LoginUserFormDtoIn
 import api.dto.output._
 import api.helpers.AppException
@@ -12,9 +11,10 @@ import cats.effect._
 import com.softwaremill.quicklens._
 import config.ConfigLoader
 import doobie.implicits._
-import doobie.implicits.javasql._             // Needed import for Meta mapping
-import doobie.postgres.circe.json.implicits._ // Needed import for Meta mapping
-import doobie.postgres.implicits._            // Needed import for Meta mapping
+import doobie.implicits.javasql._
+import doobie.postgres.circe.json.implicits._
+import doobie.postgres.implicits._
+import java.sql.Date
 import java.sql.Timestamp
 
 /**
@@ -40,15 +40,21 @@ object UserSvc {
 
   /**
    * Create the user.
-   * @param createUserFormDtoIn
-   *   User creation form
+   * @param email
+   *   Validated email
+   * @param username
+   *   Validated pseudo
+   * @param pwd
+   *   Validated password
+   * @param birthDate
+   *   Validated birth date
    * @return
    *   User status
    */
-  def createUser(createUserFormDtoIn: CreateUserFormDtoIn): IO[UserStatusDtoOut] = for {
+  def createUser(email: String, username: String, pwd: String, birthDate: Date): IO[UserStatusDtoOut] = for {
     pwdSalt <- genString(32)
-    pwd     <- s"$pwdSalt${createUserFormDtoIn.pwd}".toSHA3_512
-    user    <- UserMod(createUserFormDtoIn, pwd, pwdSalt)
+    pwd     <- s"$pwdSalt$pwd".toSHA3_512
+    user    <- UserMod(email, username, pwd, pwdSalt, birthDate)
     userDto <- this.toDto(user)
   } yield userDto
 

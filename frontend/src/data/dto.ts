@@ -15,3 +15,17 @@ export interface TokenDtoOut {
   expireAt: string;
   refreshToken: string;
 }
+
+/**
+ * User status dto.
+ */
+export interface UserStatusDtoOut {
+  kind: "UserStatusDtoOut";
+  id: number;
+  email: string;
+  username: string;
+  createdAt: string;
+  validatedAt: string;
+  updatedAt: string;
+  activeAt: string;
+}

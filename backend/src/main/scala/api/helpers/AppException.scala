@@ -41,17 +41,16 @@ object AppException {
      *   - [[AppException]] if internal voluntary raised
      *   - [[AppException]] if internal not voluntary raised
      */
-    def toErrHandled: IO[Either[AppException, A]] = x
-      .redeem(
-        {
-          case x: AppException                  => Left(x)
-          case notVoluntaryThrowable: Throwable =>
-            Left(
-              AppException(
-                s"Unhandled error occurred, it will be managed in next releases (${notVoluntaryThrowable.toString})"))
-        },
-        Right(_)
-      )
+    def toErrHandled: IO[Either[AppException, A]] = x.redeem(
+      {
+        case x: AppException                  => Left(x)
+        case notVoluntaryThrowable: Throwable =>
+          Left(
+            AppException(
+              s"Unhandled error occurred, it will be managed in next releases (${notVoluntaryThrowable.toString})."))
+      },
+      Right(_)
+    )
 
   }
 
