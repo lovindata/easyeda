@@ -51,7 +51,7 @@ function RegisterForm() {
     >
       <TitleCpt title="Create an account" desc="Just a few steps before joining the community!" />
       <TextInputCpt header="E-MAIL" isRequired={true} registerKey={register("email")} />
-      <TextInputCpt header="USERNAME" isRequired={false} registerKey={register("username")} />
+      <TextInputCpt header="USERNAME" isRequired={true} registerKey={register("username")} />
       <PwdInputCpt header="PASSWORD" isRequired={true} registerKey={register("pwd")} />
       <DateInputCpt header="BIRTH DATE" isRequired={true} registerKey={register("birthDate")} />
       <div className="flex items-center space-x-2">

@@ -54,7 +54,8 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
         setExpireAt: setExpireAt,
         refreshToken: refreshToken,
         setRefreshToken: setRefreshToken,
-      }}>
+      }}
+    >
       {children}
     </UserContext.Provider>
   );
