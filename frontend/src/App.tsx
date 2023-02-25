@@ -1,8 +1,7 @@
 import { BrowserRouter as RouterProvider, Routes, Route } from "react-router-dom";
 import { LoginPg, RegisterPg } from "./pages";
-import { CtxProvider } from "./context";
+import { CtxProvider, ToasterCpt } from "./context";
 import { HttpProvider } from "./hooks";
-import { ToasterCpt } from "./context";
 
 /**
  * Application entrypoint.
