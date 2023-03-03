@@ -1,7 +1,6 @@
 package com.ilovedatajjia
 package api.models
 
-import api.dto.input.CreateUserFormDtoIn
 import cats.effect._
 import cats.implicits._
 import doobie.implicits._                     // Needed import for Fragment

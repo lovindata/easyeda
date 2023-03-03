@@ -20,11 +20,7 @@ function RegisterForm() {
   useEffect(() => {
     switch (data?.kind) {
       case "UserStatusDtoOut":
-        addToast(
-          ToastLevelEnum.Success,
-          `😉 Hey ${data.username}, your account has been created!`,
-          `Account ${data.email} can now connect.`
-        );
+        addToast(ToastLevelEnum.Success, `😉 Account created!`, `${data.email} ready to connect.`);
         navigate("/login");
         break;
       case "AppException":

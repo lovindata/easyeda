@@ -1,7 +1,7 @@
 package com.ilovedatajjia
 package api.services
 
-import api.dto.input.LoginUserFormDtoIn
+import api.dto.input.LoginFormDtoIn
 import api.dto.output._
 import api.helpers.AppException
 import api.helpers.StringUtils._
@@ -66,7 +66,7 @@ object UserSvc {
    *   Tokens OR
    *   - [[AppException]] if incorrect login
    */
-  def loginUser(form: LoginUserFormDtoIn): IO[TokenDtoOut] = for {
+  def loginUser(form: LoginFormDtoIn): IO[TokenDtoOut] = for {
     // Verify login
     potUsers        <- UserMod.select(fr"email = ${form.email}")
     validatedUser   <- potUsers match {

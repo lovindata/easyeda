@@ -20,25 +20,25 @@ assembly / assemblyMergeStrategy := {
  */
 // Spark
 // https://mvnrepository.com/artifact/org.apache.spark/spark-core
-libraryDependencies += "org.apache.spark" %% "spark-core"  % "3.3.1" % "provided"
+libraryDependencies += "org.apache.spark" %% "spark-core"  % "3.3.2" % "provided"
 // https://mvnrepository.com/artifact/org.apache.spark/spark-sql
-libraryDependencies += "org.apache.spark" %% "spark-sql"   % "3.3.1" % "provided"
+libraryDependencies += "org.apache.spark" %% "spark-sql"   % "3.3.2" % "provided"
 // https://mvnrepository.com/artifact/org.apache.spark/spark-mllib
-libraryDependencies += "org.apache.spark" %% "spark-mllib" % "3.3.1" % "provided"
+libraryDependencies += "org.apache.spark" %% "spark-mllib" % "3.3.2" % "provided"
 
 // Cats Effect & Scala extensions
 // https://mvnrepository.com/artifact/org.typelevel/cats-effect
-libraryDependencies += "org.typelevel"              %% "cats-effect" % "3.4.6"
+libraryDependencies += "org.typelevel"              %% "cats-effect" % "3.4.8"
 // https://mvnrepository.com/artifact/com.softwaremill.quicklens/quicklens
 libraryDependencies += "com.softwaremill.quicklens" %% "quicklens"   % "1.9.0"
 
 // Tapir
 // https://mvnrepository.com/artifact/com.softwaremill.sttp.tapir/tapir-http4s-server
-libraryDependencies += "com.softwaremill.sttp.tapir" %% "tapir-http4s-server"     % "1.2.8"
+libraryDependencies += "com.softwaremill.sttp.tapir" %% "tapir-http4s-server"     % "1.2.9"
 // https://mvnrepository.com/artifact/com.softwaremill.sttp.tapir/tapir-json-circe
-libraryDependencies += "com.softwaremill.sttp.tapir" %% "tapir-json-circe"        % "1.2.8"
+libraryDependencies += "com.softwaremill.sttp.tapir" %% "tapir-json-circe"        % "1.2.9"
 // https://mvnrepository.com/artifact/com.softwaremill.sttp.tapir/tapir-swagger-ui-bundle
-libraryDependencies += "com.softwaremill.sttp.tapir" %% "tapir-swagger-ui-bundle" % "1.2.8"
+libraryDependencies += "com.softwaremill.sttp.tapir" %% "tapir-swagger-ui-bundle" % "1.2.9"
 
 // Http4s
 // https://mvnrepository.com/artifact/org.http4s/http4s-ember-server
@@ -72,7 +72,7 @@ libraryDependencies += "org.tpolecat" %% "doobie-postgres-circe" % "1.0.0-RC2"
 
 // JDBC Connectors
 // https://mvnrepository.com/artifact/org.postgresql/postgresql
-libraryDependencies += "org.postgresql" % "postgresql" % "42.5.3"
+libraryDependencies += "org.postgresql" % "postgresql" % "42.5.4"
 
 /**
  * Test dependencies.

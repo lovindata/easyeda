@@ -2,8 +2,8 @@ package com.ilovedatajjia
 package api.routes
 
 import api.controllers.UserCtrl
-import api.dto.input.CreateUserFormDtoIn
-import api.dto.input.LoginUserFormDtoIn
+import api.dto.input.UserFormDtoIn
+import api.dto.input.LoginFormDtoIn
 import api.dto.output.TokenDtoOut
 import api.dto.output.UserStatusDtoOut
 import api.helpers.AppException
@@ -24,21 +24,21 @@ import sttp.tapir.server.http4s.Http4sServerInterpreter
 object UserRts extends GenericRts {
 
   // Create user
-  private val createEpt: PublicEndpoint[CreateUserFormDtoIn, AppException, UserStatusDtoOut, Any] = errHandledEpt
+  private val createEpt: PublicEndpoint[UserFormDtoIn, AppException, UserStatusDtoOut, Any] = errHandledEpt
     .summary("Create user account")
     .post
     .in("user" / "create")
-    .in(jsonBody[CreateUserFormDtoIn])
+    .in(jsonBody[UserFormDtoIn])
     .out(jsonBody[UserStatusDtoOut])
   private val createRts: HttpRoutes[IO]                                                           =
     Http4sServerInterpreter[IO]().toRoutes(createEpt.serverLogic(UserCtrl.createUser(_).toErrHandled))
 
   // Login user
-  private val loginEpt: PublicEndpoint[LoginUserFormDtoIn, AppException, TokenDtoOut, Any] = errHandledEpt
+  private val loginEpt: PublicEndpoint[LoginFormDtoIn, AppException, TokenDtoOut, Any] = errHandledEpt
     .summary("Login user account")
     .post
     .in("user" / "login")
-    .in(jsonBody[LoginUserFormDtoIn])
+    .in(jsonBody[LoginFormDtoIn])
     .out(jsonBody[TokenDtoOut])
   private val loginRts: HttpRoutes[IO]                                                     =
     Http4sServerInterpreter[IO]().toRoutes(loginEpt.serverLogic(UserSvc.loginUser(_).toErrHandled))

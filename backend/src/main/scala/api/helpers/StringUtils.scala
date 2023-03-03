@@ -53,11 +53,12 @@ object StringUtils {
     /**
      * Validate email format. (RFC 5322 official format)
      * @return
-     *   Valid email or not
+     *   Nothing OR
+     *   - [[AppException]] if non valid email
      */
-    def isValidEmail: Boolean =
+    def isValidEmail: IO[Unit] = IO.raiseUnless(
       "^((?:[A-Za-z0-9!#$%&'*+\\-/=?^_`{|}~]|(?<=^|\\.)\"|\"(?=$|\\.|@)|(?<=\".*)[ .](?=.*\")|(?<!\\.)\\.){1,64})(@)([A-Za-z0-9.\\-]*[A-Za-z0-9]\\.[A-Za-z0-9]{2,})$".r
-        .matches(x)
+        .matches(x))(AppException("Email format invalid."))
 
     /**
      * Validate password format requirements.
@@ -67,12 +68,25 @@ object StringUtils {
      *   - One number character
      *   - One special character
      * @return
-     *   Valid password or not
+     *   Nothing OR
+     *   - [[AppException]] if non valid password
      */
-    def isValidPwd: Boolean =
+    def isValidPwd: IO[Unit] = IO.raiseUnless(
       "^[\\x20-\\x7E]{8,32}$".r.matches(x) && "[A-Z]+".r.findFirstMatchIn(x).isDefined && "[a-z]+".r
         .findFirstMatchIn(x)
-        .isDefined && "[0-9]+".r.findFirstMatchIn(x).isDefined && "[^A-Za-z0-9]+".r.findFirstMatchIn(x).isDefined
+        .isDefined && "[0-9]+".r.findFirstMatchIn(x).isDefined && "[^A-Za-z0-9]+".r
+        .findFirstMatchIn(x)
+        .isDefined)(AppException(
+      "Password must contains 8 to 32 characters, an uppercase and lowercase letter, a number and a special character."))
+
+    /**
+     * Application entity name convention.
+     * @return
+     *   Nothing OR
+     *   - [[AppException]] if non valid name
+     */
+    def isValidName: IO[Unit] = IO.raiseUnless("[a-zA-Z0-9]{2,32}".r.matches(x))(
+      AppException("Name must contains 2 to 32 alphanumerical characters."))
 
     /**
      * Convert [[x]] to hashed with SHA3-512.
