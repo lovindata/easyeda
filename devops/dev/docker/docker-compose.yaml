@@ -10,6 +10,6 @@ services:
       - "5432:5432"
     environment:
       # RestAPI env variables
-      POSTGRES_DB: elodata
+      POSTGRES_DB: elodata_db
       POSTGRES_USER: elodata_user
       POSTGRES_PASSWORD : elodata_pwd

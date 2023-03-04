@@ -31,4 +31,20 @@ object JdbcUtils {
     }
     .bracket(f)(conn => IO.interruptible(conn.close()))
 
+  /**
+   * Rich [[String]].
+   */
+  implicit class RichString(x: String) {
+
+    /**
+     * Transform identifier name to be consider as plain name.
+     * @param char
+     *   Character to use
+     * @return
+     *   [[String]] identifier name transformed
+     */
+    def nameB(char: String = "\""): String = s"$char${x.replace(char, s"$char$char")}$char"
+
+  }
+
 }

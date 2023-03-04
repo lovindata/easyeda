@@ -2,15 +2,12 @@ package com.ilovedatajjia
 package api.models
 
 import api.helpers.AppException
+import api.helpers.DoobieUtils._
+import api.helpers.JdbcUtils._
 import api.helpers.StringUtils._
 import cats.effect.IO
 import config.ConfigLoader
 import config.DBDriver
-import doobie._
-import doobie.implicits._
-import doobie.implicits.javasql._
-import doobie.postgres.circe.json.implicits._
-import doobie.postgres.implicits._
 import io.circe.Json
 import java.sql.Date
 import java.sql.Timestamp
@@ -19,6 +16,7 @@ import scala.annotation.tailrec
 /**
  * Repository to extends on the companion object for DB methods. Requirements are
  *   - Case class name matches `^(.+)Mod$`
+ *   - Case class name are in pascal case with only letters
  *   - Case class has an attribute `id` in first position in [[Long]]
  *   - Attributes are in camel case with only letters
  * @tparam A
@@ -31,11 +29,7 @@ import scala.annotation.tailrec
  *   // - Column "id" and "name"
  *
  *   // Then
- *   import doobie._
- *   import doobie.implicits._                     // Needed import for Fragment
- *   import doobie.implicits.javasql._             // Needed import for Meta mapping
- *   import doobie.postgres.circe.json.implicits._ // Needed import for Meta mapping
- *   import doobie.postgres.implicits._            // Needed import for Meta mapping
+ *   import api.helpers.DoobieUtils._
  *   case class PersonMod(id: Long, name: String)
  *   object PersonMod extends GenericRep[PersonMod]
  *   PersonMod.insert(PersonMod(-1, "Elorine"))
@@ -63,16 +57,18 @@ trait GenericMod[A <: Product] {
    */
   @tailrec
   private def anyToFrag(x: Any): Fragment = x match {
-    case x: Short       => fr0"$x"
-    case x: Long        => fr0"$x"
-    case x: String      => fr0"$x"
-    case x: Array[Byte] => fr0"$x"
-    case x: Timestamp   => fr0"$x"
-    case x: Date        => fr0"$x"
-    case x: Json        => fr0"$x"
-    case Some(x)        => anyToFrag(x)
-    case None           => Fragment.const0("null")
-    case _              => throw AppException(s"Implementation error, fragment impossible for type `${x.getClass.getTypeName}`.")
+    case x: Short                   => fr0"$x"
+    case x: Int                     => fr0"$x"
+    case x: Long                    => fr0"$x"
+    case x: String                  => fr0"$x"
+    case x: Array[Byte]             => fr0"$x"
+    case x: Timestamp               => fr0"$x"
+    case x: Date                    => fr0"$x"
+    case x: Json                    => fr0"$x"
+    case Some(x)                    => anyToFrag(x)
+    case None                       => Fragment.const0("null")
+    case x: scala.Enumeration#Value => fr0"${x.toString}"
+    case _                          => throw AppException(s"Implementation error, fragment impossible for type `${x.getClass.getTypeName}`.")
   }
 
   /**
@@ -84,9 +80,9 @@ trait GenericMod[A <: Product] {
    */
   def insert(entity: A)(implicit read: Read[A]): IO[A] = DBDriver.run {
     // Prepare fragments
-    val attributesName: Fragment  =
-      Fragment.const(entity.productElementNames.drop(1).map(_.toSnakeCase).mkString("(", ", ", ")"))
-    val attributesValue: Fragment = entity.productIterator.drop(1).map(anyToFrag).reduceLeft(_ ++ fr"," ++ _)
+    val attributesName  =
+      Fragment.const(entity.productElementNames.drop(1).map(_.toSnakeCase.nameB()).mkString("(", ", ", ")"))
+    val attributesValue = entity.productIterator.drop(1).map(anyToFrag).reduceLeft(_ ++ fr"," ++ _)
 
     // Start execution
     for {

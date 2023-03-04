@@ -2,10 +2,8 @@ package com.ilovedatajjia
 package api.routes
 
 import api.controllers.UserCtrl
-import api.dto.input.UserFormDtoIn
-import api.dto.input.LoginFormDtoIn
-import api.dto.output.TokenDtoOut
-import api.dto.output.UserStatusDtoOut
+import api.dto.input._
+import api.dto.output._
 import api.helpers.AppException
 import api.helpers.AppException._
 import api.models.UserMod
@@ -25,27 +23,27 @@ object UserRts extends GenericRts {
 
   // Create user
   private val createEpt: PublicEndpoint[UserFormDtoIn, AppException, UserStatusDtoOut, Any] = errHandledEpt
-    .summary("Create user account")
+    .summary("create user account")
     .post
     .in("user" / "create")
     .in(jsonBody[UserFormDtoIn])
     .out(jsonBody[UserStatusDtoOut])
-  private val createRts: HttpRoutes[IO]                                                           =
+  private val createRts: HttpRoutes[IO]                                                     =
     Http4sServerInterpreter[IO]().toRoutes(createEpt.serverLogic(UserCtrl.createUser(_).toErrHandled))
 
   // Login user
   private val loginEpt: PublicEndpoint[LoginFormDtoIn, AppException, TokenDtoOut, Any] = errHandledEpt
-    .summary("Login user account")
+    .summary("login user account")
     .post
     .in("user" / "login")
     .in(jsonBody[LoginFormDtoIn])
     .out(jsonBody[TokenDtoOut])
-  private val loginRts: HttpRoutes[IO]                                                     =
+  private val loginRts: HttpRoutes[IO]                                                 =
     Http4sServerInterpreter[IO]().toRoutes(loginEpt.serverLogic(UserSvc.loginUser(_).toErrHandled))
 
   // Refresh user token
   private val refreshEpt: PublicEndpoint[String, AppException, TokenDtoOut, Any] = errHandledEpt
-    .summary("Refresh user tokens")
+    .summary("refresh user tokens")
     .post
     .in(auth.bearer[String]())
     .in("user" / "refresh")
@@ -55,7 +53,7 @@ object UserRts extends GenericRts {
 
   // Retrieve user
   private val getEpt: PartialServerEndpoint[String, UserMod, Unit, AppException, UserStatusDtoOut, Any, IO] = authEpt
-    .summary("Retrieve user account info")
+    .summary("retrieve user account info")
     .get
     .in("user" / "retrieve")
     .out(jsonBody[UserStatusDtoOut])

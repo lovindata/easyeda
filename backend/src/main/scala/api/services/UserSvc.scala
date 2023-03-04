@@ -4,16 +4,13 @@ package api.services
 import api.dto.input.LoginFormDtoIn
 import api.dto.output._
 import api.helpers.AppException
+import api.helpers.DoobieUtils._
 import api.helpers.StringUtils._
 import api.models.TokenMod
 import api.models.UserMod
 import cats.effect._
 import com.softwaremill.quicklens._
 import config.ConfigLoader
-import doobie.implicits._
-import doobie.implicits.javasql._
-import doobie.postgres.circe.json.implicits._
-import doobie.postgres.implicits._
 import java.sql.Date
 import java.sql.Timestamp
 

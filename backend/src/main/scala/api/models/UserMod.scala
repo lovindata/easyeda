@@ -1,12 +1,9 @@
 package com.ilovedatajjia
 package api.models
 
+import api.helpers.DoobieUtils._
 import cats.effect._
 import cats.implicits._
-import doobie.implicits._                     // Needed import for Fragment
-import doobie.implicits.javasql._             // Needed import for Meta mapping
-import doobie.postgres.circe.json.implicits._ // Needed import for Meta mapping
-import doobie.postgres.implicits._            // Needed import for Meta mapping
 import java.sql.Date
 import java.sql.Timestamp
 
