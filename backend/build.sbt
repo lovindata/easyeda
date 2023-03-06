@@ -70,9 +70,11 @@ libraryDependencies += "org.tpolecat" %% "doobie-postgres"       % "1.0.0-RC2"
 // https://mvnrepository.com/artifact/org.tpolecat/doobie-postgres-circe
 libraryDependencies += "org.tpolecat" %% "doobie-postgres-circe" % "1.0.0-RC2"
 
-// JDBC Connectors
+// Connectors
 // https://mvnrepository.com/artifact/org.postgresql/postgresql
-libraryDependencies += "org.postgresql" % "postgresql" % "42.5.4"
+libraryDependencies += "org.postgresql" % "postgresql"          % "42.5.4"
+// https://mvnrepository.com/artifact/org.mongodb/mongodb-driver-sync
+libraryDependencies += "org.mongodb"    % "mongodb-driver-sync" % "4.9.0"
 
 /**
  * Test dependencies.

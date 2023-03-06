@@ -35,28 +35,28 @@ object ConnFormDtoIn       {
   /**
    * DTO for postgres creation.
    */
-  case class PostgresFormDtoIn(name: String, host: String, port: Int, user: String, pwd: String, dbName: String)
+  case class PostgresFormDtoIn(name: String, host: String, port: Int, dbName: String, user: String, pwd: String)
       extends ConnFormDtoIn
 
   /**
    * DTO for mongodb creation.
    */
-  case class MongoDbFormDtoIn(name: String, hostPort: List[HostPort], user: String, pwd: String, dbAuth: String)
+  case class MongoDbFormDtoIn(name: String,
+                              hostPort: List[HostPort],
+                              dbAuth: String,
+                              replicaSet: String,
+                              user: String,
+                              pwd: String)
       extends ConnFormDtoIn
 
   /**
    * Couple host & port for mongodb.
    */
-  case class HostPort(host: String, port: String)
+  case class HostPort(host: String, port: Int)
   object HostPort {
-
-    // JSON (de)serializers
     implicit val hostPortEnc: Encoder[HostPort] = deriveBasedEncoder
     implicit val hostPortDec: Decoder[HostPort] = deriveBasedDecoder
-
-    // Schema serializers
-    implicit val hostPortSch: Schema[HostPort] = Schema.derived
-
+    implicit val hostPortSch: Schema[HostPort]  = Schema.derived
   }
 
 }

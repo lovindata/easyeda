@@ -12,22 +12,26 @@ import scala.jdk.CollectionConverters._
 object JdbcUtils {
 
   /**
-   * Run SQL script.
+   * Auto-closable provided connection to run an execution.
    * @param driver
    *   JDBC Driver to use
-   * @param dbFullUrl
-   *   Database URL
+   * @param dbFullUri
+   *   Database URI
    * @param prop
    *   Key-value pair for the connection such as "user", "password", "warehouse", ...
+   * @param f
+   *   Runnable
+   * @tparam A
+   *   Output datatype
    * @return
-   *   Optional table in string representation according the sql query
+   *   Output from runnable
    */
-  def connIO[A](driver: String, dbFullUrl: String, prop: (String, String)*)(f: Connection => IO[A]): IO[A] = IO
+  def connIO[A](driver: String, dbFullUri: String, prop: (String, String)*)(f: Connection => IO[A]): IO[A] = IO
     .interruptible {
       Class.forName(driver)
       val connProps = new Properties()
       connProps.putAll(prop.toMap.asJava)
-      DriverManager.getConnection(dbFullUrl, connProps)
+      DriverManager.getConnection(dbFullUri, connProps)
     }
     .bracket(f)(conn => IO.interruptible(conn.close()))
 
