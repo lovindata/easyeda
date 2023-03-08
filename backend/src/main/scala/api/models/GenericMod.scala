@@ -65,6 +65,7 @@ trait GenericMod[A <: Product] {
     case x: Timestamp               => fr0"$x"
     case x: Date                    => fr0"$x"
     case x: Json                    => fr0"$x"
+    case x: List[Json]              => fr0"$x"
     case Some(x)                    => anyToFrag(x)
     case None                       => Fragment.const0("null")
     case x: scala.Enumeration#Value => fr0"${x.toString}"

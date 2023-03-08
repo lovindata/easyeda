@@ -32,18 +32,12 @@ object ConnPostgresMod extends GenericMod[ConnPostgresMod] {
    * Constructor of [[ConnPostgresMod]].
    * @param connId
    *   [[ConnMod]] id
-   * @param postgresForm
+   * @param form
    *   [[ConnFormDtoIn.PostgresFormDtoIn]] form
    * @return
    *   A new created postgres connection
    */
-  def apply(connId: Long, postgresForm: ConnFormDtoIn.PostgresFormDtoIn): IO[ConnPostgresMod] = insert(
-    ConnPostgresMod(-1,
-                    connId,
-                    postgresForm.host,
-                    postgresForm.port,
-                    postgresForm.dbName,
-                    postgresForm.user,
-                    postgresForm.pwd))
+  def apply(connId: Long, form: ConnFormDtoIn.PostgresFormDtoIn): IO[ConnPostgresMod] = insert(
+    ConnPostgresMod(-1, connId, form.host, form.port, form.dbName, form.user, form.pwd))
 
 }

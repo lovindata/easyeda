@@ -38,7 +38,11 @@ object ConnMod extends GenericMod[ConnMod] {
         conn <- insert(ConnMod(-1, userId, ConnKindEnum.postgres, form.name))
         _    <- ConnPostgresMod(conn.id, form)
       } yield conn
-    case _: ConnFormDtoIn.MongoDbFormDtoIn     => ???
+    case form: ConnFormDtoIn.MongoDbFormDtoIn  =>
+      for {
+        conn <- insert(ConnMod(-1, userId, ConnKindEnum.mongodb, form.name))
+        _    <- ConnMongoDbMod(conn.id, form)
+      } yield conn
   }
 
 }

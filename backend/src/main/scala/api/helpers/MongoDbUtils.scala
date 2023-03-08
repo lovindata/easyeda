@@ -4,11 +4,12 @@ package api.helpers
 import cats.effect.IO
 import com.mongodb._
 import com.mongodb.client._
+import scala.concurrent.duration._
 
 /**
  * MongoDB related utils.
  */
-object MongoDBUtils {
+object MongoDbUtils {
 
   /**
    * Auto-closable provided connection to run an execution.
@@ -33,8 +34,14 @@ object MongoDBUtils {
       f: MongoClient => IO[A]): IO[A] = IO
     .interruptible {
       val connURI =
-        s"mongodb://$user:$pwd@${hostPort.map { case (host, port) => s"$host:$port" }.mkString(",")}/?ssl=true&replicaSet=$replicaSet&authSource=$dbAuth&retryWrites=true&w=majority"
-      MongoClients.create(MongoClientSettings.builder().applyConnectionString(new ConnectionString(connURI)).build())
+        s"mongodb://$user:$pwd@${hostPort.map { case (host, port) => s"$host:$port" }.mkString(",")}/" +
+          s"?ssl=true&replicaSet=$replicaSet&authSource=$dbAuth&retryWrites=true&w=majority"
+      MongoClients.create(
+        MongoClientSettings
+          .builder()
+          .applyConnectionString(new ConnectionString(connURI))
+          .applyToClusterSettings(x => x.serverSelectionTimeout(1, SECONDS))
+          .build())
     }
     .bracket(f)(conn => IO.interruptible(conn.close()))
 

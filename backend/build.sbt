@@ -50,13 +50,13 @@ libraryDependencies += "org.http4s" %% "http4s-dsl"          % "0.23.18"
 
 // Circe
 // https://mvnrepository.com/artifact/io.circe/circe-parser
-libraryDependencies += "io.circe" %% "circe-parser"         % "0.14.4"
+libraryDependencies += "io.circe" %% "circe-parser"         % "0.14.5"
 // https://mvnrepository.com/artifact/io.circe/circe-generic
-libraryDependencies += "io.circe" %% "circe-generic"        % "0.14.4"
+libraryDependencies += "io.circe" %% "circe-generic"        % "0.14.5"
 // https://mvnrepository.com/artifact/io.circe/circe-generic-extras
 libraryDependencies += "io.circe" %% "circe-generic-extras" % "0.14.3"
 // https://mvnrepository.com/artifact/io.circe/circe-literal
-libraryDependencies += "io.circe" %% "circe-literal"        % "0.14.4"
+libraryDependencies += "io.circe" %% "circe-literal"        % "0.14.5"
 // https://mvnrepository.com/artifact/io.circe/circe-fs2
 libraryDependencies += "io.circe" %% "circe-fs2"            % "0.14.1"
 

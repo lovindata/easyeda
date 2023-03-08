@@ -57,11 +57,12 @@ CREATE TABLE IF NOT EXISTS elodata_sch.conn_postgres (
 );
 
 -- Create mongodb connection table
-CREATE TABLE IF NOT EXISTS elodata_sch.conn_mongodb (
+CREATE TABLE IF NOT EXISTS elodata_sch.conn_mongo_db (
 	id bigserial NOT NULL,
 	conn_id bigint NOT NULL,
-	host_port text [] [2] NOT NULL,
+	host_port jsonb [] NOT NULL,
 	db_auth text NOT NULL,
+	replica_set text NOT NULL,
 	"user" text NOT NULL,
 	pwd text NOT NULL,
 	PRIMARY KEY (id),

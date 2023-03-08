@@ -16,24 +16,25 @@ object ConnSvc {
 
   /**
    * Test connection.
-   * @param connForm
+   * @param form
    *   Provided connection form
    * @return
    *   [[ConnTestDtoOut]]
    */
-  def testConn(connForm: ConnFormDtoIn): IO[ConnTestDtoOut] = (connForm match {
+  def testConn(form: ConnFormDtoIn): IO[ConnTestDtoOut] = (form match {
     case PostgresFormDtoIn(_, host, port, dbName, user, pwd)          =>
       JdbcUtils
         .connIO("org.postgresql.Driver", s"jdbc:postgresql://$host:$port/$dbName", "user" -> user, "password" -> pwd)(
           conn => IO.interruptible(conn.isValid(5)))
     case MongoDbFormDtoIn(_, hostPort, dbAuth, replicaSet, user, pwd) =>
-      MongoDBUtils.connIO(hostPort.map(x => x.host -> x.port), dbAuth, replicaSet, user, pwd)(conn =>
+      MongoDbUtils.connIO(hostPort.map(x => x.host -> x.port), dbAuth, replicaSet, user, pwd)(conn =>
         IO.interruptible {
           conn
-            .getDatabase("sample_airbnb")
+            .getDatabase(dbAuth)
             .runCommand(
               new BsonDocument("ping", new BsonInt64(1))
             ) // Verify connection https://www.mongodb.com/docs/drivers/java/sync/current/fundamentals/connection/connect/
+          // & https://www.mongodb.com/docs/manual/reference/command/ping/
           true
         })
   }).redeem(_ => ConnTestDtoOut(false), ConnTestDtoOut(_))
