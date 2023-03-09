@@ -4,7 +4,8 @@ package api.dto.input
 import io.circe._
 import io.circe.generic.extras._
 import io.circe.generic.extras.semiauto._
-import io.circe.generic.semiauto.{deriveDecoder => deriveBasedDecoder, deriveEncoder => deriveBasedEncoder, _}
+import io.circe.generic.semiauto.{deriveDecoder => deriveBasedDecoder}
+import io.circe.generic.semiauto.{deriveEncoder => deriveBasedEncoder}
 import sttp.tapir.Schema
 import sttp.tapir.generic.{Configuration => TapirConfiguration}
 

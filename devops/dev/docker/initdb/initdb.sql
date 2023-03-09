@@ -36,11 +36,11 @@ CREATE TABLE IF NOT EXISTS elodata_sch.token (
 CREATE TABLE IF NOT EXISTS elodata_sch.conn (
 	id bigserial NOT NULL,
 	user_id bigint NOT NULL,
-	kind text NOT NULL,
+	"type" text NOT NULL,
 	"name" text NOT NULL,
 	PRIMARY KEY (id),
 	FOREIGN KEY (user_id) REFERENCES elodata_sch.user,
-	CHECK (kind = 'postgres' OR kind = 'mongodb')
+	CHECK ("type" = 'postgres' OR "type" = 'mongodb')
 );
 
 -- Create postgres connection table

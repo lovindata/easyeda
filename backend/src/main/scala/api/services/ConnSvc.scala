@@ -54,6 +54,6 @@ object ConnSvc {
 
     // Create
     connMod <- ConnMod(user.id, form)
-  } yield ConnStatusDtoOut(connMod.id, connMod.kind, connMod.name, isUp)
+  } yield ConnStatusDtoOut(connMod.id, connMod.`type`, connMod.name, isUp)
 
 }

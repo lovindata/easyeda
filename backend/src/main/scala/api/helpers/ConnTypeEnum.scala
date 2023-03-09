@@ -1,0 +1,28 @@
+package com.ilovedatajjia
+package api.helpers
+
+import doobie._
+import io.circe._
+import sttp.tapir.Schema
+
+/**
+ * Enum of possible connections.
+ */
+object ConnTypeEnum extends Enumeration {
+
+  // Enum
+  type ConnType = Value
+  val postgres: ConnType = Value("postgres")
+  val mongodb: ConnType  = Value("mongodb")
+
+  // JSON (de)serializers
+  implicit val enc: Encoder[ConnType] = x => Json.fromString(x.toString)
+  implicit val dec: Decoder[ConnType] = _.value.as[String].map(ConnTypeEnum.withName)
+
+  // Schema serializer(s)
+  implicit val sch: Schema[ConnType] = Schema.derivedEnumerationValue
+
+  // Doobie mapping
+  implicit val meta: Meta[ConnType] = Meta[String].timap(withName)(_.toString)
+
+}

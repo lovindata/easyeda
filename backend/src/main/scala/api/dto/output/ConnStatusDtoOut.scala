@@ -1,7 +1,7 @@
 package com.ilovedatajjia
 package api.dto.output
 
-import api.helpers.ConnKindEnum
+import api.helpers.ConnTypeEnum
 import io.circe._
 import io.circe.generic.semiauto._
 import sttp.tapir.Schema
@@ -10,14 +10,14 @@ import sttp.tapir.Schema
  * DTO for connections status.
  * @param id
  *   Connection id
- * @param kind
- *   Connection kind
+ * @param `type`
+ *   Connection type
  * @param name
  *   Connection name
  * @param isUp
  *   Connection status
  */
-case class ConnStatusDtoOut(id: Long, kind: ConnKindEnum.ConnKind, name: String, isUp: Boolean)
+case class ConnStatusDtoOut(id: Long, `type`: ConnTypeEnum.ConnType, name: String, isUp: Boolean)
 
 /**
  * [[ConnTestDtoOut]] companion.

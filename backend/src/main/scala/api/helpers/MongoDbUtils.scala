@@ -2,8 +2,7 @@ package com.ilovedatajjia
 package api.helpers
 
 import cats.effect.IO
-import com.mongodb._
-import com.mongodb.client._
+import org.mongodb.scala._
 import scala.concurrent.duration._
 
 /**
@@ -36,10 +35,10 @@ object MongoDbUtils {
       val connURI =
         s"mongodb://$user:$pwd@${hostPort.map { case (host, port) => s"$host:$port" }.mkString(",")}/" +
           s"?ssl=true&replicaSet=$replicaSet&authSource=$dbAuth&retryWrites=true&w=majority"
-      MongoClients.create(
+      MongoClient(
         MongoClientSettings
           .builder()
-          .applyConnectionString(new ConnectionString(connURI))
+          .applyConnectionString(ConnectionString(connURI))
           .applyToClusterSettings(x => x.serverSelectionTimeout(1, SECONDS))
           .build())
     }
