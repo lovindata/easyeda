@@ -6,8 +6,7 @@ import api.helpers.DoobieUtils._
 import api.helpers.JdbcUtils._
 import api.helpers.StringUtils._
 import cats.effect.IO
-import config.ConfigLoader
-import config.DBDriver
+import config._
 import io.circe.Json
 import java.sql.Date
 import java.sql.Timestamp
@@ -117,8 +116,8 @@ trait GenericMod[A <: Product] {
    *   case class PersonMod(id: Long, name: String)
    *   object PersonMod extends GenericRep[PersonMod]
    *
-   *   import doobie.implicits._      // To use fragment interpolator
-   *   Person.select(fr"id = ${1}")   // List[PersonMod]
+   *   import api.helpers.DoobieUtils._   // To use fragment interpolator
+   *   Person.select(fr"id = ${1}")       // List[PersonMod]
    *   }}}
    */
   def select(condition: Fragment)(implicit read: Read[A]): IO[List[A]] = DBDriver.run {

@@ -27,9 +27,6 @@ object ConnFormDtoIn       {
 
   // Schema serializers
   implicit val schConf: TapirConfiguration = TapirConfiguration.default.withDiscriminator("kind")
-  // .copy(toDiscriminatorValue = { case SName(fullName, _) =>
-  //   fullName.split("\\.").last
-  // })
   implicit val sch: Schema[ConnFormDtoIn]  = Schema.derived
 
   /**

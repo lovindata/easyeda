@@ -48,7 +48,7 @@ CREATE TABLE IF NOT EXISTS elodata_sch.conn_postgres (
 	id bigserial NOT NULL,
 	conn_id bigint NOT NULL,
 	host text NOT NULL,
-	port text NOT NULL,
+	port int NOT NULL,
 	db_name text NOT NULL,
 	"user" text NOT NULL,
 	pwd text NOT NULL,
@@ -60,7 +60,6 @@ CREATE TABLE IF NOT EXISTS elodata_sch.conn_postgres (
 CREATE TABLE IF NOT EXISTS elodata_sch.conn_mongo_db (
 	id bigserial NOT NULL,
 	conn_id bigint NOT NULL,
-	host_port jsonb [] NOT NULL,
 	db_auth text NOT NULL,
 	replica_set text NOT NULL,
 	"user" text NOT NULL,
@@ -68,3 +67,13 @@ CREATE TABLE IF NOT EXISTS elodata_sch.conn_mongo_db (
 	PRIMARY KEY (id),
 	FOREIGN KEY (conn_id) REFERENCES elodata_sch.conn
 );
+
+-- Create mongodb connection host port table
+CREATE TABLE IF NOT EXISTS elodata_sch.conn_mongo_db_host_port (
+	id bigserial NOT NULL,
+	conn_mongo_db_id bigint NOT NULL,
+	host text NOT NULL,
+	port int NOT NULL,
+	PRIMARY KEY (id),
+	FOREIGN KEY (conn_mongo_db_id) REFERENCES elodata_sch.conn_mongo_db
+)

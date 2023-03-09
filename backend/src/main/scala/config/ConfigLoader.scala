@@ -11,14 +11,14 @@ object ConfigLoader {
 
   // Main server conf
   val frontEndResourcePath: String = allEnvVar.getOrElse("FRONTEND_RESOURCES", default = "./frontend/dist")
-  val frontEndPort: String         = allEnvVar.getOrElse("FRONTEND_PORT", default = "8080")
-  val backEndPort: String          = allEnvVar.getOrElse("BACKEND_PORT", default = "8081")
-  val sparkUIPort: String          = allEnvVar.getOrElse("SPARK_UI_PORT", default = "4040")
-  val tokenDuration: String        = allEnvVar.getOrElse("TOKEN_DURATION", default = "3600") // In seconds
+  val frontEndPort: Int            = allEnvVar.getOrElse("FRONTEND_PORT", default = "8080").toInt
+  val backEndPort: Int             = allEnvVar.getOrElse("BACKEND_PORT", default = "8081").toInt
+  val sparkUIPort: Int             = allEnvVar.getOrElse("SPARK_UI_PORT", default = "4040").toInt
+  val tokenDuration: Long          = allEnvVar.getOrElse("TOKEN_DURATION", default = "3600").toLong // In seconds
 
   // DB conf
   val dbIp: String      = allEnvVar.getOrElse("DB_IP", default = "localhost")
-  val dbPort: String    = allEnvVar.getOrElse("DB_PORT", default = "5432")
+  val dbPort: Int       = allEnvVar.getOrElse("DB_PORT", default = "5432").toInt
   val dbDbName: String  = allEnvVar.getOrElse("DB_DBNAME", default = "elodata_db")
   val dbSchName: String = allEnvVar.getOrElse("DB_SCHNAME", default = "elodata_sch")
   val dbUser: String    = allEnvVar.getOrElse("DB_USER", default = "elodata_user")

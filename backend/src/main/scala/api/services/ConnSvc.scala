@@ -49,8 +49,8 @@ object ConnSvc {
   def createConn(user: UserMod, form: ConnFormDtoIn): IO[ConnStatusDtoOut] = for {
     // Check connectivity
     isUp    <- testConn(form).map(_.isUp)
-    _       <- IO.raiseUnless(isUp)(
-                 AppException("Impossible to connect please verify your external service and provided information."))
+    _       <-
+      IO.raiseUnless(isUp)(AppException("Impossible to connect verify your external service and provided information."))
 
     // Create
     connMod <- ConnMod(user.id, form)

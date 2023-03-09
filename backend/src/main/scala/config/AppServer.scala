@@ -41,7 +41,7 @@ object AppServer {
     _ <- EmberServerBuilder
            .default[IO]
            .withHost(ipv4"127.0.0.1") // Localhost equivalent
-           .withPort(Port.fromString(frontEndPort).get)
+           .withPort(Port.fromInt(frontEndPort).get)
            .withHttpApp(frontEndRts.orNotFound)
            .build
            .use(_ => IO.never)
@@ -51,7 +51,7 @@ object AppServer {
     _ <- EmberServerBuilder
            .default[IO]
            .withHost(ipv4"127.0.0.1") // Localhost equivalent
-           .withPort(Port.fromString(backEndPort).get)
+           .withPort(Port.fromInt(backEndPort).get)
            .withHttpApp(CORS.policy.withAllowOriginAll(backEndRts).orNotFound)
            .build
            .use(_ => IO.never)
