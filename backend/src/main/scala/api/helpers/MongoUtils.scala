@@ -2,13 +2,14 @@ package com.ilovedatajjia
 package api.helpers
 
 import cats.effect.IO
+import org.bson._
 import org.mongodb.scala._
 import scala.concurrent.duration._
 
 /**
  * MongoDB related utils.
  */
-object MongoDbUtils {
+object MongoUtils {
 
   /**
    * Auto-closable provided connection to run an execution.
@@ -43,5 +44,35 @@ object MongoDbUtils {
           .build())
     }
     .bracket(f)(conn => IO.interruptible(conn.close()))
+
+  /**
+   * Test MongoDB connection.
+   * @param hostPort
+   *   Couple host port
+   * @param dbAuth
+   *   Authentication source database
+   * @param replicaSet
+   *   Replica set name configuration
+   * @param user
+   *   User
+   * @param pwd
+   *   Password
+   * @return
+   *   [[Boolean]] if connection available
+   */
+  def testIO(hostPort: List[(String, Int)],
+             dbAuth: String,
+             replicaSet: String,
+             user: String,
+             pwd: String): IO[Boolean] = connIO(hostPort, dbAuth, replicaSet, user, pwd)(conn =>
+    IO.interruptible {
+      conn
+        .getDatabase(dbAuth)
+        .runCommand(
+          new BsonDocument("ping", new BsonInt64(1))
+        ) // Verify connection https://www.mongodb.com/docs/drivers/java/sync/current/fundamentals/connection/connect/
+      // & https://www.mongodb.com/docs/manual/reference/command/ping/
+      true
+    })
 
 }

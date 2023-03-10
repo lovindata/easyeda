@@ -39,12 +39,12 @@ object ConnFormDtoIn       {
   /**
    * DTO for mongodb creation.
    */
-  case class MongoDbFormDtoIn(name: String,
-                              hostPort: List[HostPort],
-                              dbAuth: String,
-                              replicaSet: String,
-                              user: String,
-                              pwd: String)
+  case class MongoFormDtoIn(name: String,
+                            hostPort: List[HostPort],
+                            dbAuth: String,
+                            replicaSet: String,
+                            user: String,
+                            pwd: String)
       extends ConnFormDtoIn
 
   /**

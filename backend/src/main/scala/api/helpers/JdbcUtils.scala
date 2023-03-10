@@ -36,6 +36,20 @@ object JdbcUtils {
     .bracket(f)(conn => IO.interruptible(conn.close()))
 
   /**
+   * Test JDBC connection.
+   * @param driver
+   *   JDBC Driver to use
+   * @param dbFullUri
+   *   Database URI
+   * @param prop
+   *   Key-value pair for the connection such as "user", "password", "warehouse", ...
+   * @return
+   *   [[Boolean]] if connection available
+   */
+  def testIO(driver: String, dbFullUri: String, prop: (String, String)*): IO[Boolean] =
+    connIO(driver, dbFullUri, prop: _*)(conn => IO.interruptible(conn.isValid(5)))
+
+  /**
    * Rich [[String]].
    */
   implicit class RichString(x: String) {

@@ -40,7 +40,7 @@ CREATE TABLE IF NOT EXISTS elodata_sch.conn (
 	"name" text NOT NULL,
 	PRIMARY KEY (id),
 	FOREIGN KEY (user_id) REFERENCES elodata_sch.user,
-	CHECK ("type" = 'postgres' OR "type" = 'mongodb')
+	CHECK ("type" = 'postgres' OR "type" = 'mongo')
 );
 
 -- Create postgres connection table
@@ -56,8 +56,8 @@ CREATE TABLE IF NOT EXISTS elodata_sch.conn_postgres (
 	FOREIGN KEY (conn_id) REFERENCES elodata_sch.conn
 );
 
--- Create mongodb connection table
-CREATE TABLE IF NOT EXISTS elodata_sch.conn_mongo_db (
+-- Create mongo connection table
+CREATE TABLE IF NOT EXISTS elodata_sch.conn_mongo (
 	id bigserial NOT NULL,
 	conn_id bigint NOT NULL,
 	db_auth text NOT NULL,
@@ -68,12 +68,12 @@ CREATE TABLE IF NOT EXISTS elodata_sch.conn_mongo_db (
 	FOREIGN KEY (conn_id) REFERENCES elodata_sch.conn
 );
 
--- Create mongodb connection host port table
-CREATE TABLE IF NOT EXISTS elodata_sch.conn_mongo_db_host_port (
+-- Create mongo connection host port table
+CREATE TABLE IF NOT EXISTS elodata_sch.conn_mongo_host_port (
 	id bigserial NOT NULL,
-	conn_mongo_db_id bigint NOT NULL,
+	conn_mongo_id bigint NOT NULL,
 	host text NOT NULL,
 	port int NOT NULL,
 	PRIMARY KEY (id),
-	FOREIGN KEY (conn_mongo_db_id) REFERENCES elodata_sch.conn_mongo_db
+	FOREIGN KEY (conn_mongo_id) REFERENCES elodata_sch.conn_mongo
 )

@@ -35,13 +35,13 @@ object ConnMod extends GenericMod[ConnMod] {
   def apply(userId: Long, form: ConnFormDtoIn): IO[ConnMod] = form match {
     case form: ConnFormDtoIn.PostgresFormDtoIn =>
       for {
-        conn <- insert(ConnMod(-1, userId, ConnTypeEnum.postgres, form.name))
+        conn <- insert(ConnMod(-1, userId, ConnTypeEnum.Postgres, form.name))
         _    <- ConnPostgresMod(conn.id, form)
       } yield conn
-    case form: ConnFormDtoIn.MongoDbFormDtoIn  =>
+    case form: ConnFormDtoIn.MongoFormDtoIn  =>
       for {
-        conn <- insert(ConnMod(-1, userId, ConnTypeEnum.mongodb, form.name))
-        _    <- ConnMongoDbMod(conn.id, form)
+        conn <- insert(ConnMod(-1, userId, ConnTypeEnum.Mongo, form.name))
+        _    <- ConnMongoMod(conn.id, form)
       } yield conn
   }
 

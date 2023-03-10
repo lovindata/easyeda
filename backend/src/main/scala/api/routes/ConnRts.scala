@@ -49,17 +49,28 @@ object ConnRts extends GenericRts {
     ConnCtrl.createConn(user, form).toErrHandled
   })
 
+  // List connection
+  private val listEpt: PartialServerEndpoint[String, UserMod, Unit, AppException, List[ConnStatusDtoOut], Any, IO] =
+    authEpt
+      .summary("listing all connections")
+      .post
+      .in("conn" / "list")
+      .out(jsonBody[List[ConnStatusDtoOut]])
+  private val listRts: HttpRoutes[IO]                                                                              =
+    Http4sServerInterpreter[IO]().toRoutes(listEpt.serverLogic { user => _ => ConnSvc.listConn(user).toErrHandled })
+
   /**
    * Get all endpoints.
    * @return
    *   Concatenated endpoints
    */
-  override def docEpt: List[AnyEndpoint] = List(testEpt, createEpt).map(_.endpoint)
+  override def docEpt: List[AnyEndpoint] = List(testEpt, createEpt, listEpt).map(_.endpoint)
 
   /**
    * Get all applicative routes.
    * @return
    *   Concatenated routes
    */
-  override def appRts: HttpRoutes[IO] = testRts <+> createRts
+  override def appRts: HttpRoutes[IO] = testRts <+> createRts <+> listRts
+
 }

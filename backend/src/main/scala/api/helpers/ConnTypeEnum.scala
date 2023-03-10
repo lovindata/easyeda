@@ -12,8 +12,8 @@ object ConnTypeEnum extends Enumeration {
 
   // Enum
   type ConnType = Value
-  val postgres: ConnType = Value("postgres")
-  val mongodb: ConnType  = Value("mongodb")
+  val Postgres: ConnType = Value("postgres")
+  val Mongo: ConnType    = Value("mongo")
 
   // JSON (de)serializers
   implicit val enc: Encoder[ConnType] = x => Json.fromString(x.toString)
