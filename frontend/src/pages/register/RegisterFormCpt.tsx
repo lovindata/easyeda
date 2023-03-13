@@ -9,7 +9,7 @@ import { useEffect } from "react";
 /**
  * Registration form.
  */
-function RegisterForm() {
+function RegisterFormCpt() {
   // Pre-requisites
   const { register, handleSubmit } = useForm();
   const { addToast } = useToaster();
@@ -85,4 +85,4 @@ function RegisterForm() {
   );
 }
 
-export default RegisterForm;
+export default RegisterFormCpt;

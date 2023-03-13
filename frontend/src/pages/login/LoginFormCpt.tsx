@@ -9,7 +9,7 @@ import { useToaster, ToastLevelEnum, useUser } from "../../context";
 /**
  * Login form.
  */
-function LoginForm() {
+function LoginFormCpt() {
   // Pre-requisites
   const { register, handleSubmit } = useForm();
   const { setAccessToken, setExpireAt, setRefreshToken } = useUser();
@@ -101,4 +101,4 @@ function LoginForm() {
   );
 }
 
-export default LoginForm;
+export default LoginFormCpt;
