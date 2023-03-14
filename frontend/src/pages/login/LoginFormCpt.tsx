@@ -89,8 +89,8 @@ function LoginFormCpt() {
         name="Connexion"
         isLoading={isLoading}
         extra={
-          <div className="flex space-x-1 text-sm text-white">
-            <p className="opacity-50">Need an account? </p>
+          <div className="flex space-x-1 text-sm brightness-75">
+            <p>Need an account? </p>
             <Link to="/register" className="text-sm text-sky-500 hover:underline">
               Sign up
             </Link>

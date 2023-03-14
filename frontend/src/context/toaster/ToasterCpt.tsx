@@ -78,16 +78,16 @@ function ToastCpt(props: { toast: Toast }) {
   return (
     <div
       className={
-        "flex items-center space-x-3 rounded bg-transparent p-1.5 hover:bg-slate-700" +
+        "flex items-center space-x-3 rounded bg-transparent p-1.5" +
         ` transition-all duration-${duration} ease-in-out` +
         ` origin-right ${mounted ? "scale-x-100" : "scale-x-0"}`
       }
     >
       {VBarCpt}
       {IconCpt}
-      <div className="w-64 pr-1.5 text-white">
+      <div className="w-64 pr-1.5">
         <h1 className="text-sm font-semibold">{props.toast.header}</h1>
-        {props.toast.message && <p className="text-xs opacity-50">{props.toast.message}</p>}
+        {props.toast.message && <p className="text-xs brightness-75">{props.toast.message}</p>}
       </div>
     </div>
   );

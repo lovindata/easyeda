@@ -56,25 +56,25 @@ function RegisterFormCpt() {
           className="h-5 w-5 rounded border-none bg-slate-800 text-emerald-500 focus:ring-0 focus:ring-offset-0"
           {...register("isTermsAccepted")}
         />
-        <label className="flex space-x-1 text-xs opacity-75">
+        <label className="flex space-x-1 text-xs">
           <p className="text-red-500">*</p>
-          <p className=" text-white">I have read and accept the</p>
+          <p>I have read and accept the</p>
           <a href="https://github.com/iLoveDataJjia/easyeda/blob/main/LICENSE" className="text-sky-500 hover:underline">
             terms of service
           </a>
-          <p className=" text-white">and</p>
+          <p>and</p>
           <a href="https://github.com/iLoveDataJjia/easyeda/blob/main/LICENSE" className="text-sky-500 hover:underline">
             privacy policy
           </a>
-          <p className=" text-white">of DatapiU.</p>
+          <p>of DatapiU.</p>
         </label>
       </div>
       <ButtonSubmitCpt
         name="Continue"
         isLoading={isLoading}
         extra={
-          <div className="flex space-x-1 text-sm text-white">
-            <p className="opacity-50">Already have an account?</p>
+          <div className="flex space-x-1 text-sm brightness-75">
+            <p>Already have an account?</p>
             <Link to="/login" className="text-sm text-sky-500 hover:underline">
               Sign in
             </Link>

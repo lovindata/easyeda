@@ -1,14 +1,18 @@
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { Conn, Pipeline } from "../../assets";
 
 /**
  * Sidebar component.
  */
 export function SideBarCpt() {
+  // Get current path
+  const currentPath = useLocation().pathname;
+
+  // Render
   return (
     <div className="flex h-screen w-16 flex-col justify-center bg-slate-800">
-      <IconTabLink to="connections" title="Connections" svg={Conn} />
-      <IconTabLink to="pipelines" title="Pipelines" svg={Pipeline} />
+      <IconTabLink to="connections" title="Connections" svg={Conn} isCurrent={currentPath == "/app/connections"} />
+      <IconTabLink to="pipelines" title="Pipelines" svg={Pipeline} isCurrent={currentPath == "/app/pipelines"} />
     </div>
   );
 }
@@ -24,14 +28,24 @@ function IconTabLink(props: {
       title?: string | undefined;
     }
   >;
+  isCurrent: boolean;
 }) {
   return (
-    <Link to={props.to} className="p-2">
-      <props.svg
-        className="rounded-xl fill-white p-1.5 transition-all duration-300
-      ease-in-out hover:bg-white hover:fill-slate-700"
+    <div className="relative flex flex-col justify-center p-4">
+      <span
+        className={`absolute -ml-4 h-2/3 w-1 rounded-r bg-emerald-500
+        transition-all duration-300 ease-in-out ${props.isCurrent ? "scale-100" : "scale-0"}`}
       />
-      <div className="absolute">{props.title}</div>
-    </Link>
+      <Link to={props.to} className="peer">
+        <props.svg className=" fill-emerald-500 hover:brightness-150" />
+      </Link>
+      <div
+        className="pointer-events-none absolute left-full ml-2 origin-left scale-0 select-none rounded-xl bg-slate-800
+        p-2 text-sm font-bold
+        transition-all duration-300 ease-in-out peer-hover:scale-100"
+      >
+        {props.title}
+      </div>
+    </div>
   );
 }
