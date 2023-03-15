@@ -4,7 +4,7 @@ import { ButtonSubmitCpt, PwdInputCpt, TextInputCpt, TitleCpt } from "../../comp
 import { TokenDtoOut, UserStatusDtoOut } from "../../data";
 import { useGet, usePost } from "../../hooks";
 import { useEffect } from "react";
-import { useToaster, ToastLevelEnum, useUser } from "../../context";
+import { useToaster, ToastLevelEnum, useUserContext } from "../../context";
 
 /**
  * Login form.
@@ -12,7 +12,7 @@ import { useToaster, ToastLevelEnum, useUser } from "../../context";
 function LoginFormCpt() {
   // Pre-requisites
   const { register, handleSubmit } = useForm();
-  const { setAccessToken, setExpireAt, setRefreshToken } = useUser();
+  const { setAccessToken, setExpireAt, setRefreshToken } = useUserContext();
 
   // Effect running on log in changes
   const { post, isLoading, data } = usePost<TokenDtoOut>("/user/login", "TokenDtoOut");
@@ -26,15 +26,9 @@ function LoginFormCpt() {
         get({ Authorization: `Bearer ${data.accessToken}` });
         break;
       case "AppException":
-        setAccessToken(undefined);
-        setExpireAt(undefined);
-        setRefreshToken(undefined);
         addToast(ToastLevelEnum.Error, "😧 Ooh uh, log in issue?", data.message);
         break;
       default:
-        setAccessToken(undefined);
-        setExpireAt(undefined);
-        setRefreshToken(undefined);
         break;
     }
   }, [data]);

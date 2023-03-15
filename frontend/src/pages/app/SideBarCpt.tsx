@@ -33,11 +33,11 @@ function IconTabLink(props: {
   return (
     <div className="relative flex flex-col justify-center p-4">
       <span
-        className={`absolute -ml-4 h-2/3 w-1 rounded-r bg-emerald-500
+        className={`absolute -ml-4 h-2/3 w-1 rounded-r bg-emerald-500 brightness-150
         transition-all duration-300 ease-in-out ${props.isCurrent ? "scale-100" : "scale-0"}`}
       />
       <Link to={props.to} className="peer">
-        <props.svg className=" fill-emerald-500 hover:brightness-150" />
+        <props.svg className={`fill-emerald-500 ${props.isCurrent ? "brightness-150" : "hover:brightness-150"}`} />
       </Link>
       <div
         className="pointer-events-none absolute left-full ml-2 origin-left scale-0 select-none rounded-xl bg-slate-800

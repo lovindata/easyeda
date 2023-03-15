@@ -1,7 +1,7 @@
 import { useContext } from "react";
 import { UserContext, IUserContext } from "./UserCtx";
-import { usePost } from "../../hooks";
-import { TokenDtoOut } from "../../data";
+import { usePost, useGet } from "../../hooks";
+import { TokenDtoOut, UserStatusDtoOut } from "../../data";
 import { useEffect } from "react";
 
 /**
@@ -44,4 +44,10 @@ export function useUserConnect() {
 /**
  * User info hook.
  */
-export function useUser() {}
+export function useUser() {
+  // Pre-requisites
+  const { accessToken, expireAt, refreshToken } = useUserContext();
+  const { get: get, data: dataUserInfo } = useGet<UserStatusDtoOut>("/user/retrieve", "UserStatusDtoOut");
+
+  // TODO HERE
+}
