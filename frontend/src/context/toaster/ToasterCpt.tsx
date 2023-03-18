@@ -12,7 +12,7 @@ export function ToasterCpt() {
 
   // Render
   return (
-    <div className="absolute right-2 bottom-2 space-y-2">
+    <div className="fixed right-2 bottom-2 select-none space-y-2">
       {toasts.map((toast, _) => (
         <ToastCpt toast={toast} key={toast.id} />
       ))}

@@ -14,7 +14,7 @@ object ConfigLoader {
   val frontEndPort: Int            = allEnvVar.getOrElse("FRONTEND_PORT", default = "8080").toInt
   val backEndPort: Int             = allEnvVar.getOrElse("BACKEND_PORT", default = "8081").toInt
   val sparkUIPort: Int             = allEnvVar.getOrElse("SPARK_UI_PORT", default = "4040").toInt
-  val tokenDuration: Long          = allEnvVar.getOrElse("TOKEN_DURATION", default = Long.MaxValue.toString).toLong // In seconds
+  val tokenDuration: Long          = allEnvVar.getOrElse("TOKEN_DURATION", default = "3600").toLong // In seconds
 
   // DB conf
   val dbIp: String      = allEnvVar.getOrElse("DB_IP", default = "localhost")

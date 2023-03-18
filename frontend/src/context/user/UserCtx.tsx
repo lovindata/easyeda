@@ -1,15 +1,25 @@
-import { useState, createContext, useEffect } from "react";
+import { useState, createContext, useEffect, useCallback } from "react";
 
 /**
  * User context type.
  */
 export interface IUserContext {
-  accessToken?: string;
-  setAccessToken: React.Dispatch<React.SetStateAction<string | undefined>>;
-  expireAt?: string;
-  setExpireAt: React.Dispatch<React.SetStateAction<string | undefined>>;
-  refreshToken?: string;
-  setRefreshToken: React.Dispatch<React.SetStateAction<string | undefined>>;
+  tokens:
+    | {
+        accessToken: string;
+        expireAt: string;
+        refreshToken: string;
+      }
+    | undefined;
+  setTokens: (
+    tokens:
+      | {
+          accessToken: string;
+          expireAt: string;
+          refreshToken: string;
+        }
+      | undefined
+  ) => void;
 }
 
 /**
@@ -44,16 +54,26 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     refreshToken ? localStorage.setItem("refreshToken", refreshToken) : localStorage.removeItem("refreshToken");
   }, [refreshToken]);
 
+  // Tokens
+  const tokens =
+    accessToken && expireAt && refreshToken
+      ? { accessToken: accessToken, expireAt: expireAt, refreshToken: refreshToken }
+      : undefined;
+  const setTokens = useCallback(
+    (tokens: { accessToken: string; expireAt: string; refreshToken: string } | undefined) => {
+      setAccessToken(tokens?.accessToken);
+      setExpireAt(tokens?.expireAt);
+      setRefreshToken(tokens?.refreshToken);
+    },
+    []
+  );
+
   // Render
   return (
     <UserContext.Provider
       value={{
-        accessToken: accessToken,
-        setAccessToken: setAccessToken,
-        expireAt: expireAt,
-        setExpireAt: setExpireAt,
-        refreshToken: refreshToken,
-        setRefreshToken: setRefreshToken,
+        tokens: tokens,
+        setTokens: setTokens,
       }}
     >
       {children}

@@ -3,7 +3,7 @@ import { HomePg } from "./home/HomePg";
 import { ConnsPg } from "./connections/ConnsPg";
 import { PipelinesPg } from "./pipelines/PipelinesPg";
 import { SideBarCpt } from "./SideBarCpt";
-import { useUserContext } from "../../context";
+import { useUser, useToaster, ToastLevelEnum } from "../../context";
 import { useEffect } from "react";
 
 /**
@@ -11,11 +11,15 @@ import { useEffect } from "react";
  */
 export function AppPg() {
   // Redirect to login if not connected
-  const { accessToken } = useUserContext();
+  const { user, isDoomed } = useUser();
   const navigate = useNavigate();
+  const { addToast } = useToaster();
   useEffect(() => {
-    !accessToken && navigate("/login");
-  }, []);
+    if (isDoomed) {
+      addToast(ToastLevelEnum.Warning, "Not connected", "Connection lost or account not provided.");
+      navigate("/login");
+    }
+  }, [user]);
 
   // Render
   return (

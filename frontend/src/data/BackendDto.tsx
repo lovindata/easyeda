@@ -1,16 +1,14 @@
 /**
  * Server exception dto.
  */
-export interface AppException {
-  kind: "AppException";
+export interface AppExceptionODto {
   message: string;
 }
 
 /**
  * Tokens dto.
  */
-export interface TokenDtoOut {
-  kind: "TokenDtoOut";
+export interface TokenODto {
   accessToken: string;
   expireAt: string;
   refreshToken: string;
@@ -19,8 +17,7 @@ export interface TokenDtoOut {
 /**
  * User status dto.
  */
-export interface UserStatusDtoOut {
-  kind: "UserStatusDtoOut";
+export interface UserStatusODto {
   id: number;
   email: string;
   username: string;

@@ -5,7 +5,7 @@ import RegisterFormCpt from "./RegisterFormCpt";
  */
 export function RegisterPg() {
   return (
-    <div className="m-auto w-4/12">
+    <div className="m-auto w-1/3">
       <RegisterFormCpt />
     </div>
   );

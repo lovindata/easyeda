@@ -1,7 +1,7 @@
 import { BrowserRouter as RouterProvider, Routes, Route } from "react-router-dom";
 import { LoginPg, RegisterPg, AppPg } from "./pages";
 import { CtxProvider, ToasterCpt } from "./context";
-import { HttpProvider } from "./hooks";
+import { BackendProvider } from "./hooks";
 
 /**
  * Application entrypoint.
@@ -9,7 +9,7 @@ import { HttpProvider } from "./hooks";
 function App() {
   return (
     <div className="flex min-h-screen flex-col bg-slate-900 text-gray-300">
-      <HttpProvider>
+      <BackendProvider>
         <CtxProvider>
           <RouterProvider>
             <Routes>
@@ -20,7 +20,7 @@ function App() {
             <ToasterCpt />
           </RouterProvider>
         </CtxProvider>
-      </HttpProvider>
+      </BackendProvider>
     </div>
   );
 }

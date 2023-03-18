@@ -1,10 +1,7 @@
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { ButtonSubmitCpt, DateInputCpt, PwdInputCpt, TextInputCpt, TitleCpt } from "../../components";
 import { useForm } from "react-hook-form";
-import { usePost } from "../../hooks";
-import { UserStatusDtoOut } from "../../data";
-import { useToaster, ToastLevelEnum } from "../../context";
-import { useEffect } from "react";
+import { useToaster, ToastLevelEnum, useUserRegisterM as useUserRegisterM } from "../../context";
 
 /**
  * Registration form.
@@ -13,23 +10,7 @@ function RegisterFormCpt() {
   // Pre-requisites
   const { register, handleSubmit } = useForm();
   const { addToast } = useToaster();
-
-  // Effect on post registration
-  const navigate = useNavigate();
-  const { post, isLoading, data } = usePost<UserStatusDtoOut>("/user/create", "UserStatusDtoOut");
-  useEffect(() => {
-    switch (data?.kind) {
-      case "UserStatusDtoOut":
-        addToast(ToastLevelEnum.Success, `😉 Account created!`, `${data.email} ready to connect.`);
-        navigate("/login");
-        break;
-      case "AppException":
-        addToast(ToastLevelEnum.Error, "😧 Oh no, registration issue.", data.message);
-        break;
-      default:
-        break;
-    }
-  }, [data]);
+  const { registerM, isRegisting } = useUserRegisterM();
 
   // Render
   return (
@@ -37,12 +18,8 @@ function RegisterFormCpt() {
       className="flex min-w-max flex-col space-y-5 rounded bg-slate-700 p-8"
       onSubmit={handleSubmit((data) => {
         data.isTermsAccepted
-          ? !isLoading && post({ email: data.email, username: data.username, pwd: data.pwd, birthDate: data.birthDate })
-          : addToast(
-              ToastLevelEnum.Error,
-              "🤓 Ooh, you missed something...",
-              "Terms must be read and accepted for creating an account."
-            );
+          ? !isRegisting && registerM(data.email, data.username, data.pwd, data.birthDate)
+          : addToast(ToastLevelEnum.Error, "Missing field", "Terms must be read and accepted for creating an account.");
       })}
     >
       <TitleCpt title="Create an account" desc="Just a few steps before joining the community!" />
@@ -71,7 +48,7 @@ function RegisterFormCpt() {
       </div>
       <ButtonSubmitCpt
         name="Continue"
-        isLoading={isLoading}
+        isLoading={isRegisting}
         extra={
           <div className="flex space-x-1 text-sm brightness-75">
             <p>Already have an account?</p>
