@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { ButtonSubmitCpt, DateInputCpt, PwdInputCpt, TextInputCpt, TitleCpt } from "../../components";
 import { useForm } from "react-hook-form";
-import { useToaster, ToastLevelEnum, useUserRegisterM as useUserRegisterM } from "../../context";
+import { useToaster, ToastLevelEnum, useUserRegisterM } from "../../context";
 
 /**
  * Registration form.

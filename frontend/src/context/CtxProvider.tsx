@@ -6,8 +6,8 @@ import { UserProvider } from "./user/UserCtx";
  */
 export function CtxProvider({ children }: { children: React.ReactNode }) {
   return (
-    <UserProvider>
-      <ToasterProvider>{children}</ToasterProvider>
-    </UserProvider>
+    <ToasterProvider>
+      <UserProvider>{children}</UserProvider>
+    </ToasterProvider>
   );
 }

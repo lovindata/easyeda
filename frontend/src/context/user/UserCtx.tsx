@@ -1,25 +1,19 @@
-import { useState, createContext, useEffect, useCallback } from "react";
+import { useState, createContext, useEffect } from "react";
 
 /**
  * User context type.
  */
 export interface IUserContext {
-  tokens:
-    | {
-        accessToken: string;
-        expireAt: string;
-        refreshToken: string;
-      }
-    | undefined;
-  setTokens: (
-    tokens:
-      | {
-          accessToken: string;
-          expireAt: string;
-          refreshToken: string;
-        }
-      | undefined
-  ) => void;
+  tokens: {
+    accessToken: string | undefined;
+    expireAt: string | undefined;
+    refreshToken: string | undefined;
+  };
+  setTokens: (tokens: {
+    accessToken: string | undefined;
+    expireAt: string | undefined;
+    refreshToken: string | undefined;
+  }) => void;
 }
 
 /**
@@ -31,52 +25,27 @@ export const UserContext = createContext<IUserContext | undefined>(undefined);
  * User context provider.
  */
 export function UserProvider({ children }: { children: React.ReactNode }) {
-  // Initial states
-  const accessTokenStore = localStorage.getItem("accessToken");
-  const expireAtStore = localStorage.getItem("expireAt");
-  const refreshTokenStore = localStorage.getItem("accessToken");
-
   // States
-  const [accessToken, setAccessToken] = useState<string | undefined>(accessTokenStore ? accessTokenStore : undefined);
-  const [expireAt, setExpireAt] = useState<string | undefined>(expireAtStore ? expireAtStore : undefined);
-  const [refreshToken, setRefreshToken] = useState<string | undefined>(
-    refreshTokenStore ? refreshTokenStore : undefined
-  );
+  const accessTokenStore = localStorage.getItem("accessToken") || undefined;
+  const expireAtStore = localStorage.getItem("expireAt") || undefined;
+  const refreshTokenStore = localStorage.getItem("refreshToken") || undefined;
+  const [tokens, setTokens] = useState({
+    accessToken: accessTokenStore,
+    expireAt: expireAtStore,
+    refreshToken: refreshTokenStore,
+  });
 
   // Effects
   useEffect(() => {
-    accessToken ? localStorage.setItem("accessToken", accessToken) : localStorage.removeItem("accessToken");
-  }, [accessToken]);
-  useEffect(() => {
-    expireAt ? localStorage.setItem("expireAt", expireAt) : localStorage.removeItem("expireAt");
-  }, [expireAt]);
-  useEffect(() => {
-    refreshToken ? localStorage.setItem("refreshToken", refreshToken) : localStorage.removeItem("refreshToken");
-  }, [refreshToken]);
-
-  // Tokens
-  const tokens =
-    accessToken && expireAt && refreshToken
-      ? { accessToken: accessToken, expireAt: expireAt, refreshToken: refreshToken }
-      : undefined;
-  const setTokens = useCallback(
-    (tokens: { accessToken: string; expireAt: string; refreshToken: string } | undefined) => {
-      setAccessToken(tokens?.accessToken);
-      setExpireAt(tokens?.expireAt);
-      setRefreshToken(tokens?.refreshToken);
-    },
-    []
-  );
+    tokens.accessToken
+      ? localStorage.setItem("accessToken", tokens.accessToken)
+      : localStorage.removeItem("accessToken");
+    tokens.expireAt ? localStorage.setItem("expireAt", tokens.expireAt) : localStorage.removeItem("expireAt");
+    tokens.refreshToken
+      ? localStorage.setItem("refreshToken", tokens.refreshToken)
+      : localStorage.removeItem("refreshToken");
+  }, [tokens]);
 
   // Render
-  return (
-    <UserContext.Provider
-      value={{
-        tokens: tokens,
-        setTokens: setTokens,
-      }}
-    >
-      {children}
-    </UserContext.Provider>
-  );
+  return <UserContext.Provider value={{ tokens: tokens, setTokens: setTokens }}>{children}</UserContext.Provider>;
 }

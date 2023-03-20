@@ -10,16 +10,8 @@ import { useEffect } from "react";
  * Application page.
  */
 export function AppPg() {
-  // Redirect to login if not connected
-  const { user, isDoomed } = useUser();
-  const navigate = useNavigate();
-  const { addToast } = useToaster();
-  useEffect(() => {
-    if (isDoomed) {
-      addToast(ToastLevelEnum.Warning, "Not connected", "Connection lost or account not provided.");
-      navigate("/login");
-    }
-  }, [user]);
+  // Get user
+  const user = useUser();
 
   // Render
   return (

@@ -22,7 +22,7 @@ export interface UserStatusODto {
   email: string;
   username: string;
   createdAt: string;
-  validatedAt: string;
+  validatedAt: string | null;
   updatedAt: string;
   activeAt: string;
 }

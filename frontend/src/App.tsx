@@ -9,8 +9,8 @@ import { BackendProvider } from "./hooks";
 function App() {
   return (
     <div className="flex min-h-screen flex-col bg-slate-900 text-gray-300">
-      <BackendProvider>
-        <CtxProvider>
+      <CtxProvider>
+        <BackendProvider>
           <RouterProvider>
             <Routes>
               <Route path="/login" element={<LoginPg />} />
@@ -19,8 +19,8 @@ function App() {
             </Routes>
             <ToasterCpt />
           </RouterProvider>
-        </CtxProvider>
-      </BackendProvider>
+        </BackendProvider>
+      </CtxProvider>
     </div>
   );
 }
