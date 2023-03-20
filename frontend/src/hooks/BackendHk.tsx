@@ -37,7 +37,7 @@ export function useGet<A>(queryKey: string, subDirect: string, headers?: object,
 }
 
 /**
- *  Post request hook.
+ * Post request hook.
  */
 export function usePost<A>(
   queryKey: string,
