@@ -4,8 +4,8 @@ package api.routes
 import api.controllers.UserCtrl
 import api.dto.input._
 import api.dto.output._
-import api.helpers.AppException
-import api.helpers.AppException._
+import api.helpers.BackendException
+import api.helpers.BackendException._
 import api.models.UserMod
 import api.services.UserSvc
 import cats.effect.IO
@@ -22,42 +22,43 @@ import sttp.tapir.server.http4s.Http4sServerInterpreter
 object UserRts extends GenericRts {
 
   // Create user
-  private val createEpt: PublicEndpoint[UserFormDtoIn, AppException, UserStatusDtoOut, Any] = errHandledEpt
+  private val createEpt: PublicEndpoint[UserFormIDto, BackendException, UserStatusODto, Any] = ept
     .summary("create user account")
     .post
     .in("user" / "create")
-    .in(jsonBody[UserFormDtoIn])
-    .out(jsonBody[UserStatusDtoOut])
-  private val createRts: HttpRoutes[IO]                                                     =
+    .in(jsonBody[UserFormIDto])
+    .out(jsonBody[UserStatusODto])
+  private val createRts: HttpRoutes[IO]                                                         =
     Http4sServerInterpreter[IO]().toRoutes(createEpt.serverLogic(UserCtrl.createUser(_).toErrHandled))
 
   // Login user
-  private val loginEpt: PublicEndpoint[LoginFormDtoIn, AppException, TokenDtoOut, Any] = errHandledEpt
+  private val loginEpt: PublicEndpoint[LoginFormIDto, BackendException, TokensODto, Any] = ept
     .summary("login user account")
     .post
     .in("user" / "login")
-    .in(jsonBody[LoginFormDtoIn])
-    .out(jsonBody[TokenDtoOut])
-  private val loginRts: HttpRoutes[IO]                                                 =
+    .in(jsonBody[LoginFormIDto])
+    .out(jsonBody[TokensODto])
+  private val loginRts: HttpRoutes[IO]                                                     =
     Http4sServerInterpreter[IO]().toRoutes(loginEpt.serverLogic(UserSvc.loginUser(_).toErrHandled))
 
   // Refresh user token
-  private val refreshEpt: PublicEndpoint[String, AppException, TokenDtoOut, Any] = errHandledEpt
+  private val refreshEpt: PublicEndpoint[String, BackendException, TokensODto, Any] = ept
     .summary("refresh user tokens")
     .post
     .in(auth.bearer[String]())
     .in("user" / "refresh")
-    .out(jsonBody[TokenDtoOut])
-  private val refreshRts: HttpRoutes[IO]                                         =
-    Http4sServerInterpreter[IO]().toRoutes(refreshEpt.serverLogic(UserSvc.grantToken(_).toErrHandled))
+    .out(jsonBody[TokensODto])
+  private val refreshRts: HttpRoutes[IO]                                             =
+    Http4sServerInterpreter[IO]().toRoutes(refreshEpt.serverLogic(UserSvc.grantTokens(_).toErrHandled))
 
   // Retrieve user
-  private val getEpt: PartialServerEndpoint[String, UserMod, Unit, AppException, UserStatusDtoOut, Any, IO] = authEpt
-    .summary("retrieve user account info")
-    .get
-    .in("user" / "retrieve")
-    .out(jsonBody[UserStatusDtoOut])
-  private val getRts: HttpRoutes[IO]                                                                        =
+  private val getEpt: PartialServerEndpoint[String, UserMod, Unit, BackendException, UserStatusODto, Any, IO] =
+    authEpt
+      .summary("retrieve user account info")
+      .get
+      .in("user" / "retrieve")
+      .out(jsonBody[UserStatusODto])
+  private val getRts: HttpRoutes[IO]                                                                            =
     Http4sServerInterpreter[IO]().toRoutes(getEpt.serverLogic(user => _ => UserSvc.toDto(user).toErrHandled))
 
   /**

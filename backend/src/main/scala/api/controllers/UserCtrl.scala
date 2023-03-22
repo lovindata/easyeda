@@ -1,9 +1,9 @@
 package com.ilovedatajjia
 package api.controllers
 
-import api.dto.input.UserFormDtoIn
-import api.dto.output.UserStatusDtoOut
-import api.helpers.AppException
+import api.dto.input.UserFormIDto
+import api.dto.output.UserStatusODto
+import api.helpers.BackendException.AppException
 import api.helpers.StringUtils._
 import api.services.UserSvc
 import cats.effect._
@@ -16,13 +16,14 @@ object UserCtrl {
 
   /**
    * Validate form and create the user.
+   *
    * @param createUserFormDtoIn
    *   Form to validate
    * @return
    *   User status OR
    *   - [[AppException]] if a form issue
    */
-  def createUser(createUserFormDtoIn: UserFormDtoIn): IO[UserStatusDtoOut] = for {
+  def createUser(createUserFormDtoIn: UserFormIDto): IO[UserStatusODto] = for {
     // Validate email, username and password
     _ <- createUserFormDtoIn.email.isValidEmail
     _ <- createUserFormDtoIn.username.isValidName

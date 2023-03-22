@@ -15,12 +15,10 @@ object ConnTypeEnum extends Enumeration {
   val Postgres: ConnType = Value("postgres")
   val Mongo: ConnType    = Value("mongo")
 
-  // JSON (de)serializers
+  // JSON & SwaggerUI
   implicit val enc: Encoder[ConnType] = x => Json.fromString(x.toString)
   implicit val dec: Decoder[ConnType] = _.value.as[String].map(ConnTypeEnum.withName)
-
-  // Schema serializer(s)
-  implicit val sch: Schema[ConnType] = Schema.derivedEnumerationValue
+  implicit val sch: Schema[ConnType]  = Schema.derivedEnumerationValue
 
   // Doobie mapping
   implicit val meta: Meta[ConnType] = Meta[String].timap(withName)(_.toString)

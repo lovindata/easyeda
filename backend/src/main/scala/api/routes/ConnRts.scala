@@ -2,14 +2,14 @@ package com.ilovedatajjia
 package api.routes
 
 import api.controllers.ConnCtrl
-import api.dto.input.ConnFormDtoIn
-import api.dto.input.ConnFormDtoIn._
-import api.dto.output.ConnStatusDtoOut
-import api.dto.output.ConnStatusDtoOut._
-import api.dto.output.ConnTestDtoOut
-import api.dto.output.ConnTestDtoOut._
-import api.helpers.AppException
-import api.helpers.AppException._
+import api.dto.input.ConnFormIDto
+import api.dto.input.ConnFormIDto._
+import api.dto.output.ConnStatusODto
+import api.dto.output.ConnStatusODto._
+import api.dto.output.ConnTestODto
+import api.dto.output.ConnTestODto._
+import api.helpers.BackendException
+import api.helpers.BackendException._
 import api.models.UserMod
 import api.services.ConnSvc
 import cats.effect.IO
@@ -27,36 +27,36 @@ import sttp.tapir.server.http4s.Http4sServerInterpreter
 object ConnRts extends GenericRts {
 
   // Test connection
-  private val testEpt: PartialServerEndpoint[String, UserMod, ConnFormDtoIn, AppException, ConnTestDtoOut, Any, IO] =
+  private val testEpt: PartialServerEndpoint[String, UserMod, ConnFormIDto, BackendException, ConnTestODto, Any, IO] =
     authEpt
       .summary("test unknown connection")
       .post
       .in("conn" / "test")
-      .in(jsonBody[ConnFormDtoIn])
-      .out(jsonBody[ConnTestDtoOut])
-  private val testRts: HttpRoutes[IO]                                                                               =
+      .in(jsonBody[ConnFormIDto])
+      .out(jsonBody[ConnTestODto])
+  private val testRts: HttpRoutes[IO]                                                                                =
     Http4sServerInterpreter[IO]().toRoutes(testEpt.serverLogic(_ => ConnSvc.testConn(_).toErrHandled))
 
   // Create connection
   private val createEpt
-      : PartialServerEndpoint[String, UserMod, ConnFormDtoIn, AppException, ConnStatusDtoOut, Any, IO] = authEpt
+      : PartialServerEndpoint[String, UserMod, ConnFormIDto, BackendException, ConnStatusODto, Any, IO] = authEpt
     .summary("create connection")
     .post
     .in("conn" / "create")
-    .in(jsonBody[ConnFormDtoIn])
-    .out(jsonBody[ConnStatusDtoOut])
+    .in(jsonBody[ConnFormIDto])
+    .out(jsonBody[ConnStatusODto])
   private val createRts: HttpRoutes[IO] = Http4sServerInterpreter[IO]().toRoutes(createEpt.serverLogic { user => form =>
     ConnCtrl.createConn(user, form).toErrHandled
   })
 
   // List connection
-  private val listEpt: PartialServerEndpoint[String, UserMod, Unit, AppException, List[ConnStatusDtoOut], Any, IO] =
+  private val listEpt: PartialServerEndpoint[String, UserMod, Unit, BackendException, List[ConnStatusODto], Any, IO] =
     authEpt
       .summary("listing all connections")
       .post
       .in("conn" / "list")
-      .out(jsonBody[List[ConnStatusDtoOut]])
-  private val listRts: HttpRoutes[IO]                                                                              =
+      .out(jsonBody[List[ConnStatusODto]])
+  private val listRts: HttpRoutes[IO]                                                                                =
     Http4sServerInterpreter[IO]().toRoutes(listEpt.serverLogic { user => _ => ConnSvc.listConn(user).toErrHandled })
 
   /**

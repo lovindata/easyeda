@@ -1,7 +1,7 @@
 package com.ilovedatajjia
 package api.models
 
-import api.dto.input.ConnFormDtoIn
+import api.dto.input.ConnFormIDto
 import api.helpers.DoobieUtils._
 import cats.effect.IO
 import cats.implicits._
@@ -42,11 +42,11 @@ object ConnMongoMod extends GenericMod[ConnMongoMod] {
    * @param connId
    *   [[ConnMod]] id
    * @param form
-   *   [[ConnFormDtoIn.MongoFormDtoIn]] form
+   *   [[ConnFormIDto.MongoFormIDto]] form
    * @return
    *   A new created mongodb connection
    */
-  def apply(connId: Long, form: ConnFormDtoIn.MongoFormDtoIn): IO[ConnMongoMod] = for {
+  def apply(connId: Long, form: ConnFormIDto.MongoFormIDto): IO[ConnMongoMod] = for {
     connMongo <- insert(ConnMongoMod(-1, connId, form.dbAuth, form.replicaSet, form.user, form.pwd))
     _         <- form.hostPort.traverse(x => ConnMongoHostPortMod(connMongo.id, x.host, x.port))
   } yield connMongo

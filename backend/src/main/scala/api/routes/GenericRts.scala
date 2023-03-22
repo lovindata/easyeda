@@ -1,8 +1,8 @@
 package com.ilovedatajjia
 package api.routes
 
-import api.helpers.AppException
-import api.helpers.AppException._
+import api.helpers.BackendException
+import api.helpers.BackendException._
 import api.models.UserMod
 import api.services.UserSvc
 import cats.effect.IO
@@ -18,11 +18,11 @@ import sttp.tapir.server.PartialServerEndpoint
 trait GenericRts {
 
   // Error handled endpoint
-  val errHandledEpt: Endpoint[Unit, Unit, AppException, Unit, Any] =
-    endpoint.errorOut(statusCode(StatusCode.BadRequest).and(jsonBody[AppException]))
+  val ept: Endpoint[Unit, Unit, BackendException, Unit, Any] =
+    endpoint.errorOut(statusCode(StatusCode.BadRequest).and(jsonBody[BackendException]))
 
   // Authorization handled endpoint
-  val authEpt: PartialServerEndpoint[String, UserMod, Unit, AppException, Unit, Any, IO] = errHandledEpt
+  val authEpt: PartialServerEndpoint[String, UserMod, Unit, BackendException, Unit, Any, IO] = ept
     .securityIn(auth.bearer[String]())
     .serverSecurityLogic { UserSvc.grantAccess(_).toErrHandled }
 

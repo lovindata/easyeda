@@ -1,7 +1,7 @@
 package com.ilovedatajjia
 package api.models
 
-import api.dto.input.ConnFormDtoIn
+import api.dto.input.ConnFormIDto
 import cats.effect.IO
 
 /**
@@ -30,14 +30,15 @@ object ConnPostgresMod extends GenericMod[ConnPostgresMod] {
 
   /**
    * Constructor of [[ConnPostgresMod]].
+   *
    * @param connId
    *   [[ConnMod]] id
    * @param form
-   *   [[ConnFormDtoIn.PostgresFormDtoIn]] form
+   *   [[ConnFormIDto.PostgresFormIDto]] form
    * @return
    *   A new created postgres connection
    */
-  def apply(connId: Long, form: ConnFormDtoIn.PostgresFormDtoIn): IO[ConnPostgresMod] = insert(
+  def apply(connId: Long, form: ConnFormIDto.PostgresFormIDto): IO[ConnPostgresMod] = insert(
     ConnPostgresMod(-1, connId, form.host, form.port, form.dbName, form.user, form.pwd))
 
 }

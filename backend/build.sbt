@@ -34,11 +34,11 @@ libraryDependencies += "com.softwaremill.quicklens" %% "quicklens"   % "1.9.0"
 
 // Tapir
 // https://mvnrepository.com/artifact/com.softwaremill.sttp.tapir/tapir-http4s-server
-libraryDependencies += "com.softwaremill.sttp.tapir" %% "tapir-http4s-server"     % "1.2.9"
+libraryDependencies += "com.softwaremill.sttp.tapir" %% "tapir-http4s-server"     % "1.2.10"
 // https://mvnrepository.com/artifact/com.softwaremill.sttp.tapir/tapir-json-circe
-libraryDependencies += "com.softwaremill.sttp.tapir" %% "tapir-json-circe"        % "1.2.9"
+libraryDependencies += "com.softwaremill.sttp.tapir" %% "tapir-json-circe"        % "1.2.10"
 // https://mvnrepository.com/artifact/com.softwaremill.sttp.tapir/tapir-swagger-ui-bundle
-libraryDependencies += "com.softwaremill.sttp.tapir" %% "tapir-swagger-ui-bundle" % "1.2.9"
+libraryDependencies += "com.softwaremill.sttp.tapir" %% "tapir-swagger-ui-bundle" % "1.2.10"
 
 // Http4s
 // https://mvnrepository.com/artifact/org.http4s/http4s-ember-server

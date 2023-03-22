@@ -1,7 +1,7 @@
 package com.ilovedatajjia
 package api.models
 
-import api.dto.input.ConnFormDtoIn
+import api.dto.input.ConnFormIDto
 import api.helpers.ConnTypeEnum
 import cats.effect._
 
@@ -32,13 +32,13 @@ object ConnMod extends GenericMod[ConnMod] {
    * @return
    *   A new created connection
    */
-  def apply(userId: Long, form: ConnFormDtoIn): IO[ConnMod] = form match {
-    case form: ConnFormDtoIn.PostgresFormDtoIn =>
+  def apply(userId: Long, form: ConnFormIDto): IO[ConnMod] = form match {
+    case form: ConnFormIDto.PostgresFormIDto =>
       for {
         conn <- insert(ConnMod(-1, userId, ConnTypeEnum.Postgres, form.name))
         _    <- ConnPostgresMod(conn.id, form)
       } yield conn
-    case form: ConnFormDtoIn.MongoFormDtoIn  =>
+    case form: ConnFormIDto.MongoFormIDto    =>
       for {
         conn <- insert(ConnMod(-1, userId, ConnTypeEnum.Mongo, form.name))
         _    <- ConnMongoMod(conn.id, form)

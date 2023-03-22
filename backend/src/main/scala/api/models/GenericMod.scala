@@ -1,7 +1,7 @@
 package com.ilovedatajjia
 package api.models
 
-import api.helpers.AppException
+import api.helpers.BackendException.AppException
 import api.helpers.DoobieUtils._
 import api.helpers.JdbcUtils._
 import api.helpers.StringUtils._
@@ -144,7 +144,7 @@ trait GenericMod[A <: Product] {
     // Start execution
     for {
       nbAffected <- (fr"update" ++ tableFrag ++ fr"set" ++ attributesFrag ++ fr" where id =" ++ idValue).update.run
-      _           = if (nbAffected != 1) throw AppException(s"Update failed because affects $nbAffected rows (!= 1)")
+      _           = if (nbAffected != 1) throw AppException(s"Update failed because affects $nbAffected rows (!= 1).")
       entity     <-
         (fr"select * from" ++ tableFrag ++ fr"where id =" ++ idValue).query[A].unique
     } yield entity
@@ -164,7 +164,7 @@ trait GenericMod[A <: Product] {
       nbAffected <- (fr"delete from" ++ tableFrag ++ fr"where id =" ++ idValue).update.run
       _           = nbAffected match {
                       case 0 | 1 =>
-                      case _     => throw AppException(s"Deletion failed because affects $nbAffected rows (> 1)")
+                      case _     => throw AppException(s"Deletion failed because affects $nbAffected rows (> 1).")
                     }
     } yield ()
   }

@@ -16,18 +16,16 @@ import sttp.tapir.Schema
  * @param birthDate
  *   Birth date
  */
-case class UserFormDtoIn(email: String, username: String, pwd: String, birthDate: String)
+case class UserFormIDto(email: String, username: String, pwd: String, birthDate: String)
 
 /**
- * [[UserFormDtoIn]] companion.
+ * [[UserFormIDto]] companion.
  */
-object UserFormDtoIn {
+object UserFormIDto {
 
-  // JSON (de)serializers
-  implicit val enc: Encoder[UserFormDtoIn] = deriveEncoder
-  implicit val dec: Decoder[UserFormDtoIn] = deriveDecoder
-
-  // Schema serializer
-  implicit val sch: Schema[UserFormDtoIn] = Schema.derived
+  // JSON & SwaggerUI
+  implicit val enc: Encoder[UserFormIDto] = deriveEncoder
+  implicit val dec: Decoder[UserFormIDto] = deriveDecoder
+  implicit val sch: Schema[UserFormIDto]  = Schema.derived
 
 }

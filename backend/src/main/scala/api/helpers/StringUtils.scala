@@ -1,6 +1,7 @@
 package com.ilovedatajjia
 package api.helpers
 
+import api.helpers.BackendException.AppException
 import cats.effect.IO
 import cats.effect.implicits._
 import cats.implicits._
@@ -52,6 +53,7 @@ object StringUtils {
 
     /**
      * Validate email format. (RFC 5322 official format)
+     *
      * @return
      *   Nothing OR
      *   - [[AppException]] if non valid email
@@ -67,6 +69,7 @@ object StringUtils {
      *   - One lowercase letter
      *   - One number character
      *   - One special character
+     *
      * @return
      *   Nothing OR
      *   - [[AppException]] if non valid password
@@ -81,6 +84,7 @@ object StringUtils {
 
     /**
      * Application entity name convention.
+     *
      * @return
      *   Nothing OR
      *   - [[AppException]] if non valid name

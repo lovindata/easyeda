@@ -18,7 +18,7 @@ import sttp.tapir.swagger.bundle.SwaggerInterpreter
 /**
  * Application server.
  */
-object AppServer {
+object BackendServer {
 
   // FrontEnd routes
   private val staticFilesRts: HttpRoutes[IO] = // Static files on "/assets"

@@ -1,9 +1,9 @@
 package com.ilovedatajjia
 package api.services
 
-import api.dto.input.LoginFormDtoIn
+import api.dto.input.LoginFormIDto
 import api.dto.output._
-import api.helpers.AppException
+import api.helpers.BackendException._
 import api.helpers.DoobieUtils._
 import api.helpers.StringUtils._
 import api.models.TokenMod
@@ -21,19 +21,14 @@ object UserSvc {
 
   /**
    * Convert [[UserMod]] to DTO.
+   *
    * @param user
    *   User to display
    * @return
-   *   [[UserStatusDtoOut]]
+   *   [[UserStatusODto]]
    */
-  def toDto(user: UserMod): IO[UserStatusDtoOut] = IO(
-    UserStatusDtoOut(user.id,
-                     user.email,
-                     user.username,
-                     user.createdAt,
-                     user.validatedAt,
-                     user.updatedAt,
-                     user.activeAt))
+  def toDto(user: UserMod): IO[UserStatusODto] = IO(
+    UserStatusODto(user.id, user.email, user.username, user.createdAt, user.validatedAt, user.updatedAt, user.activeAt))
 
   /**
    * Create the user.
@@ -48,7 +43,7 @@ object UserSvc {
    * @return
    *   User status
    */
-  def createUser(email: String, username: String, pwd: String, birthDate: Date): IO[UserStatusDtoOut] = for {
+  def createUser(email: String, username: String, pwd: String, birthDate: Date): IO[UserStatusODto] = for {
     pwdSalt <- genString(32)
     pwd     <- s"$pwdSalt$pwd".toSHA3_512
     user    <- UserMod(email, username, pwd, pwdSalt, birthDate)
@@ -57,13 +52,14 @@ object UserSvc {
 
   /**
    * Verify provided login.
+   *
    * @param form
    *   Login to validate
    * @return
    *   Tokens OR
    *   - [[AppException]] if incorrect login
    */
-  def loginUser(form: LoginFormDtoIn): IO[TokenDtoOut] = for {
+  def loginUser(form: LoginFormIDto): IO[TokensODto] = for {
     // Verify login
     potUsers        <- UserMod.select(fr"email = ${form.email}")
     validatedUser   <- potUsers match {
@@ -96,7 +92,7 @@ object UserSvc {
                                .setTo(genRefreshToken))
                          case _           => TokenMod(validatedUser.id, genAccessToken, genExpireAt, genRefreshToken)
                        }
-  } yield TokenDtoOut(token.accessToken, token.expireAt, token.refreshToken)
+  } yield TokensODto(token.accessToken, token.expireAt, token.refreshToken)
 
   /**
    * Validate access token.
@@ -111,8 +107,10 @@ object UserSvc {
     user         <- potTokens match {
                       case List(token) =>
                         if (nowTimestamp < token.expireAt.getTime) UserMod.select(token.userId)
-                        else IO.raiseError(AppException("Expired token provided. Please refresh your token."))
-                      case _           => IO.raiseError(AppException("Invalid token provided. Please reconnect your account."))
+                        else IO.raiseError(AuthException("Expired token provided. Please refresh your token."))
+                      case _           =>
+                        IO.raiseError(
+                          AuthException("Invalid access token provided. Please refresh your tokens or reconnect your account."))
                     }
     userUpToDate <- UserMod.update(user.modify(_.activeAt).setTo(new Timestamp(nowTimestamp)))
   } yield userUpToDate
@@ -124,7 +122,7 @@ object UserSvc {
    * @return
    *   New refreshed [[TokenMod]]
    */
-  def grantToken(refreshToken: String): IO[TokenDtoOut] = for {
+  def grantTokens(refreshToken: String): IO[TokensODto] = for {
     // Pre-requisite
     nowTimestamp <- Clock[IO].realTime.map(_.toMillis)
 
@@ -146,12 +144,12 @@ object UserSvc {
                                               .setTo(genRefreshToken))
                      } yield out
                    case _           =>
-                     IO.raiseError(AppException("Invalid refresh token provided. Please reconnect your account."))
+                     IO.raiseError(AuthException("Invalid refresh token provided. Please reconnect your account."))
                  }
 
     // Update user activity
     user      <- UserMod.select(outToken.userId)
     _         <- UserMod.update(user.modify(_.activeAt).setTo(new Timestamp(nowTimestamp)))
-  } yield TokenDtoOut(outToken.accessToken, outToken.expireAt, outToken.refreshToken)
+  } yield TokensODto(outToken.accessToken, outToken.expireAt, outToken.refreshToken)
 
 }
