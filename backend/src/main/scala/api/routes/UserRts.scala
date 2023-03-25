@@ -28,7 +28,7 @@ object UserRts extends GenericRts {
     .in("user" / "create")
     .in(jsonBody[UserFormIDto])
     .out(jsonBody[UserStatusODto])
-  private val createRts: HttpRoutes[IO]                                                         =
+  private val createRts: HttpRoutes[IO]                                                      =
     Http4sServerInterpreter[IO]().toRoutes(createEpt.serverLogic(UserCtrl.createUser(_).toErrHandled))
 
   // Login user
@@ -38,7 +38,7 @@ object UserRts extends GenericRts {
     .in("user" / "login")
     .in(jsonBody[LoginFormIDto])
     .out(jsonBody[TokensODto])
-  private val loginRts: HttpRoutes[IO]                                                     =
+  private val loginRts: HttpRoutes[IO]                                                   =
     Http4sServerInterpreter[IO]().toRoutes(loginEpt.serverLogic(UserSvc.loginUser(_).toErrHandled))
 
   // Refresh user token
@@ -48,17 +48,16 @@ object UserRts extends GenericRts {
     .in(auth.bearer[String]())
     .in("user" / "refresh")
     .out(jsonBody[TokensODto])
-  private val refreshRts: HttpRoutes[IO]                                             =
+  private val refreshRts: HttpRoutes[IO]                                            =
     Http4sServerInterpreter[IO]().toRoutes(refreshEpt.serverLogic(UserSvc.grantTokens(_).toErrHandled))
 
   // Retrieve user
-  private val getEpt: PartialServerEndpoint[String, UserMod, Unit, BackendException, UserStatusODto, Any, IO] =
-    authEpt
-      .summary("retrieve user account info")
-      .get
-      .in("user" / "retrieve")
-      .out(jsonBody[UserStatusODto])
-  private val getRts: HttpRoutes[IO]                                                                            =
+  private val getEpt: PartialServerEndpoint[String, UserMod, Unit, BackendException, UserStatusODto, Any, IO] =   authEpt
+    .summary("retrieve user account info")
+    .get
+    .in("user" / "retrieve")
+    .out(jsonBody[UserStatusODto])
+  private val getRts: HttpRoutes[IO]                                                                          =
     Http4sServerInterpreter[IO]().toRoutes(getEpt.serverLogic(user => _ => UserSvc.toDto(user).toErrHandled))
 
   /**

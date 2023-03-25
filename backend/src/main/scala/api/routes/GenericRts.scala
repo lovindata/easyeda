@@ -6,6 +6,7 @@ import api.helpers.BackendException._
 import api.models.UserMod
 import api.services.UserSvc
 import cats.effect.IO
+import io.circe._
 import org.http4s.HttpRoutes
 import sttp.model.StatusCode
 import sttp.tapir._
@@ -17,8 +18,8 @@ import sttp.tapir.server.PartialServerEndpoint
  */
 trait GenericRts {
 
-  // Error handled endpoint
-  val ept: Endpoint[Unit, Unit, BackendException, Unit, Any] =
+  // All error handled endpoint
+  def ept: Endpoint[Unit, Unit, BackendException, Unit, Any] =
     endpoint.errorOut(statusCode(StatusCode.BadRequest).and(jsonBody[BackendException]))
 
   // Authorization handled endpoint
