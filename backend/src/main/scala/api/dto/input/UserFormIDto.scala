@@ -14,9 +14,11 @@ import sttp.tapir.Schema
  * @param pwd
  *   Password defined
  * @param birthDate
- *   Birth date
+ *   Birth date in "yyyy-MM-dd" format
+ * @param isTermsAccepted
+ *   Contract terms accepted or not
  */
-case class UserFormIDto(email: String, username: String, pwd: String, birthDate: String)
+case class UserFormIDto(email: String, username: String, pwd: String, birthDate: String, isTermsAccepted: Boolean)
 
 /**
  * [[UserFormIDto]] companion.

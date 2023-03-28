@@ -1,11 +1,8 @@
 package com.ilovedatajjia
 package api.dto.output
 
-import api.helpers.CirceUtils._ // Needed import
-import api.helpers.TapirUtils._ // Needed import
 import io.circe._
 import io.circe.generic.semiauto._
-import java.sql.Timestamp
 import sttp.tapir.Schema
 
 /**
@@ -19,19 +16,19 @@ import sttp.tapir.Schema
  * @param createdAt
  *   Account created at
  * @param validatedAt
- *   Account email validated at
+ *   Account email validated at in UTC milliseconds
  * @param updatedAt
- *   Account updated at
+ *   Account updated at in UTC milliseconds
  * @param activeAt
- *   Account latest activity at
+ *   Account latest activity at in UTC milliseconds
  */
 case class UserStatusODto(id: Long,
                           email: String,
                           username: String,
-                          createdAt: Timestamp,
-                          validatedAt: Option[Timestamp],
-                          updatedAt: Timestamp,
-                          activeAt: Timestamp)
+                          createdAt: Long,
+                          validatedAt: Option[Long],
+                          updatedAt: Long,
+                          activeAt: Long)
 
 /**
  * [[UserStatusODto]] companion.

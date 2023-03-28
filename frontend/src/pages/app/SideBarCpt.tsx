@@ -6,11 +6,12 @@ import { Conn, Pipeline } from "../../assets";
  */
 export function SideBarCpt() {
   // Get current path
-  const currentPath = useLocation().pathname;
+  const location = useLocation();
+  const currentPath = location.pathname;
 
   // Render
   return (
-    <div className="flex h-screen w-16 flex-col justify-center bg-slate-800">
+    <div className="fixed flex h-screen w-16 flex-col justify-center bg-slate-800">
       <IconTabLink to="connections" title="Connections" svg={Conn} isCurrent={currentPath == "/app/connections"} />
       <IconTabLink to="pipelines" title="Pipelines" svg={Pipeline} isCurrent={currentPath == "/app/pipelines"} />
     </div>

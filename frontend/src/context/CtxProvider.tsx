@@ -1,5 +1,5 @@
 import { ToasterProvider } from "./toaster/ToasterCtx";
-import { UserProvider } from "./user/UserCtx";
+import { AuthProvider } from "./auth/AuthCtx";
 
 /**
  * All context providers.
@@ -7,7 +7,7 @@ import { UserProvider } from "./user/UserCtx";
 export function CtxProvider({ children }: { children: React.ReactNode }) {
   return (
     <ToasterProvider>
-      <UserProvider>{children}</UserProvider>
+      <AuthProvider>{children}</AuthProvider>
     </ToasterProvider>
   );
 }

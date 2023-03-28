@@ -35,8 +35,12 @@ object UserCtrl {
                    case Right(x) => x
                  }
     nowMillis <- Clock[IO].realTime.map(_.toMillis)
-    _         <- IO.raiseUnless(nowMillis - birthDate.getTime >= 378683112000L)(
+    _         <- IO.raiseUnless(nowMillis - birthDate.getTime >= 378683112000L)( // 12 years == 378683112000L
                    AppException("Being at least 12 years old is required."))
+
+    // Validate terms
+    _         <- IO.raiseUnless(createUserFormDtoIn.isTermsAccepted)(
+                   AppException("Terms must be read and accepted for creating an account."))
 
     // Create
     dtoOut    <-

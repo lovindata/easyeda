@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { ButtonSubmitCpt, DateInputCpt, PwdInputCpt, TextInputCpt, TitleCpt } from "../../components";
 import { useForm } from "react-hook-form";
-import { useToaster, ToastLevelEnum, useUserRegisterM } from "../../context";
+import { useUserRegisterM } from "../../context";
 
 /**
  * Registration form.
@@ -9,18 +9,15 @@ import { useToaster, ToastLevelEnum, useUserRegisterM } from "../../context";
 function RegisterFormCpt() {
   // Pre-requisites
   const { register, handleSubmit } = useForm();
-  const { addToast } = useToaster();
   const { registerM, isRegisting } = useUserRegisterM();
 
   // Render
   return (
     <form
       className="flex min-w-max flex-col space-y-5 rounded bg-slate-700 p-8"
-      onSubmit={handleSubmit((data) => {
-        data.isTermsAccepted
-          ? !isRegisting && registerM(data.email, data.username, data.pwd, data.birthDate)
-          : addToast(ToastLevelEnum.Error, "Missing field", "Terms must be read and accepted for creating an account.");
-      })}
+      onSubmit={handleSubmit((data) =>
+        registerM(data.email, data.username, data.pwd, data.birthDate, data.isTermsAccepted)
+      )}
     >
       <TitleCpt title="Create an account" desc="Just a few steps before joining the community!" />
       <TextInputCpt header="E-MAIL" isRequired={true} registerKey={register("email")} />

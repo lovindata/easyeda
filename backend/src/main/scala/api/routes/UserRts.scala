@@ -45,14 +45,14 @@ object UserRts extends GenericRts {
   private val refreshEpt: PublicEndpoint[String, BackendException, TokensODto, Any] = ept
     .summary("refresh user tokens")
     .post
-    .in(auth.bearer[String]())
     .in("user" / "refresh")
+    .in(header[String]("DataPiU-Refresh-Token"))
     .out(jsonBody[TokensODto])
   private val refreshRts: HttpRoutes[IO]                                            =
     Http4sServerInterpreter[IO]().toRoutes(refreshEpt.serverLogic(UserSvc.grantTokens(_).toErrHandled))
 
   // Retrieve user
-  private val getEpt: PartialServerEndpoint[String, UserMod, Unit, BackendException, UserStatusODto, Any, IO] =   authEpt
+  private val getEpt: PartialServerEndpoint[String, UserMod, Unit, BackendException, UserStatusODto, Any, IO] = authEpt
     .summary("retrieve user account info")
     .get
     .in("user" / "retrieve")

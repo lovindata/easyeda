@@ -28,7 +28,13 @@ object UserSvc {
    *   [[UserStatusODto]]
    */
   def toDto(user: UserMod): IO[UserStatusODto] = IO(
-    UserStatusODto(user.id, user.email, user.username, user.createdAt, user.validatedAt, user.updatedAt, user.activeAt))
+    UserStatusODto(user.id,
+                   user.email,
+                   user.username,
+                   user.createdAt.getNanos,
+                   user.validatedAt.map(_.getTime),
+                   user.updatedAt.getTime,
+                   user.activeAt.getTime))
 
   /**
    * Create the user.
@@ -92,7 +98,7 @@ object UserSvc {
                                .setTo(genRefreshToken))
                          case _           => TokenMod(validatedUser.id, genAccessToken, genExpireAt, genRefreshToken)
                        }
-  } yield TokensODto(token.accessToken, token.expireAt, token.refreshToken)
+  } yield TokensODto(token.accessToken, token.expireAt.getTime, token.refreshToken)
 
   /**
    * Validate access token.
@@ -150,6 +156,6 @@ object UserSvc {
     // Update user activity
     user      <- UserMod.select(outToken.userId)
     _         <- UserMod.update(user.modify(_.activeAt).setTo(new Timestamp(nowTimestamp)))
-  } yield TokensODto(outToken.accessToken, outToken.expireAt, outToken.refreshToken)
+  } yield TokensODto(outToken.accessToken, outToken.expireAt.getTime, outToken.refreshToken)
 
 }

@@ -1,4 +1,4 @@
-import { useState, createContext } from "react";
+import { useState, createContext, useCallback } from "react";
 
 /**
  * Toaster level.
@@ -25,7 +25,7 @@ export interface Toast {
  */
 export interface IToasterContext {
   toasts: Toast[];
-  addToast: (level: ToastLevelEnum, header: string, message?: string) => void;
+  addToast: (toast: { level: ToastLevelEnum; header: string; message?: string }) => void;
   timeout: number;
 }
 
@@ -41,20 +41,38 @@ export function ToasterProvider({ children }: { children: React.ReactNode }) {
   // Initalize
   const nbMax = 3;
   const timeout = 10000;
+  const [toaster, setToaster] = useState<{ toasts: Toast[]; usableId: number }>({
+    toasts: [],
+    usableId: Number.MIN_SAFE_INTEGER,
+  });
 
-  // States
-  const [toasts, setToasts] = useState<Toast[]>([]);
-  const [usableId, setUsableId] = useState(Number.MIN_SAFE_INTEGER);
-  const addToast = (level: ToastLevelEnum, header: string, message?: string) => {
-    const toastToAdd = { id: usableId, level: level, header: header, message: message };
-    setToasts(toasts.length == nbMax ? [...toasts.slice(1), toastToAdd] : [...toasts, toastToAdd]);
-    setTimeout(() => setToasts((currToasts) => currToasts.filter((x) => x.id != usableId)), timeout);
-    setUsableId(usableId + 1);
-  };
+  // Adder
+  const addToast = useCallback((toast: { level: ToastLevelEnum; header: string; message?: string }) => {
+    setToaster(({ toasts, usableId }) => {
+      // Add
+      const toastToAdd = { id: usableId, ...toast };
+      const outToasts = toasts.length === nbMax ? [...toasts.slice(1), toastToAdd] : [...toasts, toastToAdd];
+
+      // Timeout remove
+      setTimeout(
+        () =>
+          setToaster(({ toasts, usableId: currUsableId }) => {
+            const outToasts = toasts.filter((x) => x.id !== usableId);
+            const outUsableId = outToasts.length === 0 ? Number.MIN_SAFE_INTEGER : currUsableId;
+            return { toasts: outToasts, usableId: outUsableId };
+          }),
+        timeout
+      );
+
+      // Return
+      const outUsableId = usableId + 1;
+      return { toasts: outToasts, usableId: outUsableId };
+    });
+  }, []);
 
   // Render
   return (
-    <ToasterContext.Provider value={{ toasts: toasts, addToast: addToast, timeout: timeout }}>
+    <ToasterContext.Provider value={{ toasts: toaster.toasts, addToast: addToast, timeout: timeout }}>
       {children}
     </ToasterContext.Provider>
   );

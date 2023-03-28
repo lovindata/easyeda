@@ -1,11 +1,8 @@
 package com.ilovedatajjia
 package api.dto.output
 
-import api.helpers.CirceUtils._
-import api.helpers.TapirUtils._
 import io.circe._
 import io.circe.generic.semiauto._
-import java.sql.Timestamp
 import sttp.tapir.Schema
 
 /**
@@ -13,11 +10,11 @@ import sttp.tapir.Schema
  * @param accessToken
  *   Access token
  * @param expireAt
- *   Timestamp with time zone indicating expiration
+ *   Access token expiration in UTC milliseconds
  * @param refreshToken
  *   Refresh token
  */
-case class TokensODto(accessToken: String, expireAt: Timestamp, refreshToken: String)
+case class TokensODto(accessToken: String, expireAt: Long, refreshToken: String)
 
 /**
  * [[TokensODto]] companion.

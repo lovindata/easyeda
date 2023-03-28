@@ -1,17 +1,17 @@
-import { Routes, Route, useNavigate } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import { HomePg } from "./home/HomePg";
 import { ConnsPg } from "./connections/ConnsPg";
 import { PipelinesPg } from "./pipelines/PipelinesPg";
 import { SideBarCpt } from "./SideBarCpt";
-import { useUser, useToaster, ToastLevelEnum } from "../../context";
-import { useEffect } from "react";
+import { useUser } from "../../context";
 
 /**
  * Application page.
  */
 export function AppPg() {
   // Get user
-  const user = useUser();
+  const { user, isRetrieving } = useUser();
+  // console.log(user);
 
   // Render
   return (

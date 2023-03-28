@@ -28,11 +28,11 @@ function LoginFormCpt() {
             to="/login"
             className="text-sm text-sky-500 hover:underline"
             onClick={() =>
-              addToast(
-                ToastLevelEnum.Info,
-                "Comming soon",
-                "Admin related features will be available in next releases."
-              )
+              addToast({
+                level: ToastLevelEnum.Info,
+                header: "Comming soon",
+                message: "Admin related features will be available in next releases.",
+              })
             }
           >
             Password forgotten?
