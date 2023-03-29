@@ -67,7 +67,7 @@ function useBackend(authed: boolean, verbose: boolean) {
     return { ...req, signal: controller.signal };
   });
 
-  // Post-request process
+  // Post-response process
   backend.interceptors.response.use(
     (_) => _,
     (err: AxiosError<BackendException>) => {
@@ -78,6 +78,9 @@ function useBackend(authed: boolean, verbose: boolean) {
         case "AuthException":
           verbose && addToast(serverAuthErrToast);
           navigate("/login");
+          break;
+        case undefined: // TODO - Implementation error & Client internet error
+          verbose && addToast(clientErrToast);
           break;
       }
       return err;

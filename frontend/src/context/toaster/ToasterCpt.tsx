@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Success, Info, Error, Warning } from "../../assets";
 import { Toast, ToastLevelEnum } from "./ToasterCtx";
 import { useToaster } from "./ToasterHk";
+import { Transition } from "@headlessui/react";
 
 /**
  * Toaster component.
@@ -47,7 +48,7 @@ function ToastCpt(props: { toast: Toast }) {
   }
 
   // Build vertical bar & icon
-  const VBarCpt: JSX.Element = <span className={`flex min-h-[2.5rem] w-1 self-stretch rounded ${bgColor}`} />;
+  const VBarCpt = <span className={`flex min-h-[2.5rem] w-1 self-stretch rounded ${bgColor}`} />;
   const iconCSS = `w-5 ${fillColor}`;
   let IconCpt: JSX.Element;
   switch (props.toast.level) {
@@ -65,23 +66,24 @@ function ToastCpt(props: { toast: Toast }) {
       break;
   }
 
-  // Mounting effect (300 is duration of the effect)
+  // Render transition
   const duration = 300;
   const { timeout } = useToaster();
-  const [mounted, setMounted] = useState(false);
+  const [isShowing, setIsShowing] = useState(false);
   useEffect(() => {
-    setTimeout(() => setMounted(true), duration);
-    setTimeout(() => setMounted(false), timeout - duration);
+    setIsShowing(true);
+    setTimeout(() => setIsShowing(false), timeout - duration);
   }, []);
 
   // Render
   return (
-    <div
-      className={
-        "flex items-center space-x-3 rounded bg-transparent p-1.5" +
-        ` transition-all duration-${duration} ease-in-out` +
-        ` origin-right ${mounted ? "scale-x-100" : "scale-x-0"}`
-      }
+    <Transition
+      show={isShowing}
+      enterFrom="scale-x-0"
+      enterTo="scale-x-100"
+      leaveFrom="scale-x-100"
+      leaveTo="scale-x-0"
+      className={`duration-${duration} flex origin-right items-center space-x-3 rounded bg-transparent p-1.5 transition-all ease-in-out hover:bg-slate-700`}
     >
       {VBarCpt}
       {IconCpt}
@@ -89,6 +91,6 @@ function ToastCpt(props: { toast: Toast }) {
         <h1 className="text-sm font-semibold">{props.toast.header}</h1>
         {props.toast.message && <p className="text-xs brightness-75">{props.toast.message}</p>}
       </div>
-    </div>
+    </Transition>
   );
 }
