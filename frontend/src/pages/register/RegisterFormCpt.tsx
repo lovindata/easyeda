@@ -14,7 +14,7 @@ function RegisterFormCpt() {
   // Render
   return (
     <form
-      className="flex min-w-max flex-col space-y-5 rounded bg-slate-700 p-8"
+      className="flex min-w-max flex-col space-y-5 rounded bg-neutral p-8"
       onSubmit={handleSubmit((data) =>
         registerM(data.email, data.username, data.pwd, data.birthDate, data.isTermsAccepted)
       )}
@@ -25,19 +25,15 @@ function RegisterFormCpt() {
       <PwdInputCpt header="PASSWORD" isRequired={true} registerKey={register("pwd")} />
       <DateInputCpt header="BIRTH DATE" isRequired={true} registerKey={register("birthDate")} />
       <div className="flex items-center space-x-2">
-        <input
-          type="checkbox"
-          className="h-5 w-5 rounded border-none bg-slate-800 text-emerald-500 focus:ring-0 focus:ring-offset-0"
-          {...register("isTermsAccepted")}
-        />
+        <input type="checkbox" className="checkbox-primary checkbox bg-base-100" {...register("isTermsAccepted")} />
         <label className="flex space-x-1 text-xs">
-          <p className="text-red-500">*</p>
+          <p className="text-accent">*</p>
           <p>I have read and accept the</p>
-          <a href="https://github.com/iLoveDataJjia/easyeda/blob/main/LICENSE" className="text-sky-500 hover:underline">
+          <a href="https://github.com/iLoveDataJjia/easyeda/blob/main/LICENSE" className="link-primary link">
             terms of service
           </a>
           <p>and</p>
-          <a href="https://github.com/iLoveDataJjia/easyeda/blob/main/LICENSE" className="text-sky-500 hover:underline">
+          <a href="https://github.com/iLoveDataJjia/easyeda/blob/main/LICENSE" className="link-primary link">
             privacy policy
           </a>
           <p>of DatapiU.</p>
@@ -49,7 +45,7 @@ function RegisterFormCpt() {
         extra={
           <div className="flex space-x-1 text-sm brightness-75">
             <p>Already have an account?</p>
-            <Link to="/login" className="text-sm text-sky-500 hover:underline">
+            <Link to="/login" className="link-primary link text-sm">
               Sign in
             </Link>
           </div>

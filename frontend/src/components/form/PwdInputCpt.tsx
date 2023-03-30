@@ -13,13 +13,9 @@ export function PwdInputCpt<A extends string>(props: {
     <div className="flex flex-col space-y-2">
       <label className="flex space-x-1 text-sm font-semibold">
         <p>{props.header}</p>
-        {props.isRequired && <p className="text-red-500">*</p>}
+        {props.isRequired && <p className="text-accent">*</p>}
       </label>
-      <input
-        {...props.registerKey}
-        type="password"
-        className="focus rounded border-none bg-slate-800 p-2 focus:ring-0"
-      />
+      <input {...props.registerKey} type="password" className="input-bordered input-primary input" />
       {props.extra && <div className="flex">{props.extra}</div>}
     </div>
   );

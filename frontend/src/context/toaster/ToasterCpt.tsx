@@ -13,7 +13,7 @@ export function ToasterCpt() {
 
   // Render
   return (
-    <div className="fixed right-2 bottom-2 select-none space-y-2">
+    <div className="fixed bottom-2 right-2 select-none space-y-2">
       {toasts.map((toast, _) => (
         <ToastCpt toast={toast} key={toast.id} />
       ))}
@@ -83,7 +83,7 @@ function ToastCpt(props: { toast: Toast }) {
       enterTo="scale-x-100"
       leaveFrom="scale-x-100"
       leaveTo="scale-x-0"
-      className={`duration-${duration} flex origin-right items-center space-x-3 rounded bg-transparent p-1.5 transition-all ease-in-out hover:bg-slate-700`}
+      className={`duration-${duration} flex origin-right items-center space-x-3 rounded bg-transparent p-1.5 transition-all ease-in-out hover:bg-neutral`}
     >
       {VBarCpt}
       {IconCpt}

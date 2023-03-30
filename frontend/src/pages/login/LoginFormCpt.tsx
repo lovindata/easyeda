@@ -15,7 +15,7 @@ function LoginFormCpt() {
   // Render
   return (
     <form
-      className="flex min-w-max flex-col space-y-5 rounded bg-slate-700 p-8"
+      className="flex min-w-max flex-col space-y-5 rounded bg-neutral p-8"
       onSubmit={handleSubmit((data) => !isConnecting && connectM(data.email, data.pwd))}
     >
       <TitleCpt title="Hey, welcome back!" desc="We're so excited to see you again!" />
@@ -26,7 +26,7 @@ function LoginFormCpt() {
         extra={
           <Link
             to="/login"
-            className="text-sm text-sky-500 hover:underline"
+            className="link-primary link text-sm"
             onClick={() =>
               addToast({
                 level: ToastLevelEnum.Info,
@@ -46,7 +46,7 @@ function LoginFormCpt() {
         extra={
           <div className="flex space-x-1 text-sm brightness-75">
             <p>Need an account? </p>
-            <Link to="/register" className="text-sm text-sky-500 hover:underline">
+            <Link to="/register" className="link-primary link text-sm">
               Sign up
             </Link>
           </div>

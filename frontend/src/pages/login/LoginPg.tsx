@@ -5,7 +5,7 @@ import LoginFormCpt from "./LoginFormCpt";
  */
 export function LoginPg() {
   return (
-    <div className="m-auto w-3/12">
+    <div className="m-auto w-1/3">
       <LoginFormCpt />
     </div>
   );

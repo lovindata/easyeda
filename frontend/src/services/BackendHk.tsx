@@ -79,7 +79,7 @@ function useBackend(authed: boolean, verbose: boolean) {
           verbose && addToast(serverAuthErrToast);
           navigate("/login");
           break;
-        case undefined: // TODO - Implementation error & Client internet error
+        case undefined:
           verbose && addToast(clientErrToast);
           break;
       }

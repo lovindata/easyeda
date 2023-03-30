@@ -8,7 +8,7 @@ import { BackendProvider } from "./services";
  */
 function App() {
   return (
-    <div className="flex min-h-screen flex-col bg-slate-900 text-gray-300">
+    <div className="flex min-h-screen flex-col">
       <RouterProvider>
         <CtxProvider>
           <BackendProvider>
