@@ -1,19 +1,23 @@
 import { Link, useLocation } from "react-router-dom";
-import { Conn, Pipeline } from "../../assets";
+import { Conn, Pipeline, Profil } from "../../assets";
+import { useUser } from "../../context";
 
 /**
  * Sidebar component.
  */
-export function SideBarCpt() {
+export default function SideBarCpt() {
   // Get current path
   const location = useLocation();
   const currentPath = location.pathname;
 
   // Render
   return (
-    <div className="fixed flex h-screen w-16 flex-col justify-center bg-slate-800">
-      <IconTabLink to="connections" title="Connections" svg={Conn} isCurrent={currentPath == "/app/connections"} />
-      <IconTabLink to="pipelines" title="Pipelines" svg={Pipeline} isCurrent={currentPath == "/app/pipelines"} />
+    <div className="flex h-screen w-12 flex-col">
+      <div className="flex grow flex-col">
+        <IconTabLink to="connections" title="Connections" svg={Conn} isCurrent={currentPath == "/app/connections"} />
+        <IconTabLink to="pipelines" title="Pipelines" svg={Pipeline} isCurrent={currentPath == "/app/pipelines"} />
+      </div>
+      <IconUser />
     </div>
   );
 }
@@ -32,21 +36,36 @@ function IconTabLink(props: {
   isCurrent: boolean;
 }) {
   return (
-    <div className="relative flex flex-col justify-center p-4">
+    <div className="relative flex flex-col justify-center p-2.5">
       <span
-        className={`absolute -ml-4 h-2/3 w-1 rounded-r bg-emerald-500 brightness-150
+        className={`absolute -ml-2.5 h-full w-0.5 bg-primary brightness-150
         transition-all duration-300 ease-in-out ${props.isCurrent ? "scale-100" : "scale-0"}`}
       />
       <Link to={props.to} className="peer">
-        <props.svg className={`fill-emerald-500 ${props.isCurrent ? "brightness-150" : "hover:brightness-150"}`} />
+        <props.svg className={`fill-primary ${props.isCurrent ? "brightness-150" : "hover:brightness-150"}`} />
       </Link>
       <div
-        className="pointer-events-none absolute left-full ml-2 origin-left scale-0 select-none rounded-xl bg-slate-800
-        p-2 text-sm font-bold
-        transition-all duration-300 ease-in-out peer-hover:scale-100"
+        className="pointer-events-none absolute left-full ml-1 origin-left scale-0 select-none rounded
+        bg-neutral px-1.5 py-1 text-xs font-thin
+        shadow transition-all duration-300 ease-in-out peer-hover:scale-100"
       >
         {props.title}
       </div>
+    </div>
+  );
+}
+
+/**
+ * Sidebar icon user.
+ */
+function IconUser() {
+  // State
+  const { user, isRetrieving } = useUser();
+
+  // Render
+  return (
+    <div className="flex flex-col justify-center p-2.5">
+      <Profil />
     </div>
   );
 }

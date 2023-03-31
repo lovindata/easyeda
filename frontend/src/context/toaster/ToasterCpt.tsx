@@ -30,20 +30,20 @@ function ToastCpt(props: { toast: Toast }) {
   let fillColor: string;
   switch (props.toast.level) {
     case ToastLevelEnum.Success:
-      bgColor = "bg-emerald-500";
-      fillColor = "fill-emerald-500";
+      bgColor = "bg-success";
+      fillColor = "fill-success";
       break;
     case ToastLevelEnum.Info:
-      bgColor = "bg-sky-500";
-      fillColor = "fill-sky-500";
+      bgColor = "bg-info";
+      fillColor = "fill-info";
       break;
     case ToastLevelEnum.Warning:
-      bgColor = "bg-amber-500";
-      fillColor = "fill-amber-500";
+      bgColor = "bg-warning";
+      fillColor = "fill-warning";
       break;
     case ToastLevelEnum.Error:
-      bgColor = "bg-rose-500";
-      fillColor = "fill-rose-500";
+      bgColor = "bg-error";
+      fillColor = "fill-error";
       break;
   }
 
