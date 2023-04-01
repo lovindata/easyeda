@@ -60,39 +60,27 @@ function IconTabLink(props: {
  */
 function IconUser() {
   // State
-  const { user, isRetrieving } = useUser();
+  const { user } = useUser();
 
   // Render
   return (
     <div className="relative flex flex-col justify-end p-2.5">
-      <Profil className="peer flex fill-primary hover:brightness-150" />
-      <span
-        className={
-          "absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full border-2 border-base-100" +
-          (isRetrieving ? " bg-warning" : " bg-success")
-        }
-      />
+      <div className="peer relative">
+        <Profil className="peer flex fill-primary hover:brightness-150" />
+        <span
+          className={
+            "absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full border-2 border-base-100" +
+            (user ? " bg-success" : " bg-warning")
+          }
+        />
+      </div>
       <div
-        className="pointer-events-none absolute left-full ml-1 flex origin-bottom-left scale-0 select-none
-        space-x-1.5 rounded bg-neutral px-1.5 py-1 align-middle text-xs
+        className="pointer-events-none absolute left-full ml-1 min-w-max origin-left scale-0 select-none
+        rounded bg-neutral px-1.5 py-1 text-xs
         font-thin shadow transition-all duration-300 ease-in-out peer-hover:scale-100"
       >
-        <div className="flex flex-col">
-          <h1 className="text-sm font-semibold">{user?.username}</h1>
-          <p className="italic">#{user?.id}</p>
-        </div>
-        <div className="flex flex-col">
-          <div className="flex space-x-1">
-            <Conn className="w-5 fill-primary" />
-            <p className="text-error">?/?</p>
-          </div>
-          <div className="flex space-x-1">
-            <Pipeline className="w-5 fill-primary" />
-            <p>?/?</p>
-          </div>
-        </div>
+        {user ? `${user.username}#${user.id} (Connected)` : "(Connecting)"}
       </div>
-      </div>
-
+    </div>
   );
 }
