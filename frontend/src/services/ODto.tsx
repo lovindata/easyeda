@@ -1,4 +1,15 @@
 /**
+ * Server output dto.
+ */
+export type ODto =
+  | BackendException
+  | TokenODto
+  | UserStatusODto
+  | ConnTestODto
+  | ConnStatusODto
+  | ConnStatusODto[];
+
+/**
  * Server exception dto.
  */
 export type BackendException = AppException | AuthException;
@@ -39,4 +50,21 @@ export interface UserStatusODto {
   validatedAt: number | null;
   updatedAt: number;
   activeAt: number;
+}
+
+/**
+ * Connection test dto.
+ */
+export interface ConnTestODto {
+  isUp: boolean;
+}
+
+/**
+ * Connection status dto.
+ */
+export interface ConnStatusODto {
+  id: number;
+  type: "postgres" | "mongo";
+  name: string;
+  isUp: boolean;
 }

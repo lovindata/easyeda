@@ -1,4 +1,8 @@
-import { BrowserRouter as RouterProvider, Routes, Route } from "react-router-dom";
+import {
+  BrowserRouter as RouterProvider,
+  Routes,
+  Route,
+} from "react-router-dom";
 import { LoginPg, RegisterPg, AppPg } from "./pages";
 import { CtxProvider, ToasterCpt } from "./context";
 import { BackendProvider } from "./services";

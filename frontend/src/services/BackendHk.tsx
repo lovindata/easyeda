@@ -1,9 +1,10 @@
 import axios from "axios";
 import { AxiosError } from "axios";
 import { useQuery, useMutation } from "react-query";
-import { TokenODto, BackendException } from "./BackendDto";
+import { TokenODto, BackendException, ODto } from "./ODto";
 import { useToaster, ToastLevelEnum, useAuthContext } from "../context";
 import { useNavigate } from "react-router-dom";
+import { IDto } from "./IDto";
 
 // Error toasts
 const clientErrToast = {
@@ -42,15 +43,22 @@ function useBackend(authed: boolean, verbose: boolean) {
     let freshTokens: TokenODto | undefined;
     if (authed && tokens && tokens.expireAt < Date.now()) {
       await axios
-        .post<TokenODto>(`http://${window.location.hostname}:8081/user/refresh`, undefined, {
-          headers: { "DataPiU-Refresh-Token": tokens.refreshToken },
-        })
+        .post<TokenODto>(
+          `http://${window.location.hostname}:8081/user/refresh`,
+          undefined,
+          {
+            headers: { "DataPiU-Refresh-Token": tokens.refreshToken },
+          }
+        )
         .then((res) => {
           setTokens(res.data);
           freshTokens = res.data;
         })
         .catch((err: AxiosError<BackendException>) => {
-          verbose && (err.response ? addToast(serverAuthErrToast) : addToast(clientErrToast));
+          verbose &&
+            (err.response
+              ? addToast(serverAuthErrToast)
+              : addToast(clientErrToast));
           freshTokens = undefined;
         });
     } else freshTokens = tokens;
@@ -58,7 +66,8 @@ function useBackend(authed: boolean, verbose: boolean) {
     // Do request or abort (authed and no fresh tokens)
     const controller = new AbortController();
     if (authed) {
-      if (freshTokens) req.headers.setAuthorization(`Bearer ${freshTokens.accessToken}`);
+      if (freshTokens)
+        req.headers.setAuthorization(`Bearer ${freshTokens.accessToken}`);
       else {
         controller.abort();
         navigate("/login");
@@ -94,7 +103,7 @@ function useBackend(authed: boolean, verbose: boolean) {
 /**
  * Get request hook.
  */
-export function useGet<A>(
+export function useGet<A extends ODto>(
   queryKey: string,
   subDirect: string,
   headers: object | undefined,
@@ -114,7 +123,11 @@ export function useGet<A>(
 /**
  * Get request hook effect.
  */
-export function useGetM<A>(subDirect: string, authed: boolean, verbose: boolean) {
+export function useGetM<A extends ODto>(
+  subDirect: string,
+  authed: boolean,
+  verbose: boolean
+) {
   // Hooks
   const backend = useBackend(authed, verbose);
   const {
@@ -133,18 +146,26 @@ export function useGetM<A>(subDirect: string, authed: boolean, verbose: boolean)
 /**
  * Post request hook effect.
  */
-export function usePostM<A>(subDirect: string, authed: boolean, verbose: boolean) {
+export function usePostM<A extends ODto>(
+  subDirect: string,
+  authed: boolean,
+  verbose: boolean
+) {
   // Hooks
   const backend = useBackend(authed, verbose);
   const {
     mutate: postMutate,
     data,
-    isLoading,
-  } = useMutation((args: { body: object | undefined; headers: object | undefined }) =>
-    backend.post<A>(subDirect, args.body, { headers: args.headers }).then((res) => res.data)
+    isLoading
+  } = useMutation(
+    (args: { body: IDto | undefined; headers: object | undefined }) =>
+      backend
+        .post<A>(subDirect, args.body, { headers: args.headers })
+        .then((res) => res.data)
   );
 
   // Return
-  const postM = (body: object | undefined, headers: object | undefined) => postMutate({ body: body, headers: headers });
+  const postM = (body: IDto | undefined, headers: object | undefined) =>
+    postMutate({ body: body, headers: headers });
   return { postM, data, isLoading };
 }
