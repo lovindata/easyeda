@@ -76,6 +76,10 @@ libraryDependencies += "org.postgresql"     % "postgresql"         % "42.5.4"
 // https://mvnrepository.com/artifact/org.mongodb.scala/mongo-scala-driver
 libraryDependencies += "org.mongodb.scala" %% "mongo-scala-driver" % "4.9.0"
 
+// System
+// https://mvnrepository.com/artifact/com.github.oshi/oshi-core
+libraryDependencies += "com.github.oshi" % "oshi-core" % "6.4.1"
+
 /**
  * Test dependencies.
  */
