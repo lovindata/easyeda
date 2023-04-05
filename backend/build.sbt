@@ -34,11 +34,11 @@ libraryDependencies += "com.softwaremill.quicklens" %% "quicklens"   % "1.9.0"
 
 // Tapir
 // https://mvnrepository.com/artifact/com.softwaremill.sttp.tapir/tapir-http4s-server
-libraryDependencies += "com.softwaremill.sttp.tapir" %% "tapir-http4s-server"     % "1.2.10"
+libraryDependencies += "com.softwaremill.sttp.tapir" %% "tapir-http4s-server"     % "1.2.11"
 // https://mvnrepository.com/artifact/com.softwaremill.sttp.tapir/tapir-json-circe
-libraryDependencies += "com.softwaremill.sttp.tapir" %% "tapir-json-circe"        % "1.2.10"
+libraryDependencies += "com.softwaremill.sttp.tapir" %% "tapir-json-circe"        % "1.2.11"
 // https://mvnrepository.com/artifact/com.softwaremill.sttp.tapir/tapir-swagger-ui-bundle
-libraryDependencies += "com.softwaremill.sttp.tapir" %% "tapir-swagger-ui-bundle" % "1.2.10"
+libraryDependencies += "com.softwaremill.sttp.tapir" %% "tapir-swagger-ui-bundle" % "1.2.11"
 
 // Http4s
 // https://mvnrepository.com/artifact/org.http4s/http4s-ember-server
@@ -72,7 +72,7 @@ libraryDependencies += "org.tpolecat" %% "doobie-postgres-circe" % "1.0.0-RC2"
 
 // Connectors
 // https://mvnrepository.com/artifact/org.postgresql/postgresql
-libraryDependencies += "org.postgresql"     % "postgresql"         % "42.5.4"
+libraryDependencies += "org.postgresql"     % "postgresql"         % "42.6.0"
 // https://mvnrepository.com/artifact/org.mongodb.scala/mongo-scala-driver
 libraryDependencies += "org.mongodb.scala" %% "mongo-scala-driver" % "4.9.0"
 
@@ -86,4 +86,4 @@ libraryDependencies += "com.github.oshi" % "oshi-core" % "6.4.1"
 // https://mvnrepository.com/artifact/org.scalatest/scalatest
 libraryDependencies += "org.scalatest" %% "scalatest"     % "3.2.15"  % Test
 // https://mvnrepository.com/artifact/org.mockito/mockito-scala
-libraryDependencies += "org.mockito"   %% "mockito-scala" % "1.17.12" % Test
+libraryDependencies += "org.mockito"   %% "mockito-scala" % "1.17.14" % Test

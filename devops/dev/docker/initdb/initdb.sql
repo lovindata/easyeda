@@ -1,6 +1,17 @@
 -- Create schemas
 CREATE SCHEMA IF NOT EXISTS elodata_sch;
 
+-- Create cluster table
+CREATE TABLE IF NOT EXISTS elodata_sch.cluster (
+	id bigserial NOT NULL,
+	cpu double precision[] NOT NULL,
+	ram double precision NOT NULL,
+	ram_total double precision NOT NULL,
+	registered_at timestamptz(3) NOT NULL,
+	heartbeat_at timestamptz(3) NOT NULL,
+	PRIMARY KEY (id)
+);
+
 -- Create user table
 CREATE TABLE IF NOT EXISTS elodata_sch.user (
 	id bigserial NOT NULL,
