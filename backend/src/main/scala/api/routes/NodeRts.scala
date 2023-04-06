@@ -38,4 +38,5 @@ object NodeRts extends GenericRts {
    *   Concatenated routes
    */
   override def appRts: HttpRoutes[IO] = getRts
+
 }

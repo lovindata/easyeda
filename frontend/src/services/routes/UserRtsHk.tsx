@@ -79,12 +79,12 @@ export function useUserRtsLogin() {
 }
 
 /**
- * User info hook for route ("/user/retrieve").
+ * User info hook for route ("/user/status").
  */
-export function useUserRtsRetrieve() {
+export function useUserRtsStatus() {
   const { data, isLoading } = useGet<UserStatusODto>(
     "useUser",
-    "/user/retrieve",
+    "/user/status",
     undefined,
     true,
     true
