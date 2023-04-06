@@ -1,5 +1,6 @@
 package com.ilovedatajjia
 
+import api.services.NodeSvc
 import cats.effect.IO
 import cats.effect.IOApp
 import config.BackendServer
@@ -12,6 +13,6 @@ object Main extends IOApp.Simple {
   /**
    * Run all the required requisites.
    */
-  override def run: IO[Unit] = BackendServer.run
+  override def run: IO[Unit] = NodeSvc.report >> BackendServer.run >> IO.never
 
 }

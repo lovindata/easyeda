@@ -51,11 +51,11 @@ object UserRts extends GenericRts {
   private val refreshRts: HttpRoutes[IO]                                            =
     Http4sServerInterpreter[IO]().toRoutes(refreshEpt.serverLogic(UserSvc.grantTokens(_).toErrHandled))
 
-  // Retrieve user
+  // Retrieve user status
   private val getEpt: PartialServerEndpoint[String, UserMod, Unit, BackendException, UserStatusODto, Any, IO] = authEpt
-    .summary("retrieve user account info")
+    .summary("retrieve user status")
     .get
-    .in("user" / "retrieve")
+    .in("user" / "status")
     .out(jsonBody[UserStatusODto])
   private val getRts: HttpRoutes[IO]                                                                          =
     Http4sServerInterpreter[IO]().toRoutes(getEpt.serverLogic(user => _ => UserSvc.toDto(user).toErrHandled))

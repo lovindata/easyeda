@@ -59,6 +59,7 @@ trait GenericMod[A <: Product] {
     case x: Short                   => fr0"$x"
     case x: Int                     => fr0"$x"
     case x: Long                    => fr0"$x"
+    case x: Double                  => fr0"$x"
     case x: String                  => fr0"$x"
     case x: Array[Byte]             => fr0"$x"
     case x: Timestamp               => fr0"$x"
@@ -67,6 +68,7 @@ trait GenericMod[A <: Product] {
     case Some(x)                    => anyToFrag(x)
     case None                       => Fragment.const0("null")
     case x: scala.Enumeration#Value => fr0"${x.toString}"
+    case x: List[Double]            => fr0"$x"
     case _                          => throw AppException(s"Implementation error, fragment impossible for type `${x.getClass.getTypeName}`.")
   }
 

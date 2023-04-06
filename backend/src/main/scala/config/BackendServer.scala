@@ -29,9 +29,10 @@ object BackendServer {
 
   // BackEnd routes
   private val docsEpt: List[ServerEndpoint[Any, IO]] =
-    SwaggerInterpreter().fromEndpoints[IO](UserRts.docEpt ++ ConnRts.docEpt, "AppServer", "1.0") // On "/docs"
+    SwaggerInterpreter()
+      .fromEndpoints[IO](NodeRts.docEpt ++ UserRts.docEpt ++ ConnRts.docEpt, "AppServer", "1.0") // On "/docs"
   private val docsRts: HttpRoutes[IO]    = Http4sServerInterpreter[IO]().toRoutes(docsEpt)
-  private val backEndRts: HttpRoutes[IO] = docsRts <+> UserRts.appRts <+> ConnRts.appRts
+  private val backEndRts: HttpRoutes[IO] = docsRts <+> NodeRts.appRts <+> UserRts.appRts <+> ConnRts.appRts
 
   /**
    * Start the HTTP servers.
@@ -55,6 +56,7 @@ object BackendServer {
            .withHttpApp(CORS.policy.withAllowOriginAll(backEndRts).orNotFound)
            .build
            .use(_ => IO.never)
+           .start
   } yield ()
 
 }

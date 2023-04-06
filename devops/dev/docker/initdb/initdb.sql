@@ -2,7 +2,7 @@
 CREATE SCHEMA IF NOT EXISTS elodata_sch;
 
 -- Create cluster table
-CREATE TABLE IF NOT EXISTS elodata_sch.cluster (
+CREATE TABLE IF NOT EXISTS elodata_sch.node (
 	id bigserial NOT NULL,
 	cpu double precision[] NOT NULL,
 	ram double precision NOT NULL,

@@ -1,6 +1,7 @@
 package com.ilovedatajjia
 package api.models
 
+import api.helpers.DoobieUtils._
 import cats.effect.IO
 import java.sql.Timestamp
 
@@ -19,22 +20,22 @@ import java.sql.Timestamp
  * @param heartbeatAt
  *   Latest heartbeat to the database at
  */
-case class ClusterMod(id: Long,
-                      cpu: List[Double],
-                      ram: Double,
-                      ramTotal: Double,
-                      registeredAt: Timestamp,
-                      heartbeatAt: Timestamp)
+case class NodeMod(id: Long,
+                   cpu: List[Double],
+                   ram: Double,
+                   ramTotal: Double,
+                   registeredAt: Timestamp,
+                   heartbeatAt: Timestamp)
 
 /**
- * Additional [[ClusterMod]] functions.
+ * Additional [[NodeMod]] functions.
  */
-object ClusterMod extends GenericMod[ClusterMod] {
+object NodeMod extends GenericMod[NodeMod] {
 
   /**
-   * Constructor of [[ClusterMod]].
+   * Constructor of [[NodeMod]].
    * @param cpu
-   *   Cpus usage (in milli-cores)
+   *   Cpus usage (between 0 and 1 for each core)
    * @param ram
    *   Ram usage (in GiB)
    * @param ramTotal
@@ -44,8 +45,7 @@ object ClusterMod extends GenericMod[ClusterMod] {
    * @return
    *   A new registered node model
    */
-  def apply(cpu: Array[Double], ram: Double, ramTotal: Double, nowTimestamp: Timestamp): IO[ClusterMod] = for {
-    _ <- IO(???)
-  } yield ???
+  def apply(cpu: List[Double], ram: Double, ramTotal: Double, nowTimestamp: Timestamp): IO[NodeMod] = insert(
+    NodeMod(-1, cpu, ram, ramTotal, nowTimestamp, nowTimestamp))
 
 }

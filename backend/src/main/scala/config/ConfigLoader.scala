@@ -10,11 +10,13 @@ object ConfigLoader {
   private val allEnvVar: Map[String, String] = sys.env
 
   // Main server conf
-  val frontEndResourcePath: String = allEnvVar.getOrElse("FRONTEND_RESOURCES", default = "./frontend/dist")
-  val frontEndPort: Int            = allEnvVar.getOrElse("FRONTEND_PORT", default = "8080").toInt
-  val backEndPort: Int             = allEnvVar.getOrElse("BACKEND_PORT", default = "8081").toInt
-  val sparkUIPort: Int             = allEnvVar.getOrElse("SPARK_UI_PORT", default = "4040").toInt
-  val tokenDuration: Long          = allEnvVar.getOrElse("TOKEN_DURATION", default = "3600").toLong // In seconds
+  val frontEndResourcePath: String = allEnvVar.getOrElse("DATAPIU_FRONTEND_RESOURCES", default = "./frontend/dist")
+  val frontEndPort: Int            = allEnvVar.getOrElse("DATAPIU_FRONTEND_PORT", default = "8080").toInt
+  val backEndPort: Int             = allEnvVar.getOrElse("DATAPIU_BACKEND_PORT", default = "8081").toInt
+  val sparkUIPort: Int             = allEnvVar.getOrElse("DATAPIU_SPARK_UI_PORT", default = "4040").toInt
+  val tokenDuration: Long          = allEnvVar.getOrElse("DATAPIU_TOKEN_DURATION", default = "3600").toLong  // In seconds
+  val heartbeatInterval: Long      = allEnvVar.getOrElse("DATAPIU_HEARTBEAT_INTERVAL", default = "5").toLong // In seconds
+  val aliveInterval: Long          = allEnvVar.getOrElse("DATAPIU_ALIVE_INTERVAL", default = "10").toLong    // In seconds
 
   // DB conf
   val dbIp: String      = allEnvVar.getOrElse("DB_IP", default = "localhost")
