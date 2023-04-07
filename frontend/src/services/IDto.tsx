@@ -11,7 +11,7 @@ export interface UserFormIDto {
   username: string;
   pwd: string;
   birthDate: string;
-  isTermsAcepted: boolean;
+  isTermsAccepted: boolean;
 }
 
 /**

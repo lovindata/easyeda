@@ -9,10 +9,12 @@ import api.helpers.StringUtils._
 import api.models.TokenMod
 import api.models.UserMod
 import cats.effect._
+import cats.implicits._
 import com.softwaremill.quicklens._
 import config.ConfigLoader
 import java.sql.Date
 import java.sql.Timestamp
+import org.postgresql.util.PSQLException
 
 /**
  * Service layer for user.
@@ -52,7 +54,10 @@ object UserSvc {
   def createUser(email: String, username: String, pwd: String, birthDate: Date): IO[UserStatusODto] = for {
     pwdSalt <- genString(32)
     pwd     <- s"$pwdSalt$pwd".toSHA3_512
-    user    <- UserMod(email, username, pwd, pwdSalt, birthDate)
+    user    <- UserMod(email, username, pwd, pwdSalt, birthDate).attemptT.leftMap {
+                 case t: PSQLException => AppException(t.getServerErrorMessage.getDetail)
+                 case t                => t
+               }.rethrowT
     userDto <- this.toDto(user)
   } yield userDto
 

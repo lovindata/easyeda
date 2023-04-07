@@ -1,7 +1,13 @@
 import { Link } from "react-router-dom";
 import { useForm } from "react-hook-form";
-import { ButtonSubmitCpt, PwdInputCpt, TextInputCpt, TitleCpt } from "../../components";
-import { useToaster, ToastLevelEnum, useUserConnectM } from "../../context";
+import {
+  ButtonSubmitCpt,
+  PwdInputCpt,
+  TextInputCpt,
+  TitleCpt,
+} from "../../components";
+import { useToaster, ToastLevelEnum } from "../../context";
+import { useUserRtsLogin } from "../../services";
 
 /**
  * Login form.
@@ -10,16 +16,25 @@ function LoginFormCpt() {
   // Pre-requisites
   const { addToast } = useToaster();
   const { register, handleSubmit } = useForm();
-  const { connectM, isConnecting } = useUserConnectM();
+  const { logIn, isLogingIn } = useUserRtsLogin();
 
   // Render
   return (
     <form
       className="flex min-w-max flex-col space-y-5 rounded bg-neutral p-8"
-      onSubmit={handleSubmit((data) => !isConnecting && connectM(data.email, data.pwd))}
+      onSubmit={handleSubmit(
+        (data) => !isLogingIn && logIn({ email: data.email, pwd: data.pwd })
+      )}
     >
-      <TitleCpt title="Hey, welcome back!" desc="We're so excited to see you again!" />
-      <TextInputCpt header="E-MAIL" isRequired={true} registerKey={register("email")} />
+      <TitleCpt
+        title="Hey, welcome back!"
+        desc="We're so excited to see you again!"
+      />
+      <TextInputCpt
+        header="E-MAIL"
+        isRequired={true}
+        registerKey={register("email")}
+      />
       <PwdInputCpt
         header="PASSWORD"
         isRequired={true}
@@ -31,7 +46,8 @@ function LoginFormCpt() {
               addToast({
                 level: ToastLevelEnum.Info,
                 header: "Comming soon",
-                message: "Admin related features will be available in next releases.",
+                message:
+                  "Admin related features will be available in next releases.",
               })
             }
           >
@@ -42,7 +58,7 @@ function LoginFormCpt() {
       />
       <ButtonSubmitCpt
         name="Connexion"
-        isLoading={isConnecting}
+        isLoading={isLogingIn}
         extra={
           <div className="flex space-x-1 text-sm brightness-75">
             <p>Need an account? </p>

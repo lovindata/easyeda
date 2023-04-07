@@ -7,7 +7,8 @@ export type ODto =
   | UserStatusODto
   | ConnTestODto
   | ConnStatusODto
-  | ConnStatusODto[];
+  | ConnStatusODto[]
+  | NodeStatusODto;
 
 /**
  * Server exception dto.
@@ -67,4 +68,15 @@ export interface ConnStatusODto {
   type: "postgres" | "mongo";
   name: string;
   isUp: boolean;
+}
+
+/**
+ * Node(s) status dto.
+ */
+export interface NodeStatusODto {
+  nbNodes: number;
+  cpu: number;
+  cpuTotal: number;
+  ram: number;
+  ramTotal: number;
 }

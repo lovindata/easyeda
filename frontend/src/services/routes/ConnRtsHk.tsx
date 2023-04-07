@@ -42,6 +42,7 @@ export function useConnRtsList() {
     "/conn/list",
     undefined,
     true,
+    false,
     false
   );
   return { connsStatus: data, isLoading };

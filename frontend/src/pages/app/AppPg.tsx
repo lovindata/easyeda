@@ -3,17 +3,12 @@ import { HomePg } from "./home/HomePg";
 import { ConnsPg } from "./connections/ConnsPg";
 import { PipelinesPg } from "./pipelines/PipelinesPg";
 import SideBarCpt from "./SideBarCpt";
-import { useUser } from "../../context";
 import MenuBarCpt from "./MenuBarCpt";
 
 /**
  * Application page.
  */
 export function AppPg() {
-  // Get user
-  const { user, isRetrieving } = useUser();
-
-  // Render
   return (
     <div className="flex">
       <SideBarCpt />

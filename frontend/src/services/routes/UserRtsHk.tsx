@@ -13,28 +13,28 @@ export function useUserRtsCreate() {
   // Hooks
   const { addToast } = useToaster();
   const navigate = useNavigate();
-  const {
-    postM: registerM,
-    data: user,
-    isLoading: isCreating,
-  } = usePostM<UserStatusODto>("/user/create", false, true);
+  const { postM, data, isLoading } = usePostM<UserStatusODto>(
+    "/user/create",
+    false,
+    true
+  );
 
   // Effect on post registration
   useEffect(() => {
-    if (user) {
+    if (data) {
       addToast({
         level: ToastLevelEnum.Success,
         header: `Request success`,
-        message: `${user.email} ready to connect.`,
+        message: `${data.email} ready to connect.`,
       });
       navigate("/login");
     }
-  }, [user]);
+  }, [data]);
 
   // Return
   return {
-    registerM: (body: UserFormIDto) => registerM(body, undefined),
-    isCreating: isCreating,
+    create: (body: UserFormIDto) => postM(body, undefined),
+    isCreating: isLoading,
   };
 }
 
@@ -87,7 +87,8 @@ export function useUserRtsStatus() {
     "/user/status",
     undefined,
     true,
-    true
+    true,
+    false
   );
   return { user: data, isRetrieving: isLoading };
 }

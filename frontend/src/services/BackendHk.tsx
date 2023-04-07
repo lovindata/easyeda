@@ -108,12 +108,16 @@ export function useGet<A extends ODto>(
   subDirect: string,
   headers: object | undefined,
   authed: boolean,
-  verbose: boolean
+  verbose: boolean,
+  refetchInterval: number | false
 ) {
   // Hooks
   const backend = useBackend(authed, verbose);
-  const { data, isLoading } = useQuery(queryKey, () =>
-    backend.get<A>(subDirect, { headers: headers }).then((res) => res.data)
+  const { data, isLoading } = useQuery(
+    queryKey,
+    () =>
+      backend.get<A>(subDirect, { headers: headers }).then((res) => res.data),
+    { refetchInterval: refetchInterval }
   );
 
   // Return
@@ -156,7 +160,7 @@ export function usePostM<A extends ODto>(
   const {
     mutate: postMutate,
     data,
-    isLoading
+    isLoading,
   } = useMutation(
     (args: { body: IDto | undefined; headers: object | undefined }) =>
       backend
