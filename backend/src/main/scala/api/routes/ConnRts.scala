@@ -53,7 +53,7 @@ object ConnRts extends GenericRts {
   private val listEpt: PartialServerEndpoint[String, UserMod, Unit, BackendException, List[ConnStatusODto], Any, IO] =
     authEpt
       .summary("listing all connections")
-      .post
+      .get
       .in("conn" / "list")
       .out(jsonBody[List[ConnStatusODto]])
   private val listRts: HttpRoutes[IO]                                                                                =
