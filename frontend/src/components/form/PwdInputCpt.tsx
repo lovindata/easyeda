@@ -3,7 +3,7 @@ import { UseFormRegisterReturn } from "react-hook-form";
 /**
  * Generic password input.
  */
-export function PwdInputCpt<A extends string>(props: {
+export default function PwdInputCpt<A extends string>(props: {
   header: string;
   isRequired: boolean;
   extra?: JSX.Element;
@@ -15,7 +15,11 @@ export function PwdInputCpt<A extends string>(props: {
         <p>{props.header}</p>
         {props.isRequired && <p className="text-accent">*</p>}
       </label>
-      <input {...props.registerKey} type="password" className="input-bordered input-primary input" />
+      <input
+        {...props.registerKey}
+        type="password"
+        className="input-bordered input-primary input"
+      />
       {props.extra && <div className="flex">{props.extra}</div>}
     </div>
   );

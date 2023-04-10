@@ -1,7 +1,7 @@
 /**
  * Generic title.
  */
-export function TitleCpt(props: { title: string; desc?: string }) {
+export default function TitleCpt(props: { title: string; desc?: string }) {
   return (
     <div className="flex flex-col items-center space-y-2">
       <h1 className="text-2xl font-bold">{props.title}</h1>

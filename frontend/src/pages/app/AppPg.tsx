@@ -1,14 +1,14 @@
-import { Routes, Route } from "react-router-dom";
-import { HomePg } from "./home/HomePg";
+import { Route, Routes } from "react-router-dom";
 import { ConnsPg } from "./connections/ConnsPg";
+import { HomePg } from "./home/HomePg";
+import MenuBarCpt from "./MenuBarCpt";
 import { PipelinesPg } from "./pipelines/PipelinesPg";
 import SideBarCpt from "./SideBarCpt";
-import MenuBarCpt from "./MenuBarCpt";
 
 /**
  * Application page.
  */
-export function AppPg() {
+export default function AppPg() {
   return (
     <div className="flex">
       <SideBarCpt />

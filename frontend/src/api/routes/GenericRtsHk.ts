@@ -1,23 +1,39 @@
-import axios from "axios";
-import { AxiosError } from "axios";
-import { useQuery, useMutation } from "react-query";
-import { TokenODto, BackendException, ODto } from "./ODto";
-import { useToaster, ToastLevelEnum, useAuthContext } from "../context";
+import axios, { AxiosError } from "axios";
+import { useMutation, useQuery } from "react-query";
 import { useNavigate } from "react-router-dom";
-import { IDto } from "./IDto";
+import useAuthContext from "../../context/auth/AuthHk";
+import { ToastLevelEnum } from "../../context/toaster/ToasterCtx";
+import useToaster from "../../context/toaster/ToasterHk";
+import { IDto } from "../dto/IDto";
+import { BackendException, ODto, TokenODto } from "../dto/ODto";
 
-// Error toasts
-const clientErrToast = {
+/**
+ * Server location.
+ */
+const SERVER_URL = `http://${window.location.hostname}:8081/`;
+
+/**
+ * Client side error toast.
+ */
+const CLIENT_ERR_TOAST = {
   level: ToastLevelEnum.Warning,
   header: "Unreachable server",
   message: "Please verify your internet connection.",
 };
-const serverAppErrToast = (message: string) => ({
+
+/**
+ * Server side applicative error toast.
+ */
+const SERVER_APP_ERR_TOAST = (message: string) => ({
   level: ToastLevelEnum.Error,
   header: "Bad request",
   message: message,
 });
-const serverAuthErrToast = {
+
+/**
+ * Server side authentication error toast.
+ */
+const SERVER_AUTH_ERR_TOAST = {
   level: ToastLevelEnum.Warning,
   header: "Not connected",
   message: "Connection lost or account not provided. Please reconnect.",
@@ -33,9 +49,7 @@ function useBackend(authed: boolean, verbose: boolean) {
   const { tokens, setTokens } = useAuthContext();
 
   // Build backend axios
-  const backend = axios.create({
-    baseURL: `http://${window.location.hostname}:8081/`,
-  });
+  const backend = axios.create({ baseURL: SERVER_URL });
 
   // Pre-request process
   backend.interceptors.request.use(async (req) => {
@@ -43,13 +57,9 @@ function useBackend(authed: boolean, verbose: boolean) {
     let freshTokens: TokenODto | undefined;
     if (authed && tokens && tokens.expireAt < Date.now()) {
       await axios
-        .post<TokenODto>(
-          `http://${window.location.hostname}:8081/user/refresh`,
-          undefined,
-          {
-            headers: { "DataPiU-Refresh-Token": tokens.refreshToken },
-          }
-        )
+        .post<TokenODto>(`${SERVER_URL}user/refresh`, undefined, {
+          headers: { "DataPiU-Refresh-Token": tokens.refreshToken },
+        })
         .then((res) => {
           setTokens(res.data);
           freshTokens = res.data;
@@ -57,8 +67,8 @@ function useBackend(authed: boolean, verbose: boolean) {
         .catch((err: AxiosError<BackendException>) => {
           verbose &&
             (err.response
-              ? addToast(serverAuthErrToast)
-              : addToast(clientErrToast));
+              ? addToast(SERVER_AUTH_ERR_TOAST)
+              : addToast(CLIENT_ERR_TOAST));
           freshTokens = undefined;
         });
     } else freshTokens = tokens;
@@ -82,14 +92,14 @@ function useBackend(authed: boolean, verbose: boolean) {
     (err: AxiosError<BackendException>) => {
       switch (err.response?.data.kind) {
         case "AppException":
-          verbose && addToast(serverAppErrToast(err.response.data.message));
+          verbose && addToast(SERVER_APP_ERR_TOAST(err.response.data.message));
           break;
         case "AuthException":
-          verbose && addToast(serverAuthErrToast);
+          verbose && addToast(SERVER_AUTH_ERR_TOAST);
           navigate("/login");
           break;
         case undefined:
-          verbose && addToast(clientErrToast);
+          verbose && addToast(CLIENT_ERR_TOAST);
           break;
       }
       return err;
@@ -115,8 +125,7 @@ export function useGet<A extends ODto>(
   const backend = useBackend(authed, verbose);
   const { data, isLoading } = useQuery(
     queryKey,
-    () =>
-      backend.get<A>(subDirect, { headers: headers }).then((res) => res.data),
+    () => backend.get<A>(subDirect, { headers: headers }).then((_) => _.data),
     { refetchInterval: refetchInterval }
   );
 
@@ -139,7 +148,7 @@ export function useGetM<A extends ODto>(
     data,
     isLoading,
   } = useMutation((headers: object | undefined) =>
-    backend.get<A>(subDirect, { headers: headers }).then((res) => res.data)
+    backend.get<A>(subDirect, { headers: headers }).then((_) => _.data)
   );
 
   // Return
@@ -165,7 +174,7 @@ export function usePostM<A extends ODto>(
     (args: { body: IDto | undefined; headers: object | undefined }) =>
       backend
         .post<A>(subDirect, args.body, { headers: args.headers })
-        .then((res) => res.data)
+        .then((_) => _.data)
   );
 
   // Return

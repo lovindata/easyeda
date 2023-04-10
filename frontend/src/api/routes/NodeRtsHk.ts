@@ -1,5 +1,5 @@
-import { useGet } from "../BackendHk";
-import { NodeStatusODto } from "../ODto";
+import { NodeStatusODto } from "../dto/ODto";
+import { useGet } from "./GenericRtsHk";
 
 /**
  * Node status hook for route ("/node/status").

@@ -1,18 +1,17 @@
-import { Link } from "react-router-dom";
 import { useForm } from "react-hook-form";
-import {
-  ButtonSubmitCpt,
-  PwdInputCpt,
-  TextInputCpt,
-  TitleCpt,
-} from "../../components";
-import { useToaster, ToastLevelEnum } from "../../context";
-import { useUserRtsLogin } from "../../services";
+import { Link } from "react-router-dom";
+import { useUserRtsLogin } from "../../api/routes/UserRtsHk";
+import ButtonSubmitCpt from "../../components/form/ButtonSubmitCpt";
+import PwdInputCpt from "../../components/form/PwdInputCpt";
+import TextInputCpt from "../../components/form/TextInputCpt";
+import TitleCpt from "../../components/form/TitleCpt";
+import { ToastLevelEnum } from "../../context/toaster/ToasterCtx";
+import useToaster from "../../context/toaster/ToasterHk";
 
 /**
  * Login form.
  */
-function LoginFormCpt() {
+export default function LoginFormCpt() {
   // Pre-requisites
   const { addToast } = useToaster();
   const { register, handleSubmit } = useForm();
@@ -71,5 +70,3 @@ function LoginFormCpt() {
     </form>
   );
 }
-
-export default LoginFormCpt;

@@ -1,18 +1,16 @@
-import { Link } from "react-router-dom";
-import {
-  ButtonSubmitCpt,
-  DateInputCpt,
-  PwdInputCpt,
-  TextInputCpt,
-  TitleCpt,
-} from "../../components";
 import { useForm } from "react-hook-form";
-import { useUserRtsCreate } from "../../services";
+import { Link } from "react-router-dom";
+import { useUserRtsCreate } from "../../api/routes/UserRtsHk";
+import ButtonSubmitCpt from "../../components/form/ButtonSubmitCpt";
+import DateInputCpt from "../../components/form/DateInputCpt";
+import PwdInputCpt from "../../components/form/PwdInputCpt";
+import TextInputCpt from "../../components/form/TextInputCpt";
+import TitleCpt from "../../components/form/TitleCpt";
 
 /**
  * Registration form.
  */
-function RegisterFormCpt() {
+export default function RegisterFormCpt() {
   // Pre-requisites
   const { register, handleSubmit } = useForm();
   const { create, isCreating } = useUserRtsCreate();
@@ -95,5 +93,3 @@ function RegisterFormCpt() {
     </form>
   );
 }
-
-export default RegisterFormCpt;

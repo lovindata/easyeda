@@ -1,10 +1,11 @@
-import { useEffect } from "react";
-import { useAuthContext } from "../../context";
-import { useGet, usePostM, useGetM } from "../BackendHk";
-import { TokenODto, UserStatusODto } from "../ODto";
+import { useCallback, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useToaster, ToastLevelEnum } from "../../context";
-import { LoginFormIDto, UserFormIDto } from "../IDto";
+import useAuthContext from "../../context/auth/AuthHk";
+import { ToastLevelEnum } from "../../context/toaster/ToasterCtx";
+import useToaster from "../../context/toaster/ToasterHk";
+import { LoginFormIDto, UserFormIDto } from "../dto/IDto";
+import { TokenODto, UserStatusODto } from "../dto/ODto";
+import { useGet, useGetM, usePostM } from "./GenericRtsHk";
 
 /**
  * User create hook for route ("/user/create").
@@ -33,7 +34,7 @@ export function useUserRtsCreate() {
 
   // Return
   return {
-    create: (body: UserFormIDto) => postM(body, undefined),
+    create: useCallback((body: UserFormIDto) => postM(body, undefined), []),
     isCreating: isLoading,
   };
 }
@@ -57,7 +58,7 @@ export function useUserRtsLogin() {
     getM: getUserStatus,
     data: user,
     isLoading: isGettingUser,
-  } = useGetM<UserStatusODto>("/user/retrieve", true, true);
+  } = useGetM<UserStatusODto>("/user/status", true, true);
   const navigate = useNavigate();
   const { addToast } = useToaster();
   useEffect(() => {
@@ -73,7 +74,7 @@ export function useUserRtsLogin() {
 
   // Return
   return {
-    logIn: (body: LoginFormIDto) => postM(body, undefined),
+    logIn: useCallback((body: LoginFormIDto) => postM(body, undefined), []),
     isLogingIn: isGettingTokens || isGettingUser,
   };
 }

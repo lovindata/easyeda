@@ -1,10 +1,9 @@
 import { UseFormRegisterReturn } from "react-hook-form";
-import { useState } from "react";
 
 /**
  * Generic date input.
  */
-export function DateInputCpt<A extends string>(props: {
+export default function DateInputCpt<A extends string>(props: {
   header: string;
   isRequired: boolean;
   extra?: JSX.Element;
@@ -16,7 +15,11 @@ export function DateInputCpt<A extends string>(props: {
         <p>{props.header}</p>
         {props.isRequired && <p className="text-accent">*</p>}
       </label>
-      <input {...props.registerKey} type="date" className="input-bordered input-primary input" />
+      <input
+        {...props.registerKey}
+        type="date"
+        className="input-bordered input-primary input"
+      />
       {props.extra && <div className="flex">{props.extra}</div>}
     </div>
   );
