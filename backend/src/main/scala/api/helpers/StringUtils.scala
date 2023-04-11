@@ -53,7 +53,6 @@ object StringUtils {
 
     /**
      * Validate email format. (RFC 5322 official format)
-     *
      * @return
      *   Nothing OR
      *   - [[AppException]] if non valid email
@@ -84,7 +83,6 @@ object StringUtils {
 
     /**
      * Application entity name convention.
-     *
      * @return
      *   Nothing OR
      *   - [[AppException]] if non valid name

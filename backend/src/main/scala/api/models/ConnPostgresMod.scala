@@ -30,7 +30,6 @@ object ConnPostgresMod extends GenericMod[ConnPostgresMod] {
 
   /**
    * Constructor of [[ConnPostgresMod]].
-   *
    * @param connId
    *   [[ConnMod]] id
    * @param form

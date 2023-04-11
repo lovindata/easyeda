@@ -16,7 +16,6 @@ object UserCtrl {
 
   /**
    * Validate form and create the user.
-   *
    * @param createUserFormDtoIn
    *   Form to validate
    * @return

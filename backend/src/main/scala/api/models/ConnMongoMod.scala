@@ -38,7 +38,6 @@ object ConnMongoMod extends GenericMod[ConnMongoMod] {
 
   /**
    * Constructor of [[ConnMongoMod]].
-   *
    * @param connId
    *   [[ConnMod]] id
    * @param form

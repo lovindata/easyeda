@@ -18,7 +18,6 @@ object ConnSvc {
 
   /**
    * Test connection.
-   *
    * @param form
    *   Provided connection form
    * @return
@@ -36,7 +35,6 @@ object ConnSvc {
 
   /**
    * Create connection.
-   *
    * @param user
    *   User
    * @param form

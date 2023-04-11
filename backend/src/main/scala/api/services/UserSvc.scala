@@ -5,7 +5,6 @@ import api.dto.input.LoginFormIDto
 import api.dto.output._
 import api.helpers.BackendException._
 import api.helpers.DoobieUtils._
-import api.helpers.StringUtils
 import api.helpers.StringUtils._
 import api.models.TokenMod
 import api.models.UserMod
@@ -24,7 +23,6 @@ object UserSvc {
 
   /**
    * Convert [[UserMod]] to DTO.
-   *
    * @param user
    *   User to display
    * @return
@@ -53,7 +51,7 @@ object UserSvc {
    *   User status
    */
   def createUser(email: String, username: String, pwd: String, birthDate: Date): IO[UserStatusODto] = for {
-    pwdSalt <- StringUtils.genString(32)
+    pwdSalt <- genString(32)
     pwd     <- s"$pwdSalt$pwd".toSHA3_512 // Hash password logic
     user    <- UserMod(email, username, pwd, pwdSalt, birthDate).attemptT.leftMap {
                  case t: PSQLException => AppException(t.getServerErrorMessage.getDetail)
@@ -64,7 +62,6 @@ object UserSvc {
 
   /**
    * Verify provided login.
-   *
    * @param form
    *   Login to validate
    * @return
