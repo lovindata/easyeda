@@ -75,7 +75,7 @@ function ToastCpt(props: { toast: Toast }) {
   const [isShowing, setIsShowing] = useState(false);
   useEffect(() => {
     setIsShowing(true);
-    setTimeout(() => setIsShowing(false), TIMEOUT - duration);
+    setTimeout(() => setIsShowing(false), TIMEOUT * 1000 - duration);
   }, []);
 
   // Render

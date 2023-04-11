@@ -34,7 +34,7 @@ export function useUserRtsCreate() {
 
   // Return
   return {
-    create: useCallback((body: UserFormIDto) => postM(body, undefined), []),
+    create: (body: UserFormIDto) => postM(body, undefined),
     isCreating: isLoading,
   };
 }
@@ -74,7 +74,7 @@ export function useUserRtsLogin() {
 
   // Return
   return {
-    logIn: useCallback((body: LoginFormIDto) => postM(body, undefined), []),
+    logIn: (body: LoginFormIDto) => postM(body, undefined),
     isLogingIn: isGettingTokens || isGettingUser,
   };
 }

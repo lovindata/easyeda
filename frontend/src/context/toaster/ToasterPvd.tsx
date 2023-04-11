@@ -1,6 +1,7 @@
 import { useCallback, useState } from "react";
 import {
   MAX_TOASTS,
+  TIMEOUT,
   Toast,
   ToasterContext,
   ToastLevelEnum,
@@ -15,8 +16,6 @@ export default function ToasterPvd({
   children: React.ReactNode;
 }) {
   // Initalize
-  const nbMax = 3;
-  const timeout = 10000;
   const [toaster, setToaster] = useState<{ toasts: Toast[]; usableId: number }>(
     {
       toasts: [],
@@ -44,7 +43,7 @@ export default function ToasterPvd({
                 outToasts.length === 0 ? Number.MIN_SAFE_INTEGER : currUsableId;
               return { toasts: outToasts, usableId: outUsableId };
             }),
-          timeout
+          TIMEOUT * 1000
         );
 
         // Return
