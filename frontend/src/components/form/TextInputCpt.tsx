@@ -15,11 +15,7 @@ export default function TextInputCpt<A extends string>(props: {
         <p>{props.header}</p>
         {props.isRequired && <p className="text-accent">*</p>}
       </label>
-      <input
-        {...props.registerKey}
-        type="text"
-        className="input-bordered input-primary input"
-      />
+      <input {...props.registerKey} type="text" className="input-bordered input-primary input" />
       {props.extra && <div className="flex">{props.extra}</div>}
     </div>
   );

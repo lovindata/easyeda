@@ -16,18 +16,8 @@ export default function SideBarCpt() {
   return (
     <div className="flex h-screen w-12 flex-col">
       <div className="flex grow flex-col justify-center">
-        <IconTabLink
-          to="connections"
-          title="Connections"
-          svg={Conn}
-          isCurrent={currentPath == "/app/connections"}
-        />
-        <IconTabLink
-          to="pipelines"
-          title="Pipelines"
-          svg={Pipeline}
-          isCurrent={currentPath == "/app/pipelines"}
-        />
+        <IconTabLink to="connections" title="Connections" svg={Conn} isCurrent={currentPath == "/app/connections"} />
+        <IconTabLink to="pipelines" title="Pipelines" svg={Pipeline} isCurrent={currentPath == "/app/pipelines"} />
       </div>
       <IconUser />
     </div>
@@ -51,16 +41,10 @@ function IconTabLink(props: {
     <div className="relative flex flex-col justify-center p-2.5">
       <span
         className={`absolute -ml-2.5 h-full w-0.5 bg-primary brightness-150
-        transition-all duration-300 ease-in-out ${
-          props.isCurrent ? "scale-100" : "scale-0"
-        }`}
+        transition-all duration-300 ease-in-out ${props.isCurrent ? "scale-100" : "scale-0"}`}
       />
       <Link to={props.to} className="peer">
-        <props.svg
-          className={`fill-primary ${
-            props.isCurrent ? "brightness-150" : "hover:brightness-150"
-          }`}
-        />
+        <props.svg className={`fill-primary ${props.isCurrent ? "brightness-150" : "hover:brightness-150"}`} />
       </Link>
       <div
         className="pointer-events-none absolute left-full ml-1 origin-left scale-0 select-none rounded

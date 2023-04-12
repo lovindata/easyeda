@@ -1,6 +1,6 @@
-import { useCallback, useEffect } from "react";
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import useAuthContext from "../../context/auth/AuthHk";
+import useAuth from "../../context/auth/AuthHk";
 import { ToastLevelEnum } from "../../context/toaster/ToasterCtx";
 import useToaster from "../../context/toaster/ToasterHk";
 import { LoginFormIDto, UserFormIDto } from "../dto/IDto";
@@ -14,11 +14,7 @@ export function useUserRtsCreate() {
   // Hooks
   const { addToast } = useToaster();
   const navigate = useNavigate();
-  const { postM, data, isLoading } = usePostM<UserStatusODto>(
-    "/user/create",
-    false,
-    true
-  );
+  const { postM, data, isLoading } = usePostM<UserStatusODto>("/user/create", false, true);
 
   // Effect on post registration
   useEffect(() => {
@@ -44,12 +40,8 @@ export function useUserRtsCreate() {
  */
 export function useUserRtsLogin() {
   // Effect running on user connect
-  const { tokens: oldTokens, setTokens } = useAuthContext();
-  const {
-    postM,
-    data: freshTokens,
-    isLoading: isGettingTokens,
-  } = usePostM<TokenODto>("/user/login", false, true);
+  const { tokens: oldTokens, setTokens } = useAuth();
+  const { postM, data: freshTokens, isLoading: isGettingTokens } = usePostM<TokenODto>("/user/login", false, true);
   useEffect(() => freshTokens && setTokens(freshTokens), [freshTokens]);
   useEffect(() => freshTokens && getUserStatus(undefined), [oldTokens]);
 
@@ -83,13 +75,6 @@ export function useUserRtsLogin() {
  * User info hook for route ("/user/status").
  */
 export function useUserRtsStatus() {
-  const { data, isLoading } = useGet<UserStatusODto>(
-    "useUser",
-    "/user/status",
-    undefined,
-    true,
-    true,
-    false
-  );
+  const { data, isLoading } = useGet<UserStatusODto>("useUser", "/user/status", undefined, true, true, false);
   return { user: data, isRetrieving: isLoading };
 }

@@ -4,6 +4,6 @@ import { AuthContext, IAuthContext } from "./AuthCtx";
 /**
  * Auth context hook.
  */
-export default function useAuthContext() {
+export default function useAuth() {
   return useContext(AuthContext) as IAuthContext;
 }

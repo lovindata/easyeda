@@ -18,17 +18,10 @@ export default function AuthPvd({ children }: { children: React.ReactNode }) {
 
   // Effects
   useEffect(
-    () =>
-      tokens
-        ? localStorage.setItem("tokens", JSON.stringify(tokens))
-        : localStorage.removeItem("tokens"),
+    () => (tokens ? localStorage.setItem("tokens", JSON.stringify(tokens)) : localStorage.removeItem("tokens")),
     [tokens]
   );
 
   // Render
-  return (
-    <AuthContext.Provider value={{ tokens: tokens, setTokens: setTokens }}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={{ tokens: tokens, setTokens: setTokens }}>{children}</AuthContext.Provider>;
 }

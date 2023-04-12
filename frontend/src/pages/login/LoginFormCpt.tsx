@@ -21,19 +21,10 @@ export default function LoginFormCpt() {
   return (
     <form
       className="flex min-w-max flex-col space-y-5 rounded bg-neutral p-8"
-      onSubmit={handleSubmit(
-        (data) => !isLogingIn && logIn({ email: data.email, pwd: data.pwd })
-      )}
+      onSubmit={handleSubmit((data) => !isLogingIn && logIn({ email: data.email, pwd: data.pwd }))}
     >
-      <TitleCpt
-        title="Hey, welcome back!"
-        desc="We're so excited to see you again!"
-      />
-      <TextInputCpt
-        header="E-MAIL"
-        isRequired={true}
-        registerKey={register("email")}
-      />
+      <TitleCpt title="Hey, welcome back!" desc="We're so excited to see you again!" />
+      <TextInputCpt header="E-MAIL" isRequired={true} registerKey={register("email")} />
       <PwdInputCpt
         header="PASSWORD"
         isRequired={true}
@@ -45,8 +36,7 @@ export default function LoginFormCpt() {
               addToast({
                 level: ToastLevelEnum.Info,
                 header: "Comming soon",
-                message:
-                  "Admin related features will be available in next releases.",
+                message: "Admin related features will be available in next releases.",
               })
             }
           >

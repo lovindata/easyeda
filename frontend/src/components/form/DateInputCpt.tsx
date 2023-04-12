@@ -15,11 +15,7 @@ export default function DateInputCpt<A extends string>(props: {
         <p>{props.header}</p>
         {props.isRequired && <p className="text-accent">*</p>}
       </label>
-      <input
-        {...props.registerKey}
-        type="date"
-        className="input-bordered input-primary input"
-      />
+      <input {...props.registerKey} type="date" className="input-bordered input-primary input" />
       {props.extra && <div className="flex">{props.extra}</div>}
     </div>
   );

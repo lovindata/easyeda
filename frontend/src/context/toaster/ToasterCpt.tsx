@@ -48,11 +48,7 @@ function ToastCpt(props: { toast: Toast }) {
   }
 
   // Build vertical bar & icon
-  const VBarCpt = (
-    <span
-      className={`flex min-h-[2.5rem] w-1 self-stretch rounded ${bgColor}`}
-    />
-  );
+  const VBarCpt = <span className={`flex min-h-[2.5rem] w-1 self-stretch rounded ${bgColor}`} />;
   const iconCSS = `w-5 ${fillColor}`;
   let IconCpt: JSX.Element;
   switch (props.toast.level) {
@@ -92,9 +88,7 @@ function ToastCpt(props: { toast: Toast }) {
       {IconCpt}
       <div className="w-64 pr-1.5">
         <h1 className="text-sm font-semibold">{props.toast.header}</h1>
-        {props.toast.message && (
-          <p className="text-xs brightness-75">{props.toast.message}</p>
-        )}
+        {props.toast.message && <p className="text-xs brightness-75">{props.toast.message}</p>}
       </div>
     </Transition>
   );

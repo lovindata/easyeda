@@ -5,13 +5,6 @@ import { useGet } from "./GenericRtsHk";
  * Node status hook for route ("/node/status").
  */
 export function useNodeRtsStatus() {
-  const { data, isLoading } = useGet<NodeStatusODto>(
-    "useNodeRtsStatus",
-    "/node/status",
-    undefined,
-    false,
-    false,
-    5000
-  );
+  const { data, isLoading } = useGet<NodeStatusODto>("useNodeRtsStatus", "/node/status", undefined, false, false, 5);
   return { node: data, isRetrieving: isLoading };
 }

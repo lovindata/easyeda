@@ -35,16 +35,10 @@ export interface Toast {
  */
 export interface IToasterContext {
   toasts: Toast[];
-  addToast: (toast: {
-    level: ToastLevelEnum;
-    header: string;
-    message?: string;
-  }) => void;
+  addToast: (toast: { level: ToastLevelEnum; header: string; message?: string }) => void;
 }
 
 /**
  * Toaster context.
  */
-export const ToasterContext = createContext<IToasterContext | undefined>(
-  undefined
-);
+export const ToasterContext = createContext<IToasterContext | undefined>(undefined);

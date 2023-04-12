@@ -10,11 +10,7 @@ import { useGet, usePostM } from "./GenericRtsHk";
  */
 export function useConnRtsTest() {
   const { addToast } = useToaster();
-  const { postM, data, isLoading } = usePostM<ConnTestODto>(
-    "/conn/test",
-    true,
-    false
-  );
+  const { postM, data, isLoading } = usePostM<ConnTestODto>("/conn/test", true, false);
   useEffect(
     () =>
       data
@@ -38,13 +34,6 @@ export function useConnRtsTest() {
  * Connection listing hook for route ("/conn/list").
  */
 export function useConnRtsList() {
-  const { data, isLoading } = useGet<ConnStatusODto[]>(
-    "useConnRtsList",
-    "/conn/list",
-    undefined,
-    true,
-    false,
-    false
-  );
+  const { data, isLoading } = useGet<ConnStatusODto[]>("useConnRtsList", "/conn/list", undefined, true, false, false);
   return { connsStatus: data, isLoading };
 }
