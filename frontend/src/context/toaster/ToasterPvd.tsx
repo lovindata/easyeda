@@ -1,5 +1,5 @@
-import { useCallback, useState } from "react";
 import { MAX_TOASTS, TIMEOUT, Toast, ToasterContext, ToastLevelEnum } from "./ToasterCtx";
+import { useCallback, useState } from "react";
 
 /**
  * Toaster provider.

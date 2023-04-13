@@ -1,5 +1,5 @@
-import { useContext } from "react";
 import { IToasterContext, ToasterContext } from "./ToasterCtx";
+import { useContext } from "react";
 
 /**
  * Use toaster hook.

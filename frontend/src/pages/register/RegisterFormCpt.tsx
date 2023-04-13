@@ -1,11 +1,11 @@
-import { useForm } from "react-hook-form";
-import { Link } from "react-router-dom";
 import { useUserRtsCreate } from "../../api/routes/UserRtsHk";
 import ButtonSubmitCpt from "../../components/form/ButtonSubmitCpt";
 import DateInputCpt from "../../components/form/DateInputCpt";
 import PwdInputCpt from "../../components/form/PwdInputCpt";
 import TextInputCpt from "../../components/form/TextInputCpt";
 import TitleCpt from "../../components/form/TitleCpt";
+import { useForm } from "react-hook-form";
+import { Link } from "react-router-dom";
 
 /**
  * Registration form.

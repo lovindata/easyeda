@@ -1,9 +1,9 @@
-import { Route, Routes } from "react-router-dom";
+import MenuBarCpt from "./MenuBarCpt";
+import SideBarCpt from "./SideBarCpt";
 import { ConnsPg } from "./connections/ConnsPg";
 import { HomePg } from "./home/HomePg";
-import MenuBarCpt from "./MenuBarCpt";
 import { PipelinesPg } from "./pipelines/PipelinesPg";
-import SideBarCpt from "./SideBarCpt";
+import { Route, Routes } from "react-router-dom";
 
 /**
  * Application page.

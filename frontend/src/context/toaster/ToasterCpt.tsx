@@ -1,8 +1,8 @@
-import { Transition } from "@headlessui/react";
-import { useEffect, useState } from "react";
 import { Error, Info, Success, Warning } from "../../assets";
 import { TIMEOUT, Toast, ToastLevelEnum } from "./ToasterCtx";
 import useToaster from "./ToasterHk";
+import { Transition } from "@headlessui/react";
+import { useEffect, useState } from "react";
 
 /**
  * Toaster component.

@@ -1,9 +1,9 @@
-import { useEffect } from "react";
 import { ToastLevelEnum } from "../../context/toaster/ToasterCtx";
 import useToaster from "../../context/toaster/ToasterHk";
 import { ConnFormIDto } from "../dto/IDto";
 import { ConnStatusODto, ConnTestODto } from "../dto/ODto";
 import { useGet, usePostM } from "./GenericRtsHk";
+import { useEffect } from "react";
 
 /**
  * Connection testing hook for route ("/conn/test").

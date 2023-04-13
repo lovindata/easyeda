@@ -1,5 +1,5 @@
-import { useContext } from "react";
 import { AuthContext, IAuthContext } from "./AuthCtx";
+import { useContext } from "react";
 
 /**
  * Auth context hook.
