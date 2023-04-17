@@ -4,6 +4,7 @@ import useToaster from "../../context/toaster/ToasterHk";
 import { IDto } from "../dto/IDto";
 import { BackendException, ODto, TokenODto } from "../dto/ODto";
 import axios, { AxiosError } from "axios";
+import { useEffect } from "react";
 import { useMutation, useQuery } from "react-query";
 import { useNavigate } from "react-router-dom";
 
@@ -31,13 +32,54 @@ const SERVER_APP_ERR_TOAST = (message: string) => ({
 });
 
 /**
- * Server side authentication error toast.
+ * Authentication error toast.
  */
-const SERVER_AUTH_ERR_TOAST = {
+const AUTH_ERR_TOAST = {
   level: ToastLevelEnum.Warning,
   header: "Not connected",
   message: "Connection lost or account not provided. Please reconnect.",
 };
+
+/**
+ * Is refreshing access token.
+ */
+let IS_REFRESHING_TOKENS = false;
+
+/**
+ * Use fresh access token hook.
+ */
+export function useFreshAuth() {
+  // Get hooks
+  const navigate = useNavigate();
+  const { addToast } = useToaster();
+  const { tokens, setTokens } = useAuth();
+
+  // Launch refresh if necessary
+  const isExpired = tokens && tokens.expireAt < Date.now();
+  console.log(isExpired);
+  useEffect(() => {
+    if (!IS_REFRESHING_TOKENS && isExpired) {
+      IS_REFRESHING_TOKENS = true;
+      axios
+        .post<TokenODto>(`${SERVER_URL}user/refresh`, undefined, {
+          headers: { "DataPiU-Refresh-Token": tokens.refreshToken },
+        })
+        .then((res) => {
+          setTokens(res.data);
+          IS_REFRESHING_TOKENS = false;
+        })
+        .catch(() => {
+          setTokens(undefined);
+          addToast(AUTH_ERR_TOAST);
+          navigate("/login");
+          IS_REFRESHING_TOKENS = false;
+        });
+    }
+  }, [tokens]);
+
+  // Return access token
+  return isExpired ? undefined : tokens?.accessToken;
+}
 
 /**
  * Axios fetcher hook.
@@ -46,37 +88,13 @@ function useApi(authed: boolean, verbose: boolean) {
   // Get hooks & Build backend api
   const navigate = useNavigate();
   const { addToast } = useToaster();
-  const { tokens, setTokens } = useAuth();
+  const freshAccessToken = useFreshAuth();
   const api = axios.create({ baseURL: SERVER_URL });
 
-  // Pre-request process
+  // Pre-request process (request abort if authed but no fresh tokens)
   api.interceptors.request.use(async (req) => {
-    // Get fresh tokens if authed
-    let freshTokens: TokenODto | undefined;
-    if (authed && tokens && tokens.expireAt < Date.now()) {
-      await axios
-        .post<TokenODto>(`${SERVER_URL}user/refresh`, undefined, {
-          headers: { "DataPiU-Refresh-Token": tokens.refreshToken },
-        })
-        .then((res) => {
-          setTokens(res.data);
-          freshTokens = res.data;
-        })
-        .catch((err: AxiosError<BackendException>) => {
-          verbose && (err.response ? addToast(SERVER_AUTH_ERR_TOAST) : addToast(CLIENT_ERR_TOAST));
-          freshTokens = undefined;
-        });
-    } else freshTokens = tokens;
-
-    // Do request or abort (authed and no fresh tokens)
     const controller = new AbortController();
-    if (authed) {
-      if (freshTokens) req.headers.setAuthorization(`Bearer ${freshTokens.accessToken}`);
-      else {
-        controller.abort();
-        navigate("/login");
-      }
-    }
+    authed && (freshAccessToken ? req.headers.setAuthorization(`Bearer ${freshAccessToken}`) : controller.abort());
     return { ...req, signal: controller.signal };
   });
 
@@ -89,7 +107,7 @@ function useApi(authed: boolean, verbose: boolean) {
           verbose && addToast(SERVER_APP_ERR_TOAST(err.response.data.message));
           break;
         case "AuthException":
-          verbose && addToast(SERVER_AUTH_ERR_TOAST);
+          verbose && addToast(AUTH_ERR_TOAST);
           navigate("/login");
           break;
         case undefined:

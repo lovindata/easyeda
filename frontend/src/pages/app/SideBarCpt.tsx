@@ -63,10 +63,10 @@ function IconTabLink(props: {
 function IconUser() {
   // State
   const { user } = useUserRtsStatus();
-  const { node } = useNodeRtsStatus();
+  // const { node } = useNodeRtsStatus();
   const { connsStatus } = useConnRtsList();
   console.log(user);
-  console.log(node);
+  // console.log(node);
   console.log(connsStatus);
 
   // Render

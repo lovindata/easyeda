@@ -2,7 +2,7 @@
  * Project configurations.
  */
 ThisBuild / version      := "0.1.0"
-ThisBuild / scalaVersion := "2.13.10"
+ThisBuild / scalaVersion := "2.13.10" // https://www.scala-lang.org/download/all.html
 lazy val root = (project in file(".")).settings(name := "backend", idePackagePrefix := Some("com.ilovedatajjia"))
 
 /**
@@ -20,25 +20,25 @@ assembly / assemblyMergeStrategy := {
  */
 // Spark
 // https://mvnrepository.com/artifact/org.apache.spark/spark-core
-libraryDependencies += "org.apache.spark" %% "spark-core"  % "3.3.2" % "provided"
+libraryDependencies += "org.apache.spark" %% "spark-core"  % "3.4.0" % "provided"
 // https://mvnrepository.com/artifact/org.apache.spark/spark-sql
-libraryDependencies += "org.apache.spark" %% "spark-sql"   % "3.3.2" % "provided"
+libraryDependencies += "org.apache.spark" %% "spark-sql"   % "3.4.0" % "provided"
 // https://mvnrepository.com/artifact/org.apache.spark/spark-mllib
-libraryDependencies += "org.apache.spark" %% "spark-mllib" % "3.3.2" % "provided"
+libraryDependencies += "org.apache.spark" %% "spark-mllib" % "3.4.0" % "provided"
 
 // Cats Effect & Scala extensions
 // https://mvnrepository.com/artifact/org.typelevel/cats-effect
 libraryDependencies += "org.typelevel"              %% "cats-effect" % "3.4.8"
 // https://mvnrepository.com/artifact/com.softwaremill.quicklens/quicklens
-libraryDependencies += "com.softwaremill.quicklens" %% "quicklens"   % "1.9.0"
+libraryDependencies += "com.softwaremill.quicklens" %% "quicklens"   % "1.9.1"
 
 // Tapir
 // https://mvnrepository.com/artifact/com.softwaremill.sttp.tapir/tapir-http4s-server
-libraryDependencies += "com.softwaremill.sttp.tapir" %% "tapir-http4s-server"     % "1.2.11"
+libraryDependencies += "com.softwaremill.sttp.tapir" %% "tapir-http4s-server"     % "1.2.12"
 // https://mvnrepository.com/artifact/com.softwaremill.sttp.tapir/tapir-json-circe
-libraryDependencies += "com.softwaremill.sttp.tapir" %% "tapir-json-circe"        % "1.2.11"
+libraryDependencies += "com.softwaremill.sttp.tapir" %% "tapir-json-circe"        % "1.2.12"
 // https://mvnrepository.com/artifact/com.softwaremill.sttp.tapir/tapir-swagger-ui-bundle
-libraryDependencies += "com.softwaremill.sttp.tapir" %% "tapir-swagger-ui-bundle" % "1.2.11"
+libraryDependencies += "com.softwaremill.sttp.tapir" %% "tapir-swagger-ui-bundle" % "1.2.12"
 
 // Http4s
 // https://mvnrepository.com/artifact/org.http4s/http4s-ember-server
@@ -74,7 +74,7 @@ libraryDependencies += "org.tpolecat" %% "doobie-postgres-circe" % "1.0.0-RC2"
 // https://mvnrepository.com/artifact/org.postgresql/postgresql
 libraryDependencies += "org.postgresql"     % "postgresql"         % "42.6.0"
 // https://mvnrepository.com/artifact/org.mongodb.scala/mongo-scala-driver
-libraryDependencies += "org.mongodb.scala" %% "mongo-scala-driver" % "4.9.0"
+libraryDependencies += "org.mongodb.scala" %% "mongo-scala-driver" % "4.9.1"
 
 // System
 // https://mvnrepository.com/artifact/com.github.oshi/oshi-core
