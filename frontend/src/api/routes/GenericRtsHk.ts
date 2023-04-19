@@ -4,7 +4,6 @@ import useToaster from "../../context/toaster/ToasterHk";
 import { IDto } from "../dto/IDto";
 import { BackendException, ODto, TokenODto } from "../dto/ODto";
 import axios, { AxiosError } from "axios";
-import { useEffect } from "react";
 import { useMutation, useQuery } from "react-query";
 import { useNavigate } from "react-router-dom";
 
@@ -41,45 +40,14 @@ const AUTH_ERR_TOAST = {
 };
 
 /**
- * Is refreshing access token.
+ * Refresh tokens sync.
  */
-let IS_REFRESHING_TOKENS = false;
+let REFRESH_TOKENS_SYNC: Promise<TokenODto | undefined> | undefined = undefined;
 
 /**
- * Use fresh access token hook.
+ * Redirect to "/login" and toast display sync.
  */
-export function useFreshAuth() {
-  // Get hooks
-  const navigate = useNavigate();
-  const { addToast } = useToaster();
-  const { tokens, setTokens } = useAuth();
-
-  // Launch refresh if necessary
-  const isExpired = tokens && tokens.expireAt < Date.now();
-  console.log(isExpired);
-  useEffect(() => {
-    if (!IS_REFRESHING_TOKENS && isExpired) {
-      IS_REFRESHING_TOKENS = true;
-      axios
-        .post<TokenODto>(`${SERVER_URL}user/refresh`, undefined, {
-          headers: { "DataPiU-Refresh-Token": tokens.refreshToken },
-        })
-        .then((res) => {
-          setTokens(res.data);
-          IS_REFRESHING_TOKENS = false;
-        })
-        .catch(() => {
-          setTokens(undefined);
-          addToast(AUTH_ERR_TOAST);
-          navigate("/login");
-          IS_REFRESHING_TOKENS = false;
-        });
-    }
-  }, [tokens]);
-
-  // Return access token
-  return isExpired ? undefined : tokens?.accessToken;
-}
+let REDIRECT_LOGIN_TOAST_SYNC: Promise<void> | undefined = undefined;
 
 /**
  * Axios fetcher hook.
@@ -88,14 +56,51 @@ function useApi(authed: boolean, verbose: boolean) {
   // Get hooks & Build backend api
   const navigate = useNavigate();
   const { addToast } = useToaster();
-  const freshAccessToken = useFreshAuth();
+  const { tokens, setTokens } = useAuth();
   const api = axios.create({ baseURL: SERVER_URL });
 
-  // Pre-request process (request abort if authed but no fresh tokens)
+  // Pre-request process
   api.interceptors.request.use(async (req) => {
-    const controller = new AbortController();
-    authed && (freshAccessToken ? req.headers.setAuthorization(`Bearer ${freshAccessToken}`) : controller.abort());
-    return { ...req, signal: controller.signal };
+    if (!authed) return req;
+    else {
+      // Refresh tokens if necessary
+      if (!REFRESH_TOKENS_SYNC && tokens && tokens.expireAt < Date.now())
+        REFRESH_TOKENS_SYNC = axios
+          .post<TokenODto>(`${SERVER_URL}user/refresh`, undefined, {
+            headers: { "DataPiU-Refresh-Token": tokens.refreshToken },
+          })
+          .then((res) => {
+            setTokens(res.data);
+            return res.data;
+          })
+          .catch(() => {
+            setTokens(undefined);
+            return undefined;
+          });
+
+      // Get the fresh tokens (and release the refresh sync if there is one)
+      let freshTokens: TokenODto | undefined;
+      if (REFRESH_TOKENS_SYNC)
+        freshTokens = await REFRESH_TOKENS_SYNC; // Conccurent requests await the same refresh request
+      else if (tokens && tokens.expireAt < Date.now()) freshTokens = undefined;
+      else freshTokens = tokens;
+      REFRESH_TOKENS_SYNC && (REFRESH_TOKENS_SYNC = undefined);
+
+      // Launch request (or abort if no fresh tokens)
+      const controller = new AbortController();
+      if (freshTokens) req.headers.setAuthorization(`Bearer ${freshTokens.accessToken}`);
+      else {
+        controller.abort();
+        !REDIRECT_LOGIN_TOAST_SYNC &&
+          (REDIRECT_LOGIN_TOAST_SYNC = new Promise(() => {
+            navigate("/login");
+            addToast(AUTH_ERR_TOAST);
+          }));
+        await REDIRECT_LOGIN_TOAST_SYNC; // Concurrent requests await the same redirection & toast display
+        REDIRECT_LOGIN_TOAST_SYNC && (REDIRECT_LOGIN_TOAST_SYNC = undefined);
+      }
+      return { ...req, signal: controller.signal };
+    }
   });
 
   // Post-response process
@@ -111,7 +116,7 @@ function useApi(authed: boolean, verbose: boolean) {
           navigate("/login");
           break;
         case undefined:
-          verbose && addToast(CLIENT_ERR_TOAST);
+          verbose && err.message === "Network Error" && addToast(CLIENT_ERR_TOAST);
           break;
       }
       return err;
