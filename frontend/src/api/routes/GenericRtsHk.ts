@@ -63,42 +63,9 @@ function useApi(authed: boolean, verbose: boolean) {
   api.interceptors.request.use(async (req) => {
     if (!authed) return req;
     else {
-      // Refresh tokens if necessary
-      if (!REFRESH_TOKENS_SYNC && tokens && tokens.expireAt < Date.now())
-        REFRESH_TOKENS_SYNC = axios
-          .post<TokenODto>(`${SERVER_URL}user/refresh`, undefined, {
-            headers: { "DataPiU-Refresh-Token": tokens.refreshToken },
-          })
-          .then((res) => {
-            setTokens(res.data);
-            return res.data;
-          })
-          .catch(() => {
-            setTokens(undefined);
-            return undefined;
-          });
-
-      // Get the fresh tokens (and release the refresh sync if there is one)
-      let freshTokens: TokenODto | undefined;
-      if (REFRESH_TOKENS_SYNC)
-        freshTokens = await REFRESH_TOKENS_SYNC; // Conccurent requests await the same refresh request
-      else if (tokens && tokens.expireAt < Date.now()) freshTokens = undefined;
-      else freshTokens = tokens;
-      REFRESH_TOKENS_SYNC && (REFRESH_TOKENS_SYNC = undefined);
-
-      // Launch request (or abort if no fresh tokens)
       const controller = new AbortController();
-      if (freshTokens) req.headers.setAuthorization(`Bearer ${freshTokens.accessToken}`);
-      else {
-        controller.abort();
-        !REDIRECT_LOGIN_TOAST_SYNC &&
-          (REDIRECT_LOGIN_TOAST_SYNC = new Promise(() => {
-            navigate("/login");
-            addToast(AUTH_ERR_TOAST);
-          }));
-        await REDIRECT_LOGIN_TOAST_SYNC; // Concurrent requests await the same redirection & toast display
-        REDIRECT_LOGIN_TOAST_SYNC && (REDIRECT_LOGIN_TOAST_SYNC = undefined);
-      }
+      if (tokens) req.headers.setAuthorization(`Bearer ${tokens.accessToken}`);
+      else controller.abort();
       return { ...req, signal: controller.signal };
     }
   });
@@ -106,7 +73,34 @@ function useApi(authed: boolean, verbose: boolean) {
   // Post-response process
   api.interceptors.response.use(
     (_) => _,
-    (err: AxiosError<BackendException>) => {
+    async (err: AxiosError<BackendException>) => {
+      // Retry case
+      if (err.response?.data.kind === "AuthException" && tokens) {
+        // Refresh tokens
+        !REFRESH_TOKENS_SYNC &&
+          (REFRESH_TOKENS_SYNC = axios
+            .post<TokenODto>(`${SERVER_URL}user/refresh`, undefined, {
+              headers: { "DataPiU-Refresh-Token": tokens.refreshToken },
+            })
+            .then((res) => {
+              setTokens(res.data);
+              return res.data;
+            })
+            .catch(() => {
+              setTokens(undefined);
+              return undefined;
+            }));
+        const freshTokens = await REFRESH_TOKENS_SYNC;
+        REFRESH_TOKENS_SYNC && (REFRESH_TOKENS_SYNC = undefined);
+
+        // Launch retry (or logout user if error)
+        if (freshTokens && err.config) {
+          err.config.headers.setAuthorization(`Bearer ${freshTokens.accessToken}`);
+          return await axios.request(err.config);
+        }
+      }
+
+      // No retry cases
       switch (err.response?.data.kind) {
         case "AppException":
           verbose && addToast(SERVER_APP_ERR_TOAST(err.response.data.message));
@@ -142,7 +136,7 @@ export function useGet<A extends ODto>(
   const api = useApi(authed, verbose);
   const { data, isLoading } = useQuery(
     queryKey,
-    () => api.get<A>(subDirect, { headers: headers }).then((_) => _.data),
+    () => api.get<A>(subDirect, { headers: headers }).then(async (_) => _.data),
     { refetchInterval: refetchInterval ? refetchInterval * 1000 : refetchInterval }
   );
 
