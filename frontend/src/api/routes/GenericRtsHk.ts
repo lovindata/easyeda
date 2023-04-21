@@ -5,7 +5,7 @@ import { IDto } from "../dto/IDto";
 import { BackendException, ODto, TokenODto } from "../dto/ODto";
 import axios, { AxiosError } from "axios";
 import { useMutation, useQuery } from "react-query";
-import { useNavigate } from "react-router-dom";
+import { NavigateFunction, useNavigate } from "react-router-dom";
 
 /**
  * Server location.
@@ -40,14 +40,61 @@ const AUTH_ERR_TOAST = {
 };
 
 /**
- * Refresh tokens sync.
+ * Refresh tokens syncer.
  */
-let REFRESH_TOKENS_SYNC: Promise<TokenODto | undefined> | undefined = undefined;
+let REFRESH_TOKENS_SYNCER: Promise<TokenODto | undefined> | undefined = undefined;
 
 /**
- * Redirect to "/login" and toast display sync.
+ * Non concurrent refresh tokens.
  */
-let REDIRECT_LOGIN_TOAST_SYNC: Promise<void> | undefined = undefined;
+async function REFRESH_TOKENS_UNCONCURENT(
+  tokens: {
+    accessToken: string;
+    expireAt: number;
+    refreshToken: string;
+  },
+  setTokens: (tokens: { accessToken: string; expireAt: number; refreshToken: string } | undefined) => void
+) {
+  !REFRESH_TOKENS_SYNCER &&
+    (REFRESH_TOKENS_SYNCER = axios
+      .post<TokenODto>(`${SERVER_URL}user/refresh`, undefined, {
+        headers: { "DataPiU-Refresh-Token": tokens.refreshToken },
+      })
+      .then((res) => {
+        setTokens(res.data);
+        return res.data;
+      })
+      .catch(() => {
+        setTokens(undefined);
+        return undefined;
+      }));
+  const freshTokens = await REFRESH_TOKENS_SYNCER; // Concurrent executions await the same global promise
+  REFRESH_TOKENS_SYNCER && (REFRESH_TOKENS_SYNCER = undefined);
+  return freshTokens;
+}
+
+/**
+ * Redirect to "/login" and toast display syncer.
+ */
+let REDIRECT_LOGIN_TOAST_SYNCER: Promise<void> | undefined = undefined;
+
+/**
+ * Non concurrent redirect to "/login" and toast display.
+ */
+async function REDIRECT_LOGIN_TOAST_UNCONCURRENT(
+  navigate: NavigateFunction,
+  addToast: (toast: { level: ToastLevelEnum; header: string; message?: string | undefined }) => void,
+  verbose: boolean
+) {
+  !REDIRECT_LOGIN_TOAST_SYNCER &&
+    (REDIRECT_LOGIN_TOAST_SYNCER = new Promise((resolve) => {
+      navigate("/login");
+      verbose && addToast(AUTH_ERR_TOAST);
+      return resolve();
+    }));
+  await REDIRECT_LOGIN_TOAST_SYNCER; // Concurrent executions await the same global promise
+  REDIRECT_LOGIN_TOAST_SYNCER && (REDIRECT_LOGIN_TOAST_SYNCER = undefined);
+}
 
 /**
  * Axios fetcher hook.
@@ -65,7 +112,10 @@ function useApi(authed: boolean, verbose: boolean) {
     else {
       const controller = new AbortController();
       if (tokens) req.headers.setAuthorization(`Bearer ${tokens.accessToken}`);
-      else controller.abort();
+      else {
+        controller.abort();
+        REDIRECT_LOGIN_TOAST_UNCONCURRENT(navigate, addToast, verbose);
+      }
       return { ...req, signal: controller.signal };
     }
   });
@@ -76,24 +126,7 @@ function useApi(authed: boolean, verbose: boolean) {
     async (err: AxiosError<BackendException>) => {
       // Retry case
       if (err.response?.data.kind === "AuthException" && tokens) {
-        // Refresh tokens
-        !REFRESH_TOKENS_SYNC &&
-          (REFRESH_TOKENS_SYNC = axios
-            .post<TokenODto>(`${SERVER_URL}user/refresh`, undefined, {
-              headers: { "DataPiU-Refresh-Token": tokens.refreshToken },
-            })
-            .then((res) => {
-              setTokens(res.data);
-              return res.data;
-            })
-            .catch(() => {
-              setTokens(undefined);
-              return undefined;
-            }));
-        const freshTokens = await REFRESH_TOKENS_SYNC;
-        REFRESH_TOKENS_SYNC && (REFRESH_TOKENS_SYNC = undefined);
-
-        // Launch retry (or logout user if error)
+        const freshTokens = await REFRESH_TOKENS_UNCONCURENT(tokens, setTokens);
         if (freshTokens && err.config) {
           err.config.headers.setAuthorization(`Bearer ${freshTokens.accessToken}`);
           return await axios.request(err.config);
@@ -106,8 +139,7 @@ function useApi(authed: boolean, verbose: boolean) {
           verbose && addToast(SERVER_APP_ERR_TOAST(err.response.data.message));
           break;
         case "AuthException":
-          verbose && addToast(AUTH_ERR_TOAST);
-          navigate("/login");
+          REDIRECT_LOGIN_TOAST_UNCONCURRENT(navigate, addToast, verbose);
           break;
         case undefined:
           verbose && err.message === "Network Error" && addToast(CLIENT_ERR_TOAST);
@@ -136,7 +168,7 @@ export function useGet<A extends ODto>(
   const api = useApi(authed, verbose);
   const { data, isLoading } = useQuery(
     queryKey,
-    () => api.get<A>(subDirect, { headers: headers }).then(async (_) => _.data),
+    () => api.get<A>(subDirect, { headers: headers }).then((_) => _.data),
     { refetchInterval: refetchInterval ? refetchInterval * 1000 : refetchInterval }
   );
 
