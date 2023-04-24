@@ -34,6 +34,6 @@ export function useConnRtsTest() {
  * Connection listing hook for route ("/conn/list").
  */
 export function useConnRtsList() {
-  const { data, isLoading } = useGet<ConnStatusODto[]>("useConnRtsList", "/conn/list", undefined, true, true, false);
+  const { data, isLoading } = useGet<ConnStatusODto[]>("useConnRtsList", "/conn/list", undefined, true, false, false);
   return { connsStatus: data, isLoading };
 }

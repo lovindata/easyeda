@@ -13,9 +13,9 @@ import { NavigateFunction, useNavigate } from "react-router-dom";
 const SERVER_URL = `http://${window.location.hostname}:8081/`;
 
 /**
- * Client side error toast.
+ * Cannot reach server error toast.
  */
-const CLIENT_ERR_TOAST = {
+const CLIENT_UNREACHABLE_SERVER_TOAST = {
   level: ToastLevelEnum.Warning,
   header: "Unreachable server",
   message: "Please verify your internet connection.",
@@ -33,7 +33,7 @@ const SERVER_APP_ERR_TOAST = (message: string) => ({
 /**
  * Authentication error toast.
  */
-const AUTH_ERR_TOAST = {
+const SERVER_AUTH_ERR_TOAST = {
   level: ToastLevelEnum.Warning,
   header: "Not connected",
   message: "Connection lost or account not provided. Please reconnect.",
@@ -89,7 +89,7 @@ async function REDIRECT_LOGIN_TOAST_UNCONCURRENT(
   !REDIRECT_LOGIN_TOAST_SYNCER &&
     (REDIRECT_LOGIN_TOAST_SYNCER = new Promise((resolve) => {
       navigate("/login");
-      verbose && addToast(AUTH_ERR_TOAST);
+      verbose && addToast(SERVER_AUTH_ERR_TOAST);
       return resolve();
     }));
   await REDIRECT_LOGIN_TOAST_SYNCER; // Concurrent executions await the same global promise
@@ -142,7 +142,7 @@ function useApi(authed: boolean, verbose: boolean) {
           REDIRECT_LOGIN_TOAST_UNCONCURRENT(navigate, addToast, verbose);
           break;
         case undefined:
-          verbose && err.message === "Network Error" && addToast(CLIENT_ERR_TOAST);
+          verbose && err.message === "Network Error" && addToast(CLIENT_UNREACHABLE_SERVER_TOAST);
           break;
       }
       return err;

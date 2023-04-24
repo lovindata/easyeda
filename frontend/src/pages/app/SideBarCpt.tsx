@@ -2,6 +2,7 @@ import { useConnRtsList } from "../../api/routes/ConnRtsHk";
 import { useNodeRtsStatus } from "../../api/routes/NodeRtsHk";
 import { useUserRtsStatus } from "../../api/routes/UserRtsHk";
 import { Conn, Pipeline, Profil } from "../../assets";
+import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 
 /**
@@ -61,19 +62,20 @@ function IconTabLink(props: {
  * Sidebar icon user.
  */
 function IconUser() {
-  // State
-  const { user } = useUserRtsStatus();
+  // States
+  const [isOpen, setIsOpen] = useState(false);
   const { node } = useNodeRtsStatus();
+  const { user } = useUserRtsStatus();
   const { connsStatus } = useConnRtsList();
-  console.log(user);
-  console.log(node);
-  console.log(connsStatus);
+  // console.log(user);
+  // console.log(node);
+  // console.log(connsStatus);
 
   // Render
   return (
     <div className="relative flex flex-col justify-end p-2.5">
-      <div className="peer relative">
-        <Profil className="peer flex fill-primary hover:brightness-150" />
+      <div className="peer relative cursor-pointer" onClick={() => setIsOpen((_) => !_)}>
+        <Profil className={"peer flex fill-primary" + (isOpen ? " brightness-150" : " hover:brightness-150")} />
         <span
           className={
             "absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full border-2 border-base-100" +
@@ -82,11 +84,59 @@ function IconUser() {
         />
       </div>
       <div
-        className="pointer-events-none absolute left-full ml-1 min-w-max origin-left select-none
-        rounded bg-neutral px-1.5 py-1 text-xs
-        font-thin shadow transition-all duration-300 ease-in-out peer-hover:scale-100"
+        className={
+          "pointer-events-none absolute left-full ml-1 min-w-max origin-left select-none rounded" +
+          " bg-neutral px-1.5 py-1 text-xs font-thin shadow transition-all duration-300 ease-in-out" +
+          (isOpen ? " scale-100" : " scale-0 peer-hover:scale-100")
+        }
       >
-        {user ? `${user.username}#${user.id} (Connected)` : "(Connecting)"}
+        <div className="flex flex-col">
+          <div className="flex flex-col items-center">
+            <h1 className="">My Status</h1>
+            <div className="flex">
+              <div className="flex flex-col">
+                <p className="">{user?.username}</p>
+                <p>#{user?.id}</p>
+                <p>{user ? "(Connected)" : "(Connecting)"}</p>
+              </div>
+              <div className="flex flex-col">
+                <div className="flex">
+                  <Conn className="h-5" />
+                  <p>
+                    {connsStatus?.filter((_) => _.isUp).length}/{connsStatus?.length}
+                  </p>
+                </div>
+                <div className="flex">
+                  <Pipeline className="h-5" />
+                  <p>?/?</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex flex-col items-center">
+            <h1 className="">My Status</h1>
+            <div className="flex">
+              <div className="flex flex-col">
+                <p className="">{user?.username}</p>
+                <p>#{user?.id}</p>
+                <p>{user ? "(Connected)" : "(Connecting)"}</p>
+              </div>
+              <div className="flex flex-col">
+                <div className="flex">
+                  <Conn className="h-5" />
+                  <p>
+                    {connsStatus?.filter((_) => _.isUp).length}/{connsStatus?.length}
+                  </p>
+                </div>
+                <div className="flex">
+                  <Pipeline className="h-5" />
+                  <p>?/?</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
