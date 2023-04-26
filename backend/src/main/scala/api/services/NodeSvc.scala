@@ -9,7 +9,6 @@ import cats.implicits._
 import config.ConfigLoader._
 import java.sql.Timestamp
 import oshi.SystemInfo
-import scala.concurrent.duration._
 
 /**
  * Service layer for cluster monitoring.
@@ -30,7 +29,7 @@ object NodeSvc {
    */
   def toDto: IO[NodeStatusODto] = for {
     // Retrieve
-    timestampAlive <- Clock[IO].realTime.map(x => new Timestamp(x.toMillis - aliveInterval.seconds.toMillis))
+    timestampAlive <- Clock[IO].realTime.map(x => new Timestamp(x.toMillis - aliveInterval.toMillis))
     nodesMod       <- NodeMod.select(fr"heartbeat_at >= $timestampAlive")
 
     // Prepare info
@@ -47,7 +46,7 @@ object NodeSvc {
   def report: IO[Unit] = (for {
     // Get usages
     hardware <- IO(new SystemInfo().getHardware)
-    cpu      <- IO.blocking(hardware.getProcessor.getProcessorCpuLoad(heartbeatInterval.seconds.toMillis).toList)
+    cpu      <- IO.blocking(hardware.getProcessor.getProcessorCpuLoad(heartbeatInterval.toMillis).toList)
     ramTotal <- IO(hardware.getMemory.getTotal.toDouble / 1073741824L.toDouble)
     ram      <- IO(ramTotal - (hardware.getMemory.getAvailable.toDouble / 1073741824L.toDouble))
 

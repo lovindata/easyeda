@@ -1,4 +1,4 @@
-import { useConnRtsList } from "../../api/routes/ConnRtsHk";
+import { useConnRtsIdTest, useConnRtsList } from "../../api/routes/ConnRtsHk";
 import { useNodeRtsStatus } from "../../api/routes/NodeRtsHk";
 import { useUserRtsStatus } from "../../api/routes/UserRtsHk";
 import { Conn, Pipeline, Profil } from "../../assets";
@@ -64,18 +64,38 @@ function IconTabLink(props: {
 function IconUser() {
   // States
   const [isOpen, setIsOpen] = useState(false);
-  const { node } = useNodeRtsStatus();
   const { user } = useUserRtsStatus();
   const { connsStatus } = useConnRtsList();
-  // console.log(user);
-  // console.log(node);
-  // console.log(connsStatus);
+  const { node } = useNodeRtsStatus();
+
+  // Retrieve connexions up
+  connsStatus && connsStatus.map((_) => useConnRtsIdTest(_.id)); // TODO
+  const upConnsStat = connsStatus && { up: connsStatus.filter((_) => _.isUp).length, total: connsStatus.length };
+
+  // Text color logic
+  const upTextColor = (stat: { up: number; total: number } | undefined) => {
+    if (stat === undefined) return " text-warning";
+    if (stat.up === stat.total) return " text-success";
+    return " text-error";
+  };
+  const usageTextColor = (stat: { usage: number; total: number } | undefined) => {
+    if (stat === undefined) return " text-warning";
+    else {
+      const percentage = stat.usage / stat.total;
+      if (percentage > 0.9) return " text-error";
+      if (percentage < 0.75) return " text-success";
+      return " text-warning";
+    }
+  };
 
   // Render
   return (
     <div className="relative flex flex-col justify-end p-2.5">
-      <div className="peer relative cursor-pointer" onClick={() => setIsOpen((_) => !_)}>
-        <Profil className={"peer flex fill-primary" + (isOpen ? " brightness-150" : " hover:brightness-150")} />
+      <div
+        className={"peer relative cursor-pointer" + (isOpen ? " brightness-150" : " hover:brightness-150")}
+        onClick={() => setIsOpen((_) => !_)}
+      >
+        <Profil className="peer flex fill-primary" />
         <span
           className={
             "absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full border-2 border-base-100" +
@@ -85,54 +105,59 @@ function IconUser() {
       </div>
       <div
         className={
-          "pointer-events-none absolute left-full ml-1 min-w-max origin-left select-none rounded" +
-          " bg-neutral px-1.5 py-1 text-xs font-thin shadow transition-all duration-300 ease-in-out" +
+          "pointer-events-none cursor-pointer absolute left-full ml-1 min-w-max origin-bottom-left select-none rounded" +
+          " bg-neutral text-xs font-thin shadow transition-all duration-300 ease-in-out" +
           (isOpen ? " scale-100" : " scale-0 peer-hover:scale-100")
         }
       >
-        <div className="flex flex-col">
-          <div className="flex flex-col items-center">
-            <h1 className="">My Status</h1>
-            <div className="flex">
+        <div className="flex flex-col space-y-2">
+          {/* My Status */}
+          <div className="flex flex-col items-center px-2 pt-2 space-y-1">
+            <h1 className="font-semibold text-sm">User</h1>
+            <div className="flex items-center space-x-4">
               <div className="flex flex-col">
-                <p className="">{user?.username}</p>
-                <p>#{user?.id}</p>
+                <p>{user ? user.username : "???"}</p>
+                <p>#{user ? user.id : "?"}</p>
                 <p>{user ? "(Connected)" : "(Connecting)"}</p>
               </div>
               <div className="flex flex-col">
-                <div className="flex">
-                  <Conn className="h-5" />
-                  <p>
-                    {connsStatus?.filter((_) => _.isUp).length}/{connsStatus?.length}
+                <div className="flex space-x-1.5 items-center">
+                  <Conn className="h-5 fill-primary" />
+                  <p className={upTextColor(upConnsStat)}>
+                    {connsStatus ? `${connsStatus.filter((_) => _.isUp).length}/${connsStatus.length}` : "?/?"}
                   </p>
                 </div>
-                <div className="flex">
-                  <Pipeline className="h-5" />
-                  <p>?/?</p>
+                <div className="flex space-x-1.5 items-center">
+                  <Pipeline className="h-5 fill-primary" />
+                  <p className="text-warning">?/?</p>
                 </div>
               </div>
             </div>
           </div>
 
-          <div className="flex flex-col items-center">
-            <h1 className="">My Status</h1>
-            <div className="flex">
-              <div className="flex flex-col">
-                <p className="">{user?.username}</p>
-                <p>#{user?.id}</p>
-                <p>{user ? "(Connected)" : "(Connecting)"}</p>
+          {/* Nodes status */}
+          <div className="flex flex-col items-center px-2 pb-2 space-y-1">
+            <h1 className="font-semibold text-sm">Nodes</h1>
+            <div className="flex space-x-2">
+              <div className="flex flex-col items-center">
+                <p>Node(s)</p>
+                <p>{node ? node.nbNodes : "?"}</p>
               </div>
-              <div className="flex flex-col">
-                <div className="flex">
-                  <Conn className="h-5" />
-                  <p>
-                    {connsStatus?.filter((_) => _.isUp).length}/{connsStatus?.length}
-                  </p>
-                </div>
-                <div className="flex">
-                  <Pipeline className="h-5" />
-                  <p>?/?</p>
-                </div>
+              <div
+                className={
+                  "flex flex-col items-center" + usageTextColor(node && { usage: node.cpu, total: node.cpuTotal })
+                }
+              >
+                <p>CPU</p>
+                <p>{node ? `${node.cpu.toFixed(1)}/${node.cpuTotal.toFixed(1)}` : "?/?"}</p>
+              </div>
+              <div
+                className={
+                  "flex flex-col items-center" + usageTextColor(node && { usage: node.ram, total: node.ramTotal })
+                }
+              >
+                <p>RAM</p>
+                <p>{node ? `${node.ram.toFixed(1)}/${node?.ramTotal.toFixed(1)}` : "?/?"}</p>
               </div>
             </div>
           </div>

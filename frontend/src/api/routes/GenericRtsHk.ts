@@ -157,7 +157,6 @@ function useApi(authed: boolean, verbose: boolean) {
  * Get request hook.
  */
 export function useGet<A extends ODto>(
-  queryKey: string,
   subDirect: string,
   headers: object | undefined,
   authed: boolean,
@@ -167,7 +166,7 @@ export function useGet<A extends ODto>(
   // Hooks
   const api = useApi(authed, verbose);
   const { data, isLoading } = useQuery(
-    queryKey,
+    subDirect,
     () => api.get<A>(subDirect, { headers: headers }).then((_) => _.data),
     { refetchInterval: refetchInterval ? refetchInterval * 1000 : refetchInterval }
   );

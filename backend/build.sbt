@@ -28,9 +28,9 @@ libraryDependencies += "org.apache.spark" %% "spark-mllib" % "3.4.0" % "provided
 
 // Cats Effect & Scala extensions
 // https://mvnrepository.com/artifact/org.typelevel/cats-effect
-libraryDependencies += "org.typelevel"              %% "cats-effect" % "3.4.8"
+libraryDependencies += "org.typelevel"              %% "cats-effect" % "3.4.9"
 // https://mvnrepository.com/artifact/com.softwaremill.quicklens/quicklens
-libraryDependencies += "com.softwaremill.quicklens" %% "quicklens"   % "1.9.1"
+libraryDependencies += "com.softwaremill.quicklens" %% "quicklens"   % "1.9.2"
 
 // Tapir
 // https://mvnrepository.com/artifact/com.softwaremill.sttp.tapir/tapir-http4s-server

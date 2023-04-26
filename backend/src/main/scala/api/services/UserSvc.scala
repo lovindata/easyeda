@@ -86,7 +86,7 @@ object UserSvc {
 
     // Check if existing valid token then provide a valid one
     genAccessToken  <- genString(100)
-    genExpireAt     <- Clock[IO].realTime.map(x => new Timestamp(x.toMillis + (ConfigLoader.tokenDuration * 1000)))
+    genExpireAt     <- Clock[IO].realTime.map(x => new Timestamp((x + ConfigLoader.tokenDuration).toMillis))
     genRefreshToken <- genString(100)
     inDBToken       <- TokenMod.select(fr"user_id = ${validatedUser.id}")
     token           <- inDBToken match {
@@ -141,7 +141,7 @@ object UserSvc {
                    case List(token) =>
                      for {
                        genAccessToken  <- genString(100)
-                       genExpireAt      = new Timestamp(nowTimestamp + (ConfigLoader.tokenDuration * 1000))
+                       genExpireAt      = new Timestamp(nowTimestamp + ConfigLoader.tokenDuration.toMillis)
                        genRefreshToken <- genString(100)
                        out             <- TokenMod.update(
                                             token

@@ -2,7 +2,7 @@ package com.ilovedatajjia
 package api.controllers
 
 import api.dto.input.ConnFormIDto
-import api.dto.output.ConnStatusODto
+import api.dto.output.ConnODto
 import api.helpers.StringUtils._
 import api.models.UserMod
 import api.services.ConnSvc
@@ -22,7 +22,7 @@ object ConnCtrl {
    * @return
    *   Connection status
    */
-  def createConn(user: UserMod, form: ConnFormIDto): IO[ConnStatusODto] =
+  def createConn(user: UserMod, form: ConnFormIDto): IO[ConnODto] =
     form.name.isValidName >> ConnSvc.createConn(user, form)
 
 }

@@ -34,6 +34,14 @@ export function useConnRtsTest() {
  * Connection listing hook for route ("/conn/list").
  */
 export function useConnRtsList() {
-  const { data, isLoading } = useGet<ConnStatusODto[]>("useConnRtsList", "/conn/list", undefined, true, false, false);
+  const { data, isLoading } = useGet<ConnStatusODto[]>("/conn/list", undefined, true, false, 10);
   return { connsStatus: data, isLoading };
+}
+
+/**
+ * Test known connection ("/conn/{id}/test").
+ */
+export function useConnRtsIdTest(connId: number) {
+  const { data, isLoading } = useGet<ConnTestODto>(`/conn/${connId}/test`, undefined, true, false, 10);
+  return { connTest: data, isLoading };
 }

@@ -75,6 +75,6 @@ export function useUserRtsLogin() {
  * User info hook for route ("/user/status").
  */
 export function useUserRtsStatus() {
-  const { data, isLoading } = useGet<UserStatusODto>("useUser", "/user/status", undefined, true, true, false);
+  const { data, isLoading } = useGet<UserStatusODto>("/user/status", undefined, true, true, 10);
   return { user: data, isRetrieving: isLoading };
 }
