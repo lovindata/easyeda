@@ -1,10 +1,8 @@
 import useAuth from "../../context/auth/AuthHk";
 import { ToastLevelEnum } from "../../context/toaster/ToasterCtx";
 import useToaster from "../../context/toaster/ToasterHk";
-import { IDto } from "../dto/IDto";
-import { BackendException, ODto, TokenODto } from "../dto/ODto";
+import { BackendException, TokenODto } from "../dto/ODto";
 import axios, { AxiosError } from "axios";
-import { useMutation, useQuery } from "react-query";
 import { NavigateFunction, useNavigate } from "react-router-dom";
 
 /**
@@ -99,7 +97,7 @@ async function REDIRECT_LOGIN_TOAST_UNCONCURRENT(
 /**
  * Axios fetcher hook.
  */
-function useApi(authed: boolean, verbose: boolean) {
+export default function useApi(authed: boolean, verbose: boolean) {
   // Get hooks & Build backend api
   const navigate = useNavigate();
   const { addToast } = useToaster();
@@ -151,62 +149,4 @@ function useApi(authed: boolean, verbose: boolean) {
 
   // Return
   return api;
-}
-
-/**
- * Get request hook.
- */
-export function useGet<A extends ODto>(
-  subDirect: string,
-  headers: object | undefined,
-  authed: boolean,
-  verbose: boolean,
-  refetchInterval: number | false // In second(s)
-) {
-  // Hooks
-  const api = useApi(authed, verbose);
-  const { data, isLoading } = useQuery(
-    subDirect,
-    () => api.get<A>(subDirect, { headers: headers }).then((_) => _.data),
-    { refetchInterval: refetchInterval ? refetchInterval * 1000 : refetchInterval }
-  );
-
-  // Return
-  return { data, isLoading };
-}
-
-/**
- * Get request hook effect.
- */
-export function useGetM<A extends ODto>(subDirect: string, authed: boolean, verbose: boolean) {
-  // Hooks
-  const api = useApi(authed, verbose);
-  const {
-    mutate: getMutate,
-    data,
-    isLoading,
-  } = useMutation((headers: object | undefined) => api.get<A>(subDirect, { headers: headers }).then((_) => _.data));
-
-  // Return
-  const getM = (headers: object | undefined) => getMutate(headers);
-  return { getM, data, isLoading };
-}
-
-/**
- * Post request hook effect.
- */
-export function usePostM<A extends ODto>(subDirect: string, authed: boolean, verbose: boolean) {
-  // Hooks
-  const api = useApi(authed, verbose);
-  const {
-    mutate: postMutate,
-    data,
-    isLoading,
-  } = useMutation((args: { body: IDto | undefined; headers: object | undefined }) =>
-    api.post<A>(subDirect, args.body, { headers: args.headers }).then((_) => _.data)
-  );
-
-  // Return
-  const postM = (body: IDto | undefined, headers: object | undefined) => postMutate({ body: body, headers: headers });
-  return { postM, data, isLoading };
 }

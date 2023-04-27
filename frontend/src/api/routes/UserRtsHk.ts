@@ -3,8 +3,9 @@ import { ToastLevelEnum } from "../../context/toaster/ToasterCtx";
 import useToaster from "../../context/toaster/ToasterHk";
 import { LoginFormIDto, UserFormIDto } from "../dto/IDto";
 import { TokenODto, UserStatusODto } from "../dto/ODto";
-import { useGet, useGetM, usePostM } from "./GenericRtsHk";
+import useApi from "./GenericRtsHk";
 import { useEffect } from "react";
+import { useQuery, useMutation } from "react-query";
 import { useNavigate } from "react-router-dom";
 
 /**
@@ -14,7 +15,12 @@ export function useUserRtsCreate() {
   // Hooks
   const { addToast } = useToaster();
   const navigate = useNavigate();
-  const { postM, data, isLoading } = usePostM<UserStatusODto>("/user/create", false, true);
+  const api = useApi(false, true);
+  const {
+    mutate: postM,
+    data,
+    isLoading,
+  } = useMutation((body: UserFormIDto) => api.post<UserStatusODto>("/user/create", body).then((_) => _.data));
 
   // Effect on post registration
   useEffect(() => {
@@ -30,7 +36,7 @@ export function useUserRtsCreate() {
 
   // Return
   return {
-    create: (body: UserFormIDto) => postM(body, undefined),
+    create: (body: UserFormIDto) => postM(body),
     isCreating: isLoading,
   };
 }
@@ -41,16 +47,22 @@ export function useUserRtsCreate() {
 export function useUserRtsLogin() {
   // Effect running on user connect
   const { tokens: oldTokens, setTokens } = useAuth();
-  const { postM, data: freshTokens, isLoading: isGettingTokens } = usePostM<TokenODto>("/user/login", false, true);
+  const apiLogin = useApi(false, true);
+  const {
+    mutate: postM,
+    data: freshTokens,
+    isLoading: isGettingTokens,
+  } = useMutation((body: LoginFormIDto) => apiLogin.post<TokenODto>("/user/login", body).then((_) => _.data));
   useEffect(() => freshTokens && setTokens(freshTokens), [freshTokens]);
-  useEffect(() => freshTokens && getUserStatus(undefined), [oldTokens]);
+  useEffect(() => freshTokens && getUserStatus(), [oldTokens]);
 
   // Effect running on user get
+  const apiStatus = useApi(true, true);
   const {
-    getM: getUserStatus,
+    mutate: getUserStatus,
     data: user,
     isLoading: isGettingUser,
-  } = useGetM<UserStatusODto>("/user/status", true, true);
+  } = useMutation(() => apiStatus.get<UserStatusODto>("/user/status").then((_) => _.data));
   const navigate = useNavigate();
   const { addToast } = useToaster();
   useEffect(() => {
@@ -66,7 +78,7 @@ export function useUserRtsLogin() {
 
   // Return
   return {
-    logIn: (body: LoginFormIDto) => postM(body, undefined),
+    logIn: (body: LoginFormIDto) => postM(body),
     isLogingIn: isGettingTokens || isGettingUser,
   };
 }
@@ -75,6 +87,11 @@ export function useUserRtsLogin() {
  * User info hook for route ("/user/status").
  */
 export function useUserRtsStatus() {
-  const { data, isLoading } = useGet<UserStatusODto>("/user/status", undefined, true, true, 10);
-  return { user: data, isRetrieving: isLoading };
+  const api = useApi(true, true);
+  const { data } = useQuery(
+    "/node/status",
+    () => api.get<UserStatusODto>("/user/status", { headers: undefined }).then((_) => _.data),
+    { refetchInterval: 10000 }
+  );
+  return data;
 }

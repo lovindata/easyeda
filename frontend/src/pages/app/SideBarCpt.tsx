@@ -62,15 +62,17 @@ function IconTabLink(props: {
  * Sidebar icon user.
  */
 function IconUser() {
-  // States
+  // Hooks
   const [isOpen, setIsOpen] = useState(false);
-  const { user } = useUserRtsStatus();
-  const { connsStatus } = useConnRtsList();
-  const { node } = useNodeRtsStatus();
+  const [connsStatus, setConnsStatus] = useState();
 
-  // Retrieve connexions up
-  connsStatus && connsStatus.map((_) => useConnRtsIdTest(_.id)); // TODO
-  const upConnsStat = connsStatus && { up: connsStatus.filter((_) => _.isUp).length, total: connsStatus.length };
+  // Retrieve data
+  const user = useUserRtsStatus();
+  const conns = useConnRtsList();
+  const nodeStatus = useNodeRtsStatus();
+
+  // Build connexions status
+  const { test, isUp } = useConnRtsIdTest();
 
   // Text color logic
   const upTextColor = (stat: { up: number; total: number } | undefined) => {
@@ -141,23 +143,25 @@ function IconUser() {
             <div className="flex space-x-2">
               <div className="flex flex-col items-center">
                 <p>Node(s)</p>
-                <p>{node ? node.nbNodes : "?"}</p>
+                <p>{nodeStatus ? nodeStatus.nbNodes : "?"}</p>
               </div>
               <div
                 className={
-                  "flex flex-col items-center" + usageTextColor(node && { usage: node.cpu, total: node.cpuTotal })
+                  "flex flex-col items-center" +
+                  usageTextColor(nodeStatus && { usage: nodeStatus.cpu, total: nodeStatus.cpuTotal })
                 }
               >
                 <p>CPU</p>
-                <p>{node ? `${node.cpu.toFixed(1)}/${node.cpuTotal.toFixed(1)}` : "?/?"}</p>
+                <p>{nodeStatus ? `${nodeStatus.cpu.toFixed(1)}/${nodeStatus.cpuTotal.toFixed(1)}` : "?/?"}</p>
               </div>
               <div
                 className={
-                  "flex flex-col items-center" + usageTextColor(node && { usage: node.ram, total: node.ramTotal })
+                  "flex flex-col items-center" +
+                  usageTextColor(nodeStatus && { usage: nodeStatus.ram, total: nodeStatus.ramTotal })
                 }
               >
                 <p>RAM</p>
-                <p>{node ? `${node.ram.toFixed(1)}/${node?.ramTotal.toFixed(1)}` : "?/?"}</p>
+                <p>{nodeStatus ? `${nodeStatus.ram.toFixed(1)}/${nodeStatus?.ramTotal.toFixed(1)}` : "?/?"}</p>
               </div>
             </div>
           </div>

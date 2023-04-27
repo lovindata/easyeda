@@ -1,32 +1,20 @@
-import { ToastLevelEnum } from "../../context/toaster/ToasterCtx";
-import useToaster from "../../context/toaster/ToasterHk";
 import { ConnFormIDto } from "../dto/IDto";
-import { ConnStatusODto, ConnTestODto } from "../dto/ODto";
-import { useGet, usePostM } from "./GenericRtsHk";
-import { useEffect } from "react";
+import { ConnODto, ConnTestODto } from "../dto/ODto";
+import useApi from "./GenericRtsHk";
+import { useQuery, useMutation } from "react-query";
 
 /**
  * Connection testing hook for route ("/conn/test").
  */
 export function useConnRtsTest() {
-  const { addToast } = useToaster();
-  const { postM, data, isLoading } = usePostM<ConnTestODto>("/conn/test", true, true);
-  useEffect(
-    () =>
-      data
-        ? addToast({
-            level: ToastLevelEnum.Success,
-            header: "Connection is UP.",
-          })
-        : addToast({
-            level: ToastLevelEnum.Warning,
-            header: "Connection is DOWN.",
-          }),
-    [isLoading]
+  // Hooks
+  const api = useApi(true, true);
+  const { mutate: postM, data } = useMutation((body: ConnFormIDto) =>
+    api.post<ConnTestODto>("/conn/test", body, { headers: undefined }).then((_) => _.data)
   );
   return {
-    test: (body: ConnFormIDto) => postM(body, undefined),
-    isTesting: isLoading,
+    test: (body: ConnFormIDto) => postM(body),
+    data,
   };
 }
 
@@ -34,14 +22,22 @@ export function useConnRtsTest() {
  * Connection listing hook for route ("/conn/list").
  */
 export function useConnRtsList() {
-  const { data, isLoading } = useGet<ConnStatusODto[]>("/conn/list", undefined, true, false, 10);
-  return { connsStatus: data, isLoading };
+  const api = useApi(true, false);
+  const { data } = useQuery(
+    "/conn/list",
+    () => api.get<ConnODto[]>("/conn/list", { headers: undefined }).then((_) => _.data),
+    { refetchInterval: 10000 }
+  );
+  return data;
 }
 
 /**
  * Test known connection ("/conn/{id}/test").
  */
-export function useConnRtsIdTest(connId: number) {
-  const { data, isLoading } = useGet<ConnTestODto>(`/conn/${connId}/test`, undefined, true, false, 10);
-  return { connTest: data, isLoading };
+export function useConnRtsIdTest() {
+  const api = useApi(true, false);
+  const { mutate: test, data: isUp } = useMutation((connId: number) =>
+    api.post<ConnTestODto>(`/conn/${connId}/test`).then((_) => _.data.isUp)
+  );
+  return { test, isUp };
 }

@@ -6,8 +6,8 @@ export type ODto =
   | TokenODto
   | UserStatusODto
   | ConnTestODto
-  | ConnStatusODto
-  | ConnStatusODto[]
+  | ConnODto
+  | ConnODto[]
   | NodeStatusODto;
 
 /**
@@ -63,11 +63,10 @@ export interface ConnTestODto {
 /**
  * Connection status dto.
  */
-export interface ConnStatusODto {
+export interface ConnODto {
   id: number;
   type: "postgres" | "mongo";
   name: string;
-  isUp: boolean;
 }
 
 /**

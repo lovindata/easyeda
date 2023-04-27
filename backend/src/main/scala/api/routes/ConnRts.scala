@@ -63,7 +63,7 @@ object ConnRts extends GenericRts {
   private val testKnownEpt: PartialServerEndpoint[String, UserMod, Long, BackendException, ConnTestODto, Any, IO] =
     authEpt
       .summary("test known connection")
-      .get
+      .post
       .in("conn" / path[Long]("id") / "test")
       .out(jsonBody[ConnTestODto])
   private val testKnownRts: HttpRoutes[IO]                                                                        =
