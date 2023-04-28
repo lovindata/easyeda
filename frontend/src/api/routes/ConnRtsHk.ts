@@ -1,7 +1,7 @@
 import { ConnFormIDto } from "../dto/IDto";
 import { ConnODto, ConnTestODto } from "../dto/ODto";
 import useApi from "./GenericRtsHk";
-import { useQuery, useMutation } from "react-query";
+import { useQuery, useMutation, useQueries } from "react-query";
 
 /**
  * Connection testing hook for route ("/conn/test").
@@ -34,10 +34,16 @@ export function useConnRtsList() {
 /**
  * Test known connection ("/conn/{id}/test").
  */
-export function useConnRtsIdTest() {
+export function useConnRtsIdsTest(connIds: number[] | undefined) {
   const api = useApi(true, false);
-  const { mutate: test, data: isUp } = useMutation((connId: number) =>
-    api.post<ConnTestODto>(`/conn/${connId}/test`).then((_) => _.data.isUp)
+  const data = useQueries(
+    (connIds || []).map((id) => {
+      return {
+        queryKey: `/conn/${id}/test`,
+        queryFn: () => api.post<ConnTestODto>(`/conn/${id}/test`, { headers: undefined }).then((_) => _.data),
+        refetchInterval: 10000,
+      };
+    })
   );
-  return { test, isUp };
+  return data.length ? data.map((_) => _.data?.isUp) : undefined;
 }

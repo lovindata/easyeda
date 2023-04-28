@@ -89,7 +89,7 @@ export function useUserRtsLogin() {
 export function useUserRtsStatus() {
   const api = useApi(true, true);
   const { data } = useQuery(
-    "/node/status",
+    "/user/status",
     () => api.get<UserStatusODto>("/user/status", { headers: undefined }).then((_) => _.data),
     { refetchInterval: 10000 }
   );
