@@ -1,8 +1,11 @@
 package com.ilovedatajjia
-package api.models
+package api.models.conn
 
 import api.dto.input.ConnFormIDto
+import api.models.ConnMod
+import api.models.GenericDB
 import cats.effect.IO
+import api.helpers.JdbcUtils
 
 /**
  * DB representation of a postgres connection.
@@ -21,12 +24,24 @@ import cats.effect.IO
  * @param pwd
  *   Password
  */
-case class ConnPostgresMod(id: Long, connId: Long, host: String, port: Int, dbName: String, user: String, pwd: String)
+case class ConnPostgresMod(id: Long, connId: Long, host: String, port: Int, dbName: String, user: String, pwd: String) {
+
+  /**
+   * Test if connection is up.
+   * @return
+   *   If is up
+   */
+  def testIO: IO[Boolean] = JdbcUtils.testIO("org.postgresql.Driver",
+                                             s"jdbc:postgresql://$host:$port/$dbName",
+                                             "user"     -> user,
+                                             "password" -> pwd)
+
+}
 
 /**
- * Additional [[ConnPostgresMod]] functions.
+ * [[ConnPostgresMod]] additions.
  */
-object ConnPostgresMod extends GenericMod[ConnPostgresMod] {
+object ConnPostgresMod extends GenericDB[ConnPostgresMod] {
 
   /**
    * Constructor of [[ConnPostgresMod]].

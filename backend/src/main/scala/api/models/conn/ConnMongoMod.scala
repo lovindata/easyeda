@@ -1,8 +1,10 @@
 package com.ilovedatajjia
-package api.models
+package api.models.conn
 
 import api.dto.input.ConnFormIDto
 import api.helpers.DoobieUtils._
+import api.helpers.MongoUtils
+import api.models._
 import cats.effect.IO
 import cats.implicits._
 
@@ -24,17 +26,21 @@ import cats.implicits._
 case class ConnMongoMod(id: Long, connId: Long, dbAuth: String, replicaSet: String, user: String, pwd: String) {
 
   /**
-   * Get host port.
+   * Test if connection is up.
+   * @return
+   *   If is up
    */
-  def hostPort: IO[List[(String, Int)]] =
-    ConnMongoMod.ConnMongoHostPortMod.select(fr"conn_mongo_id = $id").map(_.map(x => (x.host, x.port)))
+  def testIO: IO[Boolean] = for {
+    hostPort <- ConnMongoMod.ConnMongoHostPortMod.select(fr"conn_mongo_id = $id").map(_.map(x => (x.host, x.port)))
+    isUp     <- MongoUtils.testIO(hostPort, dbAuth, replicaSet, user, pwd)
+  } yield isUp
 
 }
 
 /**
- * Additional [[ConnMongoMod]] functions.
+ * [[ConnMongoMod]] additions.
  */
-object ConnMongoMod extends GenericMod[ConnMongoMod] {
+object ConnMongoMod extends GenericDB[ConnMongoMod] {
 
   /**
    * Constructor of [[ConnMongoMod]].
@@ -54,9 +60,9 @@ object ConnMongoMod extends GenericMod[ConnMongoMod] {
    * DB representation host & port for mongodb.
    */
   private case class ConnMongoHostPortMod(id: Long, connMongoId: Long, host: String, port: Int)
-  private object ConnMongoHostPortMod extends GenericMod[ConnMongoHostPortMod] {
+  private object ConnMongoHostPortMod extends GenericDB[ConnMongoHostPortMod] {
     def apply(connMongoId: Long, host: String, port: Int): IO[ConnMongoHostPortMod] = insert(
-      new ConnMongoHostPortMod(-1, connMongoId, host, port))
+      ConnMongoHostPortMod(-1, connMongoId, host, port))
   }
 
 }

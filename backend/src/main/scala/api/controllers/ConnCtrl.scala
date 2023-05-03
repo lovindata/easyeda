@@ -11,7 +11,7 @@ import cats.effect.IO
 /**
  * Controller layer for connections.
  */
-object ConnCtrl {
+trait ConnCtrl {
 
   /**
    * Verify form & create connection.
@@ -22,7 +22,12 @@ object ConnCtrl {
    * @return
    *   Connection status
    */
-  def createConn(user: UserMod, form: ConnFormIDto): IO[ConnODto] =
-    form.name.isValidName >> ConnSvc.createConn(user, form)
+  def createConn(user: UserMod, form: ConnFormIDto)(implicit connSvc: ConnSvc): IO[ConnODto] =
+    form.name.isValidName >> connSvc.createConn(user, form)
 
 }
+
+/**
+ * Auto-DI on import.
+ */
+object ConnCtrl { implicit val impl: ConnCtrl = new ConnCtrl {} }

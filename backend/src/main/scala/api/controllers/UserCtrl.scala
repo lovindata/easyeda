@@ -7,12 +7,13 @@ import api.helpers.BackendException.AppException
 import api.helpers.StringUtils._
 import api.services.UserSvc
 import cats.effect._
+import cats.effect.IO
 import java.sql.Date
 
 /**
  * Controller layer for user.
  */
-object UserCtrl {
+trait UserCtrl {
 
   /**
    * Validate form and create the user.
@@ -22,7 +23,7 @@ object UserCtrl {
    *   User status OR
    *   - [[AppException]] if a form issue
    */
-  def createUser(createUserFormDtoIn: UserFormIDto): IO[UserStatusODto] = for {
+  def createUser(createUserFormDtoIn: UserFormIDto)(implicit userSvc: UserSvc): IO[UserStatusODto] = for {
     // Validate email, username and password
     _ <- createUserFormDtoIn.email.isValidEmail
     _ <- createUserFormDtoIn.username.isValidName
@@ -43,7 +44,12 @@ object UserCtrl {
 
     // Create
     dtoOut    <-
-      UserSvc.createUser(createUserFormDtoIn.email, createUserFormDtoIn.username, createUserFormDtoIn.pwd, birthDate)
+      userSvc.createUser(createUserFormDtoIn.email, createUserFormDtoIn.username, createUserFormDtoIn.pwd, birthDate)
   } yield dtoOut
 
 }
+
+/**
+ * Auto-DI on import.
+ */
+object UserCtrl { implicit val impl: UserCtrl = new UserCtrl {} }

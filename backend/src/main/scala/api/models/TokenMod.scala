@@ -21,30 +21,33 @@ import java.sql.Timestamp
 case class TokenMod(id: Long, userId: Long, accessToken: String, expireAt: Timestamp, refreshToken: String)
 
 /**
- * Additional [[TokenMod]] functions.
+ * [[TokenMod]] additions.
  */
-object TokenMod extends GenericMod[TokenMod] {
+object TokenMod {
+  trait DB extends GenericDB[TokenMod] {
 
-  /**
-   * Constructor of [[TokenMod]].
-   * @param userId
-   *   Token for this [[UserMod]] id
-   * @param accessToken
-   *   Access token
-   * @param expireAt
-   *   Expire at
-   * @param refreshToken
-   *   Refresh token
-   * @return
-   *   A new created token
-   */
-  def apply(userId: Long, accessToken: String, expireAt: Timestamp, refreshToken: String): IO[TokenMod] = insert(
-    TokenMod(
-      -1,
-      userId,
-      accessToken,
-      expireAt,
-      refreshToken
-    ))
+    /**
+     * Constructor of [[TokenMod]].
+     * @param userId
+     *   Token for this [[UserMod]] id
+     * @param accessToken
+     *   Access token
+     * @param expireAt
+     *   Expire at
+     * @param refreshToken
+     *   Refresh token
+     * @return
+     *   A new created token
+     */
+    def apply(userId: Long, accessToken: String, expireAt: Timestamp, refreshToken: String): IO[TokenMod] = insert(
+      TokenMod(
+        -1,
+        userId,
+        accessToken,
+        expireAt,
+        refreshToken
+      ))
 
+  }
+  object DB { implicit val impl: DB = new DB {} } // Auto-DI on import
 }

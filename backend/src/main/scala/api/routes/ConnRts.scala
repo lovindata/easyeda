@@ -35,7 +35,7 @@ object ConnRts extends GenericRts {
       .in(jsonBody[ConnFormIDto])
       .out(jsonBody[ConnTestODto])
   private val testRts: HttpRoutes[IO]                                                                                =
-    Http4sServerInterpreter[IO]().toRoutes(testEpt.serverLogic(_ => ConnSvc.testConn(_).toErrHandled))
+    Http4sServerInterpreter[IO]().toRoutes(testEpt.serverLogic(_ => ConnSvc.impl.testConn(_).toErrHandled))
 
   // Create connection
   private val createEpt: PartialServerEndpoint[String, UserMod, ConnFormIDto, BackendException, ConnODto, Any, IO] =
@@ -45,9 +45,10 @@ object ConnRts extends GenericRts {
       .in("conn" / "create")
       .in(jsonBody[ConnFormIDto])
       .out(jsonBody[ConnODto])
-  private val createRts: HttpRoutes[IO]                                                                            = Http4sServerInterpreter[IO]().toRoutes(createEpt.serverLogic { user => form =>
-    ConnCtrl.createConn(user, form).toErrHandled
-  })
+  private val createRts: HttpRoutes[IO]                                                                            =
+    Http4sServerInterpreter[IO]().toRoutes(createEpt.serverLogic { user => form =>
+      ConnCtrl.impl.createConn(user, form).toErrHandled
+    })
 
   // List connection
   private val listEpt: PartialServerEndpoint[String, UserMod, Unit, BackendException, List[ConnODto], Any, IO] =
@@ -57,7 +58,9 @@ object ConnRts extends GenericRts {
       .in("conn" / "list")
       .out(jsonBody[List[ConnODto]])
   private val listRts: HttpRoutes[IO]                                                                          =
-    Http4sServerInterpreter[IO]().toRoutes(listEpt.serverLogic { user => _ => ConnSvc.listConn(user).toErrHandled })
+    Http4sServerInterpreter[IO]().toRoutes(listEpt.serverLogic { user => _ =>
+      ConnSvc.impl.listConn(user).toErrHandled
+    })
 
   // Test known connection
   private val testKnownEpt: PartialServerEndpoint[String, UserMod, Long, BackendException, ConnTestODto, Any, IO] =
@@ -68,7 +71,7 @@ object ConnRts extends GenericRts {
       .out(jsonBody[ConnTestODto])
   private val testKnownRts: HttpRoutes[IO]                                                                        =
     Http4sServerInterpreter[IO]().toRoutes(testKnownEpt.serverLogic { user => connId =>
-      ConnSvc.testKnownConn(user, connId).toErrHandled
+      ConnSvc.impl.testKnownConn(user, connId).toErrHandled
     })
 
   /**

@@ -43,7 +43,7 @@ object MongoUtils {
           .applyToClusterSettings(x => x.serverSelectionTimeout(1, SECONDS))
           .build())
     }
-    .bracket(f)(conn => IO.interruptible(conn.close()))
+    .bracket(f)(conn => IO.interruptible(conn.close))
 
   /**
    * Test MongoDB connection.

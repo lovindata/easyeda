@@ -28,24 +28,27 @@ case class NodeMod(id: Long,
                    heartbeatAt: Timestamp)
 
 /**
- * Additional [[NodeMod]] functions.
+ * [[NodeMod]] additions.
  */
-object NodeMod extends GenericMod[NodeMod] {
+object NodeMod {
+  trait DB extends GenericDB[NodeMod] {
 
-  /**
-   * Constructor of [[NodeMod]].
-   * @param cpu
-   *   Cpus usage (between 0 and 1 for each core)
-   * @param ram
-   *   Ram usage (in GiB)
-   * @param ramTotal
-   *   Total ram (in GiB)
-   * @param nowTimestamp
-   *   Current timestamp
-   * @return
-   *   A new registered node model
-   */
-  def apply(cpu: List[Double], ram: Double, ramTotal: Double, nowTimestamp: Timestamp): IO[NodeMod] = insert(
-    NodeMod(-1, cpu, ram, ramTotal, nowTimestamp, nowTimestamp))
+    /**
+     * Constructor of [[NodeMod]].
+     * @param cpu
+     *   Cpus usage (between 0 and 1 for each core)
+     * @param ram
+     *   Ram usage (in GiB)
+     * @param ramTotal
+     *   Total ram (in GiB)
+     * @param nowTimestamp
+     *   Current timestamp
+     * @return
+     *   A new registered node model
+     */
+    def apply(cpu: List[Double], ram: Double, ramTotal: Double, nowTimestamp: Timestamp): IO[NodeMod] = insert(
+      NodeMod(-1, cpu, ram, ramTotal, nowTimestamp, nowTimestamp))
 
+  }
+  object DB { implicit val impl: DB = new DB {} } // Auto-DI on import
 }

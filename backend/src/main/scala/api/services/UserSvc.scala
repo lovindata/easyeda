@@ -4,10 +4,10 @@ package api.services
 import api.dto.input.LoginFormIDto
 import api.dto.output._
 import api.helpers.BackendException._
+import api.helpers.BackendException.AppException
 import api.helpers.DoobieUtils._
 import api.helpers.StringUtils._
-import api.models.TokenMod
-import api.models.UserMod
+import api.models._
 import cats.effect._
 import cats.implicits._
 import com.softwaremill.quicklens._
@@ -19,7 +19,7 @@ import org.postgresql.util.PSQLException
 /**
  * Service layer for user.
  */
-object UserSvc {
+trait UserSvc {
 
   /**
    * Convert [[UserMod]] to DTO.
@@ -50,10 +50,11 @@ object UserSvc {
    * @return
    *   User status
    */
-  def createUser(email: String, username: String, pwd: String, birthDate: Date): IO[UserStatusODto] = for {
+  def createUser(email: String, username: String, pwd: String, birthDate: Date)(implicit
+      userModDB: UserMod.DB): IO[UserStatusODto] = for {
     pwdSalt <- genString(32)
     pwd     <- s"$pwdSalt$pwd".toSHA3_512 // Hash password logic
-    user    <- UserMod(email, username, pwd, pwdSalt, birthDate).attemptT.leftMap {
+    user    <- userModDB(email, username, pwd, pwdSalt, birthDate).attemptT.leftMap {
                  case t: PSQLException => AppException(t.getServerErrorMessage.getDetail)
                  case t                => t
                }.rethrowT
@@ -68,9 +69,9 @@ object UserSvc {
    *   Tokens OR
    *   - [[AppException]] if incorrect login
    */
-  def loginUser(form: LoginFormIDto): IO[TokensODto] = for {
+  def loginUser(form: LoginFormIDto)(implicit userModDB: UserMod.DB, tokenModDB: TokenMod.DB): IO[TokensODto] = for {
     // Verify login
-    potUsers        <- UserMod.select(fr"email = ${form.email}")
+    potUsers        <- userModDB.select(fr"email = ${form.email}")
     validatedUser   <- potUsers match {
                          case List(user) =>
                            for {
@@ -88,10 +89,10 @@ object UserSvc {
     genAccessToken  <- genString(100)
     genExpireAt     <- Clock[IO].realTime.map(x => new Timestamp((x + ConfigLoader.tokenDuration).toMillis))
     genRefreshToken <- genString(100)
-    inDBToken       <- TokenMod.select(fr"user_id = ${validatedUser.id}")
+    inDBToken       <- tokenModDB.select(fr"user_id = ${validatedUser.id}")
     token           <- inDBToken match {
                          case List(token) =>
-                           TokenMod.update(
+                           tokenModDB.update(
                              token
                                .modify(_.accessToken)
                                .setTo(genAccessToken)
@@ -99,7 +100,7 @@ object UserSvc {
                                .setTo(genExpireAt)
                                .modify(_.refreshToken)
                                .setTo(genRefreshToken))
-                         case _           => TokenMod(validatedUser.id, genAccessToken, genExpireAt, genRefreshToken)
+                         case _           => tokenModDB(validatedUser.id, genAccessToken, genExpireAt, genRefreshToken)
                        }
   } yield TokensODto(token.accessToken, token.expireAt.getTime, token.refreshToken)
 
@@ -110,19 +111,21 @@ object UserSvc {
    * @return
    *   [[UserMod]]
    */
-  def grantAccess(accessToken: String): IO[UserMod] = for {
-    nowTimestamp <- Clock[IO].realTime.map(_.toMillis)
-    potTokens    <- TokenMod.select(fr"access_token = $accessToken")
-    user         <- potTokens match {
-                      case List(token) =>
-                        if (nowTimestamp < token.expireAt.getTime) UserMod.select(token.userId)
-                        else IO.raiseError(AuthException("Expired token provided. Please refresh your token."))
-                      case _           =>
-                        IO.raiseError(
-                          AuthException("Invalid access token provided. Please refresh your tokens or reconnect your account."))
-                    }
-    userUpToDate <- UserMod.update(user.modify(_.activeAt).setTo(new Timestamp(nowTimestamp)))
-  } yield userUpToDate
+  def grantAccess(accessToken: String)(implicit userModDB: UserMod.DB, tokenModDB: TokenMod.DB): IO[UserMod] =
+    for {
+      nowTimestamp <- Clock[IO].realTime.map(_.toMillis)
+      potTokens    <- tokenModDB.select(fr"access_token = $accessToken")
+      user         <- potTokens match {
+                        case List(token) =>
+                          if (nowTimestamp < token.expireAt.getTime) userModDB.select(token.userId)
+                          else IO.raiseError(AuthException("Expired token provided. Please refresh your token."))
+                        case _           =>
+                          IO.raiseError(
+                            AuthException(
+                              "Invalid access token provided. Please refresh your tokens or reconnect your account."))
+                      }
+      userUpToDate <- userModDB.update(user.modify(_.activeAt).setTo(new Timestamp(nowTimestamp)))
+    } yield userUpToDate
 
   /**
    * Validate refresh token.
@@ -131,19 +134,19 @@ object UserSvc {
    * @return
    *   New refreshed [[TokenMod]]
    */
-  def grantTokens(refreshToken: String): IO[TokensODto] = for {
+  def grantTokens(refreshToken: String)(implicit userModDB: UserMod.DB, tokenModDB: TokenMod.DB): IO[TokensODto] = for {
     // Pre-requisite
     nowTimestamp <- Clock[IO].realTime.map(_.toMillis)
 
     // Refresh token
-    potTokens <- TokenMod.select(fr"refresh_token = $refreshToken")
+    potTokens <- tokenModDB.select(fr"refresh_token = $refreshToken")
     outToken  <- potTokens match {
                    case List(token) =>
                      for {
                        genAccessToken  <- genString(100)
                        genExpireAt      = new Timestamp(nowTimestamp + ConfigLoader.tokenDuration.toMillis)
                        genRefreshToken <- genString(100)
-                       out             <- TokenMod.update(
+                       out             <- tokenModDB.update(
                                             token
                                               .modify(_.accessToken)
                                               .setTo(genAccessToken)
@@ -157,8 +160,13 @@ object UserSvc {
                  }
 
     // Update user activity
-    user      <- UserMod.select(outToken.userId)
-    _         <- UserMod.update(user.modify(_.activeAt).setTo(new Timestamp(nowTimestamp)))
+    user      <- userModDB.select(outToken.userId)
+    _         <- userModDB.update(user.modify(_.activeAt).setTo(new Timestamp(nowTimestamp)))
   } yield TokensODto(outToken.accessToken, outToken.expireAt.getTime, outToken.refreshToken)
 
 }
+
+/**
+ * Auto-DI on import.
+ */
+object UserSvc { implicit val impl: UserSvc = new UserSvc {} }

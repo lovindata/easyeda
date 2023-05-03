@@ -45,41 +45,44 @@ case class UserMod(id: Long,
                    activeAt: Timestamp)
 
 /**
- * Additional [[UserMod]] functions.
+ * [[UserMod]] additions.
  */
-object UserMod extends GenericMod[UserMod] {
+object UserMod {
+  trait DB extends GenericDB[UserMod] {
 
-  /**
-   * Constructor of [[UserMod]].
-   * @param email
-   *   Email
-   * @param username
-   *   Username
-   * @param pwd
-   *   Password
-   * @param pwdSalt
-   *   Password salt
-   * @param birthDate
-   *   Birth date
-   * @return
-   *   A new created user
-   */
-  def apply(email: String, username: String, pwd: String, pwdSalt: String, birthDate: Date): IO[UserMod] = for {
-    nowTimestamp <- Clock[IO].realTime.map(x => new Timestamp(x.toMillis))
-    out          <- insert(
-                      UserMod(
-                        -1,
-                        email,
-                        username,
-                        pwd,
-                        pwdSalt,
-                        birthDate,
-                        none,
-                        nowTimestamp,
-                        none,
-                        nowTimestamp,
-                        nowTimestamp
-                      ))
-  } yield out
+    /**
+     * Constructor of [[UserMod]].
+     * @param email
+     *   Email
+     * @param username
+     *   Username
+     * @param pwd
+     *   Password
+     * @param pwdSalt
+     *   Password salt
+     * @param birthDate
+     *   Birth date
+     * @return
+     *   A new created user
+     */
+    def apply(email: String, username: String, pwd: String, pwdSalt: String, birthDate: Date): IO[UserMod] = for {
+      nowTimestamp <- Clock[IO].realTime.map(x => new Timestamp(x.toMillis))
+      out          <- insert(
+                        UserMod(
+                          -1,
+                          email,
+                          username,
+                          pwd,
+                          pwdSalt,
+                          birthDate,
+                          none,
+                          nowTimestamp,
+                          none,
+                          nowTimestamp,
+                          nowTimestamp
+                        ))
+    } yield out
 
+  }
+  object DB { implicit val impl: DB = new DB {} } // Auto-DI on import
 }

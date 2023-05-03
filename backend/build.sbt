@@ -28,17 +28,17 @@ libraryDependencies += "org.apache.spark" %% "spark-mllib" % "3.4.0" % "provided
 
 // Cats Effect & Scala extensions
 // https://mvnrepository.com/artifact/org.typelevel/cats-effect
-libraryDependencies += "org.typelevel"              %% "cats-effect" % "3.4.9"
+libraryDependencies += "org.typelevel"              %% "cats-effect" % "3.4.10"
 // https://mvnrepository.com/artifact/com.softwaremill.quicklens/quicklens
 libraryDependencies += "com.softwaremill.quicklens" %% "quicklens"   % "1.9.2"
 
 // Tapir
 // https://mvnrepository.com/artifact/com.softwaremill.sttp.tapir/tapir-http4s-server
-libraryDependencies += "com.softwaremill.sttp.tapir" %% "tapir-http4s-server"     % "1.2.12"
+libraryDependencies += "com.softwaremill.sttp.tapir" %% "tapir-http4s-server"     % "1.3.0"
 // https://mvnrepository.com/artifact/com.softwaremill.sttp.tapir/tapir-json-circe
-libraryDependencies += "com.softwaremill.sttp.tapir" %% "tapir-json-circe"        % "1.2.12"
+libraryDependencies += "com.softwaremill.sttp.tapir" %% "tapir-json-circe"        % "1.3.0"
 // https://mvnrepository.com/artifact/com.softwaremill.sttp.tapir/tapir-swagger-ui-bundle
-libraryDependencies += "com.softwaremill.sttp.tapir" %% "tapir-swagger-ui-bundle" % "1.2.12"
+libraryDependencies += "com.softwaremill.sttp.tapir" %% "tapir-swagger-ui-bundle" % "1.3.0"
 
 // Http4s
 // https://mvnrepository.com/artifact/org.http4s/http4s-ember-server

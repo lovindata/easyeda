@@ -13,7 +13,7 @@ import oshi.SystemInfo
 /**
  * Service layer for cluster monitoring.
  */
-object NodeSvc {
+trait NodeSvc {
 
   /**
    * Node identifier.
@@ -27,10 +27,10 @@ object NodeSvc {
    * @return
    *   DTO version of node(s) status
    */
-  def toDto: IO[NodeStatusODto] = for {
+  def toDto(implicit nodeModDB: NodeMod.DB): IO[NodeStatusODto] = for {
     // Retrieve
     timestampAlive <- Clock[IO].realTime.map(x => new Timestamp(x.toMillis - aliveInterval.toMillis))
-    nodesMod       <- NodeMod.select(fr"heartbeat_at >= $timestampAlive")
+    nodesMod       <- nodeModDB.select(fr"heartbeat_at >= $timestampAlive")
 
     // Prepare info
     nbNodes  <- IO(nodesMod.length)
@@ -43,7 +43,7 @@ object NodeSvc {
   /**
    * Report current CPU & RAM usage.
    */
-  def report: IO[Unit] = (for {
+  def report(implicit nodeModDB: NodeMod.DB): IO[Unit] = (for {
     // Get usages
     hardware <- IO(new SystemInfo().getHardware)
     cpu      <- IO.blocking(hardware.getProcessor.getProcessorCpuLoad(heartbeatInterval.toMillis).toList)
@@ -54,12 +54,12 @@ object NodeSvc {
     nowTimestamp <- Clock[IO].realTime.map(x => new Timestamp(x.toMillis))
     _            <- nodeId match {
                       case None         =>
-                        NodeMod(cpu, ram, ramTotal, nowTimestamp).map(node => nodeId = node.id.some)
+                        nodeModDB(cpu, ram, ramTotal, nowTimestamp).map(node => nodeId = node.id.some)
                       case Some(nodeId) =>
-                        NodeMod
+                        nodeModDB
                           .select(nodeId)
                           .map(_.copy(cpu = cpu, ram = ram, ramTotal = ramTotal, heartbeatAt = nowTimestamp))
-                          .flatMap(NodeMod.update)
+                          .flatMap(nodeModDB.update)
                     }
 
     // Rec
@@ -67,3 +67,8 @@ object NodeSvc {
   } yield ()).start.void
 
 }
+
+/**
+ * Auto-DI on import.
+ */
+object NodeSvc { implicit val impl: NodeSvc = new NodeSvc {} }

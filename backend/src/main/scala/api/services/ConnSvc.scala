@@ -1,7 +1,7 @@
 package com.ilovedatajjia
 package api.services
 
-import api.dto.input._
+import api.dto.input.ConnFormIDto
 import api.dto.input.ConnFormIDto._
 import api.dto.output._
 import api.helpers._
@@ -14,7 +14,7 @@ import cats.implicits._
 /**
  * Service layer for connection.
  */
-object ConnSvc {
+trait ConnSvc {
 
   /**
    * Test connection.
@@ -35,22 +35,22 @@ object ConnSvc {
 
   /**
    * Create connection.
-   *
    * @param user
    *   User
    * @param form
    *   Provided connection form
    * @return
-   *   All [[ConnODto]]
+   *   All [[ConnODto]] OR
+   *   - [[AppException]] if not up connection
    */
-  def createConn(user: UserMod, form: ConnFormIDto): IO[ConnODto] = for {
+  def createConn(user: UserMod, form: ConnFormIDto)(implicit connModDB: ConnMod.DB): IO[ConnODto] = for {
     // Check connectivity
     isUp    <- testConn(form).map(_.isUp)
     _       <-
       IO.raiseUnless(isUp)(AppException("Impossible to connect verify your external service and provided information."))
 
     // Create
-    connMod <- ConnMod(user.id, form)
+    connMod <- connModDB(user.id, form)
   } yield ConnODto(connMod.id, connMod.`type`, connMod.name)
 
   /**
@@ -58,10 +58,10 @@ object ConnSvc {
    * @param user
    *   User
    * @return
-   *   All connections and their status
+   *   All connections
    */
-  def listConn(user: UserMod): IO[List[ConnODto]] = for {
-    allConn <- ConnMod.select(fr"user_id = ${user.id}")
+  def listConn(user: UserMod)(implicit connModDB: ConnMod.DB): IO[List[ConnODto]] = for {
+    allConn <- connModDB.select(fr"user_id = ${user.id}")
     allDto  <- allConn.traverse { x => IO(ConnODto(x.id, x.`type`, x.name)) }
   } yield allDto
 
@@ -72,11 +72,12 @@ object ConnSvc {
    * @param connId
    *   Connection id
    * @return
-   *   [[ConnTestODto]]
+   *   [[ConnTestODto]] OR
+   *   - [[AppException]] if forbidden access
    */
-  def testKnownConn(user: UserMod, connId: Long): IO[ConnTestODto] = for {
+  def testKnownConn(user: UserMod, connId: Long)(implicit connModDB: ConnMod.DB): IO[ConnTestODto] = for {
     // Retrieve connection
-    allConn <- ConnMod.select(fr"user_id = ${user.id} AND id = $connId")
+    allConn <- connModDB.select(fr"user_id = ${user.id} AND id = $connId")
     conn    <- allConn match {
                  case List(conn) => IO(conn)
                  case List()     => IO.raiseError(AppException("Forbidden connection access or no connection retrievable."))
@@ -86,24 +87,12 @@ object ConnSvc {
                }
 
     // Do test
-    dto     <- conn match {
-                 case ConnMod(id, _, ConnTypeEnum.Postgres, _) =>
-                   for {
-                     conn <- ConnPostgresMod.select(fr"conn_id = $id").map(_.head)
-                     isUp <- JdbcUtils.testIO("org.postgresql.Driver",
-                                              s"jdbc:postgresql://${conn.host}:${conn.port}/${conn.dbName}",
-                                              "user"     -> conn.user,
-                                              "password" -> conn.pwd)
-                   } yield ConnTestODto(isUp)
-                 case ConnMod(id, _, ConnTypeEnum.Mongo, _)    =>
-                   for {
-                     conn     <- ConnMongoMod.select(fr"conn_id = $id").map(_.head)
-                     hostPort <- conn.hostPort
-                     isUp     <- MongoUtils.testIO(hostPort, conn.dbAuth, conn.replicaSet, conn.user, conn.pwd)
-                   } yield ConnTestODto(isUp)
-                 case ConnMod(_, _, connType, _)               =>
-                   IO.raiseError(AppException(s"Implementation error, unknown connection type $connType."))
-               }
-  } yield dto
+    isUp    <- conn.testIO
+  } yield ConnTestODto(isUp)
 
 }
+
+/**
+ * Auto-DI on import.
+ */
+object ConnSvc { implicit val impl: ConnSvc = new ConnSvc {} }

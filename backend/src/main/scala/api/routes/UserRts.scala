@@ -29,7 +29,7 @@ object UserRts extends GenericRts {
     .in(jsonBody[UserFormIDto])
     .out(jsonBody[UserStatusODto])
   private val createRts: HttpRoutes[IO]                                                      =
-    Http4sServerInterpreter[IO]().toRoutes(createEpt.serverLogic(UserCtrl.createUser(_).toErrHandled))
+    Http4sServerInterpreter[IO]().toRoutes(createEpt.serverLogic(UserCtrl.impl.createUser(_).toErrHandled))
 
   // Login user
   private val loginEpt: PublicEndpoint[LoginFormIDto, BackendException, TokensODto, Any] = ept
@@ -39,7 +39,7 @@ object UserRts extends GenericRts {
     .in(jsonBody[LoginFormIDto])
     .out(jsonBody[TokensODto])
   private val loginRts: HttpRoutes[IO]                                                   =
-    Http4sServerInterpreter[IO]().toRoutes(loginEpt.serverLogic(UserSvc.loginUser(_).toErrHandled))
+    Http4sServerInterpreter[IO]().toRoutes(loginEpt.serverLogic(UserSvc.impl.loginUser(_).toErrHandled))
 
   // Refresh user token
   private val refreshEpt: PublicEndpoint[String, BackendException, TokensODto, Any] = ept
@@ -49,7 +49,7 @@ object UserRts extends GenericRts {
     .in(header[String]("DataPiU-Refresh-Token"))
     .out(jsonBody[TokensODto])
   private val refreshRts: HttpRoutes[IO]                                            =
-    Http4sServerInterpreter[IO]().toRoutes(refreshEpt.serverLogic(UserSvc.grantTokens(_).toErrHandled))
+    Http4sServerInterpreter[IO]().toRoutes(refreshEpt.serverLogic(UserSvc.impl.grantTokens(_).toErrHandled))
 
   // Retrieve user status
   private val getEpt: PartialServerEndpoint[String, UserMod, Unit, BackendException, UserStatusODto, Any, IO] = authEpt
@@ -58,7 +58,7 @@ object UserRts extends GenericRts {
     .in("user" / "status")
     .out(jsonBody[UserStatusODto])
   private val getRts: HttpRoutes[IO]                                                                          =
-    Http4sServerInterpreter[IO]().toRoutes(getEpt.serverLogic(user => _ => UserSvc.toDto(user).toErrHandled))
+    Http4sServerInterpreter[IO]().toRoutes(getEpt.serverLogic(user => _ => UserSvc.impl.toDto(user).toErrHandled))
 
   /**
    * Get all endpoints.

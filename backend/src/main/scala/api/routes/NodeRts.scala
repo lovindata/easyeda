@@ -23,7 +23,7 @@ object NodeRts extends GenericRts {
     .in("node" / "status")
     .out(jsonBody[NodeStatusODto])
   private val getRts: HttpRoutes[IO]                                              =
-    Http4sServerInterpreter[IO]().toRoutes(getEpt.serverLogic(_ => NodeSvc.toDto.toErrHandled))
+    Http4sServerInterpreter[IO]().toRoutes(getEpt.serverLogic(_ => NodeSvc.impl.toDto.toErrHandled))
 
   /**
    * Get all endpoints.

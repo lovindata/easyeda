@@ -13,6 +13,6 @@ object Main extends IOApp.Simple {
   /**
    * Run all the required requisites.
    */
-  override def run: IO[Unit] = NodeSvc.report >> BackendServer.run >> IO.never
+  override def run: IO[Unit] = NodeSvc.impl.report >> BackendServer.run >> IO.never
 
 }

@@ -11,6 +11,7 @@ import io.circe.Json
 import java.sql.Date
 import java.sql.Timestamp
 import scala.annotation.tailrec
+import scala.reflect._
 
 /**
  * Repository to extends on the companion object for DB methods. Requirements are
@@ -34,16 +35,16 @@ import scala.annotation.tailrec
  *   PersonMod.insert(PersonMod(-1, "Elorine"))
  *   }}}
  */
-trait GenericMod[A <: Product] {
+trait GenericDB[A <: Product] {
 
   /**
    * Build table DB path [[Fragment]].
    * @return
    *   Table DB path [[Fragment]]
    */
-  private def tableFrag: Fragment = {
-    val pattern            = "^(.+)Mod\\$$".r
-    val pattern(tableName) = getClass.getSimpleName
+  private def tableFrag(ct: ClassTag[A]): Fragment = {
+    val pattern            = "^(.+)Mod$".r
+    val pattern(tableName) = ct.runtimeClass.getSimpleName
     Fragment.const(s"\"${ConfigLoader.dbSchName}\".\"${tableName.toSnakeCase}\"")
   }
 
@@ -79,7 +80,7 @@ trait GenericMod[A <: Product] {
    * @return
    *   Up-to-date entity
    */
-  def insert(entity: A)(implicit read: Read[A]): IO[A] = DBDriver.run {
+  def insert(entity: A)(implicit read: Read[A], ct: ClassTag[A]): IO[A] = DBDriver.run {
     // Prepare fragments
     val attributesName  =
       Fragment.const(entity.productElementNames.drop(1).map(_.toSnakeCase.nameB()).mkString("(", ", ", ")"))
@@ -87,9 +88,9 @@ trait GenericMod[A <: Product] {
 
     // Start execution
     for {
-      id     <- (fr"insert into" ++ tableFrag ++ attributesName ++ fr0"values (" ++ attributesValue ++ fr")").update
+      id     <- (fr"insert into" ++ tableFrag(ct) ++ attributesName ++ fr0"values (" ++ attributesValue ++ fr")").update
                   .withUniqueGeneratedKeys[Long]("id")
-      entity <- (fr"select * from" ++ tableFrag ++ fr"where id = $id").query[A].unique
+      entity <- (fr"select * from" ++ tableFrag(ct) ++ fr"where id = $id").query[A].unique
     } yield entity
   }
 
@@ -100,9 +101,9 @@ trait GenericMod[A <: Product] {
    * @return
    *   Up-to-date entity
    */
-  def select(id: Long)(implicit read: Read[A]): IO[A] = DBDriver.run {
+  def select(id: Long)(implicit read: Read[A], ct: ClassTag[A]): IO[A] = DBDriver.run {
     val idValue: Fragment = anyToFrag(id)
-    (fr"select * from" ++ tableFrag ++ fr"where id =" ++ idValue).query[A].unique
+    (fr"select * from" ++ tableFrag(ct) ++ fr"where id =" ++ idValue).query[A].unique
   }
 
   /**
@@ -121,8 +122,8 @@ trait GenericMod[A <: Product] {
    *   Person.select(fr"id = ${1}")       // List[PersonMod]
    *   }}}
    */
-  def select(condition: Fragment)(implicit read: Read[A]): IO[List[A]] = DBDriver.run {
-    (fr"select * from" ++ tableFrag ++ fr"where" ++ condition).query[A].to[List]
+  def select(condition: Fragment)(implicit read: Read[A], ct: ClassTag[A]): IO[List[A]] = DBDriver.run {
+    (fr"select * from" ++ tableFrag(ct) ++ fr"where" ++ condition).query[A].to[List]
   }
 
   /**
@@ -132,7 +133,7 @@ trait GenericMod[A <: Product] {
    * @return
    *   Up-to-date entity
    */
-  def update(entity: A)(implicit read: Read[A]): IO[A] = DBDriver.run {
+  def update(entity: A)(implicit read: Read[A], ct: ClassTag[A]): IO[A] = DBDriver.run {
     // Prepare fragments
     val idValue: Fragment                   = anyToFrag(entity.productIterator.next())
     val attributesName: Iterator[Fragment]  =
@@ -145,10 +146,10 @@ trait GenericMod[A <: Product] {
 
     // Start execution
     for {
-      nbAffected <- (fr"update" ++ tableFrag ++ fr"set" ++ attributesFrag ++ fr" where id =" ++ idValue).update.run
+      nbAffected <- (fr"update" ++ tableFrag(ct) ++ fr"set" ++ attributesFrag ++ fr" where id =" ++ idValue).update.run
       _           = if (nbAffected != 1) throw AppException(s"Update failed because affects $nbAffected rows (!= 1).")
       entity     <-
-        (fr"select * from" ++ tableFrag ++ fr"where id =" ++ idValue).query[A].unique
+        (fr"select * from" ++ tableFrag(ct) ++ fr"where id =" ++ idValue).query[A].unique
     } yield entity
   }
 
@@ -157,13 +158,13 @@ trait GenericMod[A <: Product] {
    * @param entity
    *   Entity to delete
    */
-  def delete(entity: A): IO[Unit] = DBDriver.run {
+  def delete(entity: A)(implicit ct: ClassTag[A]): IO[Unit] = DBDriver.run {
     // Prepare fragments
     val idValue: Fragment = anyToFrag(entity.productIterator.next())
 
     // Start execution
     for {
-      nbAffected <- (fr"delete from" ++ tableFrag ++ fr"where id =" ++ idValue).update.run
+      nbAffected <- (fr"delete from" ++ tableFrag(ct) ++ fr"where id =" ++ idValue).update.run
       _           = nbAffected match {
                       case 0 | 1 =>
                       case _     => throw AppException(s"Deletion failed because affects $nbAffected rows (> 1).")

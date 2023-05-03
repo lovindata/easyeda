@@ -6,7 +6,6 @@ import api.helpers.BackendException._
 import api.models.UserMod
 import api.services.UserSvc
 import cats.effect.IO
-import io.circe._
 import org.http4s.HttpRoutes
 import sttp.model.StatusCode
 import sttp.tapir._
@@ -25,7 +24,7 @@ trait GenericRts {
   // Authorization handled endpoint
   val authEpt: PartialServerEndpoint[String, UserMod, Unit, BackendException, Unit, Any, IO] = ept
     .securityIn(auth.bearer[String]())
-    .serverSecurityLogic { UserSvc.grantAccess(_).toErrHandled }
+    .serverSecurityLogic { UserSvc.impl.grantAccess(_).toErrHandled }
 
   /**
    * Get all endpoints.
