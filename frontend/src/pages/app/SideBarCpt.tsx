@@ -17,18 +17,18 @@ export default function SideBarCpt() {
   return (
     <div className="flex h-screen w-12 flex-col">
       <div className="flex grow flex-col justify-center">
-        <IconTabLink to="connections" title="Connections" svg={Conn} isCurrent={currentPath == "/app/connections"} />
-        <IconTabLink to="pipelines" title="Pipelines" svg={Pipeline} isCurrent={currentPath == "/app/pipelines"} />
+        <IconTabLinkCpt to="connections" title="Connections" svg={Conn} isCurrent={currentPath == "/app/connections"} />
+        <IconTabLinkCpt to="pipelines" title="Pipelines" svg={Pipeline} isCurrent={currentPath == "/app/pipelines"} />
       </div>
-      <IconUser />
+      <IconUserCpt />
     </div>
   );
 }
 
 /**
- * Tooltip.
+ * Tooltip component.
  */
-function Tooltip(props: { text: string; className?: string }) {
+function TooltipCpt(props: { text: string; className?: string }) {
   return (
     <div
       className={
@@ -44,7 +44,7 @@ function Tooltip(props: { text: string; className?: string }) {
 /**
  * Sidebar icon tab component.
  */
-function IconTabLink(props: {
+function IconTabLinkCpt(props: {
   to: string;
   title: string;
   svg: React.FunctionComponent<
@@ -63,7 +63,7 @@ function IconTabLink(props: {
       <Link to={props.to} className="peer">
         <props.svg className={`fill-primary ${props.isCurrent ? "brightness-150" : "hover:brightness-150"}`} />
       </Link>
-      <Tooltip text={props.title} className="absolute left-full ml-1 origin-left scale-0 peer-hover:scale-100" />
+      <TooltipCpt text={props.title} className="absolute left-full ml-1 origin-left scale-0 peer-hover:scale-100" />
     </div>
   );
 }
@@ -71,7 +71,7 @@ function IconTabLink(props: {
 /**
  * Sidebar icon user.
  */
-function IconUser() {
+function IconUserCpt() {
   // Hooks & Retrieve data
   const user = useUserRtsStatus();
   const conns = useConnRtsList();
@@ -114,7 +114,10 @@ function IconUser() {
               }
             />
             {!open && (
-              <Tooltip text="Status" className="absolute left-full ml-3.5 origin-left scale-0 peer-hover:scale-100" />
+              <TooltipCpt
+                text="Status"
+                className="absolute left-full ml-3.5 origin-left scale-0 peer-hover:scale-100"
+              />
             )}
           </Disclosure.Button>
           <Disclosure.Panel

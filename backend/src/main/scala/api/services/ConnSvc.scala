@@ -40,16 +40,9 @@ trait ConnSvc {
    * @param form
    *   Provided connection form
    * @return
-   *   All [[ConnODto]] OR
-   *   - [[AppException]] if not up connection
+   *   All [[ConnODto]]
    */
   def createConn(user: UserMod, form: ConnFormIDto)(implicit connModDB: ConnMod.DB): IO[ConnODto] = for {
-    // Check connectivity
-    isUp    <- testConn(form).map(_.isUp)
-    _       <-
-      IO.raiseUnless(isUp)(AppException("Impossible to connect verify your external service and provided information."))
-
-    // Create
     connMod <- connModDB(user.id, form)
   } yield ConnODto(connMod.id, connMod.`type`, connMod.name)
 

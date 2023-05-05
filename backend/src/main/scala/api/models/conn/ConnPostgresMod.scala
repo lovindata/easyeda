@@ -2,10 +2,10 @@ package com.ilovedatajjia
 package api.models.conn
 
 import api.dto.input.ConnFormIDto
+import api.helpers.JdbcUtils
 import api.models.ConnMod
 import api.models.GenericDB
 import cats.effect.IO
-import api.helpers.JdbcUtils
 
 /**
  * DB representation of a postgres connection.
@@ -36,23 +36,28 @@ case class ConnPostgresMod(id: Long, connId: Long, host: String, port: Int, dbNa
                                              "user"     -> user,
                                              "password" -> pwd)
 
+  def listDB: IO[List[String]] = ???
+
 }
 
 /**
  * [[ConnPostgresMod]] additions.
  */
-object ConnPostgresMod extends GenericDB[ConnPostgresMod] {
+object ConnPostgresMod {
+  trait DB extends GenericDB[ConnPostgresMod] {
 
-  /**
-   * Constructor of [[ConnPostgresMod]].
-   * @param connId
-   *   [[ConnMod]] id
-   * @param form
-   *   [[ConnFormIDto.PostgresFormIDto]] form
-   * @return
-   *   A new created postgres connection
-   */
-  def apply(connId: Long, form: ConnFormIDto.PostgresFormIDto): IO[ConnPostgresMod] = insert(
-    ConnPostgresMod(-1, connId, form.host, form.port, form.dbName, form.user, form.pwd))
+    /**
+     * Constructor of [[ConnPostgresMod]].
+     * @param connId
+     *   [[ConnMod]] id
+     * @param form
+     *   [[ConnFormIDto.PostgresFormIDto]] form
+     * @return
+     *   A new created postgres connection
+     */
+    def apply(connId: Long, form: ConnFormIDto.PostgresFormIDto): IO[ConnPostgresMod] = insert(
+      ConnPostgresMod(-1, connId, form.host, form.port, form.dbName, form.user, form.pwd))
 
+  }
+  object DB { implicit val impl: DB = new DB {} } // Auto-DI on import
 }

@@ -25,18 +25,19 @@ case class ConnMod(id: Long, userId: Long, `type`: ConnTypeEnum.ConnType, name: 
    * @return
    *   If is up
    */
-  def testIO: IO[Boolean] = `type` match {
-    case ConnTypeEnum.Postgres =>
-      for {
-        conn <- ConnPostgresMod.select(fr"conn_id = $id").map(_.head)
-        isUp <- conn.testIO
-      } yield isUp
-    case ConnTypeEnum.Mongo    =>
-      for {
-        conn <- ConnMongoMod.select(fr"conn_id = $id").map(_.head)
-        isUp <- conn.testIO
-      } yield isUp
-  }
+  def testIO(implicit connPostgresModDB: ConnPostgresMod.DB, connMongoModDB: ConnMongoMod.DB): IO[Boolean] =
+    `type` match {
+      case ConnTypeEnum.Postgres =>
+        for {
+          conn <- connPostgresModDB.select(fr"conn_id = $id").map(_.head)
+          isUp <- conn.testIO
+        } yield isUp
+      case ConnTypeEnum.Mongo    =>
+        for {
+          conn <- connMongoModDB.select(fr"conn_id = $id").map(_.head)
+          isUp <- conn.testIO
+        } yield isUp
+    }
 
 }
 
@@ -55,16 +56,18 @@ object ConnMod {
      * @return
      *   A new created connection
      */
-    def apply(userId: Long, form: ConnFormIDto): IO[ConnMod] = form match {
+    def apply(userId: Long, form: ConnFormIDto)(implicit
+        connPostgresModDB: ConnPostgresMod.DB,
+        connMongoModDB: ConnMongoMod.DB): IO[ConnMod] = form match {
       case form: ConnFormIDto.PostgresFormIDto =>
         for {
           conn <- insert(ConnMod(-1, userId, ConnTypeEnum.Postgres, form.name))
-          _    <- ConnPostgresMod(conn.id, form)
+          _    <- connPostgresModDB(conn.id, form)
         } yield conn
       case form: ConnFormIDto.MongoFormIDto    =>
         for {
           conn <- insert(ConnMod(-1, userId, ConnTypeEnum.Mongo, form.name))
-          _    <- ConnMongoMod(conn.id, form)
+          _    <- connMongoModDB(conn.id, form)
         } yield conn
     }
 

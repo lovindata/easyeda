@@ -40,21 +40,29 @@ case class ConnMongoMod(id: Long, connId: Long, dbAuth: String, replicaSet: Stri
 /**
  * [[ConnMongoMod]] additions.
  */
-object ConnMongoMod extends GenericDB[ConnMongoMod] {
+object ConnMongoMod {
 
   /**
-   * Constructor of [[ConnMongoMod]].
-   * @param connId
-   *   [[ConnMod]] id
-   * @param form
-   *   [[ConnFormIDto.MongoFormIDto]] form
-   * @return
-   *   A new created mongodb connection
+   * DB layer.
    */
-  def apply(connId: Long, form: ConnFormIDto.MongoFormIDto): IO[ConnMongoMod] = for {
-    connMongo <- insert(ConnMongoMod(-1, connId, form.dbAuth, form.replicaSet, form.user, form.pwd))
-    _         <- form.hostPort.traverse(x => ConnMongoHostPortMod(connMongo.id, x.host, x.port))
-  } yield connMongo
+  trait DB extends GenericDB[ConnMongoMod] {
+
+    /**
+     * Constructor of [[ConnMongoMod]].
+     * @param connId
+     *   [[ConnMod]] id
+     * @param form
+     *   [[ConnFormIDto.MongoFormIDto]] form
+     * @return
+     *   A new created mongodb connection
+     */
+    def apply(connId: Long, form: ConnFormIDto.MongoFormIDto): IO[ConnMongoMod] = for {
+      connMongo <- insert(ConnMongoMod(-1, connId, form.dbAuth, form.replicaSet, form.user, form.pwd))
+      _         <- form.hostPort.traverse(x => ConnMongoHostPortMod(connMongo.id, x.host, x.port))
+    } yield connMongo
+
+  }
+  object DB { implicit val impl: DB = new DB {} } // Auto-DI on import
 
   /**
    * DB representation host & port for mongodb.

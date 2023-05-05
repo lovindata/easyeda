@@ -50,6 +50,43 @@ object JdbcUtils {
     connIO(driver, dbFullUri, prop: _*)(conn => IO.interruptible(conn.isValid(5)))
 
   /**
+   * Run SQL script.
+   * @param sql
+   *   SQL script
+   * @param driver
+   *   JDBC Driver to use
+   * @param dbFullUri
+   *   Database URI
+   * @param prop
+   *   Key-value pair for the connection such as "user", "password"
+   * @return
+   *   Optional table in string representation according the sql query
+   */
+  def runSQL(
+      sql: String,
+      driver: String,
+      dbFullUri: String,
+      prop: (String, String)*): IO[Option[List[List[Option[String]]]]] = // TODO James - Refactoring into Resource
+    connIO(driver, dbFullUri, prop: _*) { conn =>
+      for {
+        stmt <- IO(conn.createStatement)
+        out  <- for {
+                  hasResult <- IO(stmt.execute(sql))
+                  out       <- if (hasResult) IO.some {
+                                 val resSet = stmt.getResultSet
+                                 val nbCols = resSet.getMetaData.getColumnCount
+                                 var output = List.empty[List[Option[String]]]
+                                 while (resSet.next()) output = output :+ (1 to nbCols).toList.map { y =>
+                                   Option(resSet.getString(y))
+                                 }
+                                 output
+                               }
+                               else IO.none
+                } yield out
+      } yield out
+    }
+
+  /**
    * Rich [[String]].
    */
   implicit class RichString(x: String) {
