@@ -49,7 +49,7 @@ function IconTabLink(props: {
       </Link>
       <div
         className="pointer-events-none absolute left-full ml-1 origin-left scale-0 select-none rounded
-        bg-neutral px-1.5 py-1 text-xs font-thin
+        bg-neutral px-1.5 py-1 text-xs font-thin text-neutral-content
         shadow transition-all duration-300 ease-in-out peer-hover:scale-100"
       >
         {props.title}
@@ -89,8 +89,8 @@ function IconUser() {
     <Disclosure>
       {({ open }) => (
         <div className="relative flex flex-col justify-end p-2.5">
-          <Disclosure.Button className="flex relative items-center">
-            <Profil className={"fill-primary peer" + (open ? " brightness-150" : " hover:brightness-150")} />
+          <Disclosure.Button className="relative flex items-center">
+            <Profil className={"peer fill-primary" + (open ? " brightness-150" : " hover:brightness-150")} />
             <span
               className={
                 "absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full border-2 border-base-100" +
@@ -99,21 +99,23 @@ function IconUser() {
             />
             {!open && (
               <div
-                className="pointer-events-none absolute left-full ml-3.5 origin-left select-none rounded
-                bg-neutral px-1.5 py-1 text-xs font-thin
-                shadow transition-all duration-300 ease-in-out scale-0 peer-hover:scale-100"
+                className="pointer-events-none absolute left-full ml-3.5 origin-left scale-0 select-none
+                rounded bg-neutral px-1.5 py-1 text-xs font-thin
+                text-neutral-content shadow transition-all duration-300 ease-in-out peer-hover:scale-100"
               >
                 Status
               </div>
             )}
           </Disclosure.Button>
           <Disclosure.Panel
-            className={"select-none absolute left-full ml-1 rounded bg-neutral text-xs font-thin shadow"}
+            className={
+              "absolute left-full ml-1 select-none rounded bg-neutral text-xs font-thin text-neutral-content shadow"
+            }
           >
             <div className="flex flex-col space-y-2">
               {/* My Status */}
-              <div className="flex flex-col items-center px-2 pt-2 space-y-1">
-                <h1 className="font-semibold text-sm">User</h1>
+              <div className="flex flex-col items-center space-y-1 px-2 pt-2">
+                <h1 className="text-sm font-semibold">User</h1>
                 <div className="flex items-center space-x-4">
                   <div className="flex flex-col">
                     <p className="font-bold">{user ? user.username : "???"}</p>
@@ -121,7 +123,7 @@ function IconUser() {
                     {user ? <p className="text-success">(Connected)</p> : <p className="text-warning">(Connecting)</p>}
                   </div>
                   <div className="flex flex-col">
-                    <div className="flex space-x-1.5 items-center">
+                    <div className="flex items-center space-x-1.5">
                       <Conn className="h-5 fill-primary" />
                       <p
                         className={upTextColor(
@@ -131,7 +133,7 @@ function IconUser() {
                         {isUps ? `${isUps.filter((_) => _ === true).length}/${isUps.length}` : "?/?"}
                       </p>
                     </div>
-                    <div className="flex space-x-1.5 items-center">
+                    <div className="flex items-center space-x-1.5">
                       <Pipeline className="h-5 fill-primary" />
                       <p className="text-warning">?/?</p>
                     </div>
@@ -140,8 +142,8 @@ function IconUser() {
               </div>
 
               {/* Nodes status */}
-              <div className="flex flex-col items-center px-2 pb-2 space-y-1">
-                <h1 className="font-semibold text-sm">Nodes</h1>
+              <div className="flex flex-col items-center space-y-1 px-2 pb-2">
+                <h1 className="text-sm font-semibold">Nodes</h1>
                 <div className="flex space-x-2">
                   <div className="flex flex-col items-center">
                     <p>Node(s)</p>

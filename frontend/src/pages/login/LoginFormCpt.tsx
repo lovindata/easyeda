@@ -20,7 +20,7 @@ export default function LoginFormCpt() {
   // Render
   return (
     <form
-      className="flex min-w-max flex-col space-y-5 rounded bg-neutral p-8"
+      className="flex min-w-max flex-col space-y-5 rounded bg-neutral p-8 text-neutral-content shadow"
       onSubmit={handleSubmit((data) => !isLogingIn && logIn({ email: data.email, pwd: data.pwd }))}
     >
       <TitleCpt title="Hey, welcome back!" desc="We're so excited to see you again!" />

@@ -14,7 +14,7 @@ export default function ToasterCpt() {
   // Render
   return (
     <div className="fixed bottom-2 right-2 select-none space-y-2">
-      {toasts.map((toast, _) => (
+      {toasts.map((toast) => (
         <ToastCpt toast={toast} key={toast.id} />
       ))}
     </div>
@@ -82,7 +82,9 @@ function ToastCpt(props: { toast: Toast }) {
       enterTo="scale-x-100"
       leaveFrom="scale-x-100"
       leaveTo="scale-x-0"
-      className={`duration-${duration} flex origin-right items-center space-x-3 rounded bg-transparent p-1.5 transition-all ease-in-out hover:bg-neutral`}
+      className={`duration-${duration} flex origin-right items-center space-x-3 rounded bg-neutral
+      p-1.5 text-neutral-content shadow transition-all ease-in-out
+      hover:bg-neutral-focus`}
     >
       {VBarCpt}
       {IconCpt}

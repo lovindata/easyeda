@@ -18,7 +18,7 @@ export default function RegisterFormCpt() {
   // Render
   return (
     <form
-      className="flex min-w-max flex-col space-y-5 rounded bg-neutral p-8"
+      className="flex min-w-max flex-col space-y-5 rounded bg-neutral p-8 text-neutral-content shadow"
       onSubmit={handleSubmit((data) =>
         create({
           email: data.email,
@@ -35,7 +35,11 @@ export default function RegisterFormCpt() {
       <PwdInputCpt header="PASSWORD" isRequired={true} registerKey={register("pwd")} />
       <DateInputCpt header="BIRTH DATE" isRequired={true} registerKey={register("birthDate")} />
       <div className="flex items-center space-x-2">
-        <input type="checkbox" className="checkbox-primary checkbox bg-base-100" {...register("isTermsAccepted")} />
+        <input
+          type="checkbox"
+          className="checkbox-primary checkbox bg-neutral-focus"
+          {...register("isTermsAccepted")}
+        />
         <label className="flex space-x-1 text-xs">
           <p className="text-accent">*</p>
           <p>I have read and accept the</p>

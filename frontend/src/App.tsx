@@ -12,7 +12,7 @@ import { BrowserRouter as RouterPvd, Route, Routes } from "react-router-dom";
  */
 export default function App() {
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="flex min-h-screen flex-col bg-base-100">
       <ToasterPvd>
         <AuthPvd>
           <GenericRtsPvd>

@@ -45,5 +45,5 @@ export function useConnRtsIdsTest(connIds: number[] | undefined) {
       };
     })
   );
-  return data.length ? data.map((_) => _.data?.isUp) : undefined;
+  return connIds ? data.map((_) => _.data?.isUp) : undefined;
 }
