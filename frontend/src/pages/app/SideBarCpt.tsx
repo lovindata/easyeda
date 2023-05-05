@@ -26,6 +26,22 @@ export default function SideBarCpt() {
 }
 
 /**
+ * Tooltip.
+ */
+function Tooltip(props: { text: string; className?: string }) {
+  return (
+    <div
+      className={
+        "pointer-events-none select-none rounded bg-neutral px-1.5 py-1 text-xs font-thin text-neutral-content shadow transition-all duration-300 ease-in-out" +
+        (props.className ? ` ${props.className}` : "")
+      }
+    >
+      {props.text}
+    </div>
+  );
+}
+
+/**
  * Sidebar icon tab component.
  */
 function IconTabLink(props: {
@@ -47,13 +63,7 @@ function IconTabLink(props: {
       <Link to={props.to} className="peer">
         <props.svg className={`fill-primary ${props.isCurrent ? "brightness-150" : "hover:brightness-150"}`} />
       </Link>
-      <div
-        className="pointer-events-none absolute left-full ml-1 origin-left scale-0 select-none rounded
-        bg-neutral px-1.5 py-1 text-xs font-thin text-neutral-content
-        shadow transition-all duration-300 ease-in-out peer-hover:scale-100"
-      >
-        {props.title}
-      </div>
+      <Tooltip text={props.title} className="absolute left-full ml-1 origin-left scale-0 peer-hover:scale-100" />
     </div>
   );
 }
@@ -68,12 +78,18 @@ function IconUser() {
   const isUps = useConnRtsIdsTest(conns?.map((_) => _.id));
   const nodeStatus = useNodeRtsStatus();
 
-  // Text color logic
-  const upTextColor = (stat: { up: number; total: number } | undefined) => {
-    if (stat === undefined) return " text-warning";
-    if (stat.up === stat.total) return " text-success";
-    return " text-error";
-  };
+  // Process data
+  const isUpStat = isUps && { up: isUps.filter((_) => _ === true).length, total: isUps.length };
+  const cpuStat = nodeStatus && { usage: nodeStatus.cpu, total: nodeStatus.cpuTotal };
+  const ramStat = nodeStatus && { usage: nodeStatus.ram, total: nodeStatus.ramTotal };
+
+  // isUpStat: Text color logic
+  let isUpTextColor: string;
+  if (isUpStat === undefined) isUpTextColor = "text-warning";
+  else if (isUpStat.up === isUpStat.total) isUpTextColor = "text-success";
+  else isUpTextColor = "text-error";
+
+  // cpuStat & ramStat: Text color logic
   const usageTextColor = (stat: { usage: number; total: number } | undefined) => {
     if (stat === undefined) return " text-warning";
     else {
@@ -98,19 +114,12 @@ function IconUser() {
               }
             />
             {!open && (
-              <div
-                className="pointer-events-none absolute left-full ml-3.5 origin-left scale-0 select-none
-                rounded bg-neutral px-1.5 py-1 text-xs font-thin
-                text-neutral-content shadow transition-all duration-300 ease-in-out peer-hover:scale-100"
-              >
-                Status
-              </div>
+              <Tooltip text="Status" className="absolute left-full ml-3.5 origin-left scale-0 peer-hover:scale-100" />
             )}
           </Disclosure.Button>
           <Disclosure.Panel
-            className={
-              "absolute left-full ml-1 select-none rounded bg-neutral text-xs font-thin text-neutral-content shadow"
-            }
+            className="absolute left-full ml-1 select-none rounded bg-neutral text-xs font-thin text-neutral-content
+          shadow"
           >
             <div className="flex flex-col space-y-2">
               {/* My Status */}
@@ -125,13 +134,7 @@ function IconUser() {
                   <div className="flex flex-col">
                     <div className="flex items-center space-x-1.5">
                       <Conn className="h-5 fill-primary" />
-                      <p
-                        className={upTextColor(
-                          isUps && { up: isUps.filter((_) => _ === true).length, total: isUps.length }
-                        )}
-                      >
-                        {isUps ? `${isUps.filter((_) => _ === true).length}/${isUps.length}` : "?/?"}
-                      </p>
+                      <p className={isUpTextColor}>{isUpStat ? `${isUpStat.up}/${isUpStat.total}` : "?/?"}</p>
                     </div>
                     <div className="flex items-center space-x-1.5">
                       <Pipeline className="h-5 fill-primary" />
@@ -149,23 +152,13 @@ function IconUser() {
                     <p>Node(s)</p>
                     <p>{nodeStatus ? nodeStatus.nbNodes : "?"}</p>
                   </div>
-                  <div
-                    className={
-                      "flex flex-col items-center" +
-                      usageTextColor(nodeStatus && { usage: nodeStatus.cpu, total: nodeStatus.cpuTotal })
-                    }
-                  >
+                  <div className={"flex flex-col items-center" + usageTextColor(cpuStat)}>
                     <p>CPU</p>
-                    <p>{nodeStatus ? `${nodeStatus.cpu.toFixed(1)}/${nodeStatus.cpuTotal.toFixed(1)}` : "?/?"}</p>
+                    <p>{cpuStat ? `${cpuStat.usage.toFixed(1)}/${cpuStat.total.toFixed(1)}` : "?/?"}</p>
                   </div>
-                  <div
-                    className={
-                      "flex flex-col items-center" +
-                      usageTextColor(nodeStatus && { usage: nodeStatus.ram, total: nodeStatus.ramTotal })
-                    }
-                  >
+                  <div className={"flex flex-col items-center" + usageTextColor(ramStat)}>
                     <p>RAM</p>
-                    <p>{nodeStatus ? `${nodeStatus.ram.toFixed(1)}/${nodeStatus.ramTotal.toFixed(1)}` : "?/?"}</p>
+                    <p>{ramStat ? `${ramStat.usage.toFixed(1)}/${ramStat.total.toFixed(1)}` : "?/?"}</p>
                   </div>
                 </div>
               </div>
