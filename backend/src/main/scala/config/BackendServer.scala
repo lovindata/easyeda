@@ -11,6 +11,7 @@ import org.http4s.ember.server.EmberServerBuilder
 import org.http4s.implicits._
 import org.http4s.server.middleware.CORS
 import sttp.tapir._
+import sttp.tapir.files._
 import sttp.tapir.server.ServerEndpoint
 import sttp.tapir.server.http4s.Http4sServerInterpreter
 import sttp.tapir.swagger.bundle.SwaggerInterpreter
@@ -22,9 +23,10 @@ object BackendServer {
 
   // FrontEnd routes
   private val staticFilesRts: HttpRoutes[IO] = // Static files on "/assets"
-    Http4sServerInterpreter[IO]().toRoutes(filesServerEndpoints[IO]("assets")(s"$frontEndResourcePath/assets"))
+    Http4sServerInterpreter[IO]().toRoutes(staticFilesServerEndpoints[IO]("assets")(s"$frontEndResourcePath/assets"))
   private val indexHTMLRts: HttpRoutes[IO]   = // "index.html" on "/*"
-    Http4sServerInterpreter[IO]().toRoutes(fileGetServerEndpoint[IO](emptyInput)(s"$frontEndResourcePath/index.html"))
+    Http4sServerInterpreter[IO]().toRoutes(
+      staticFileGetServerEndpoint[IO](emptyInput)(s"$frontEndResourcePath/index.html"))
   private val frontEndRts: HttpRoutes[IO]    = staticFilesRts <+> indexHTMLRts
 
   // BackEnd routes

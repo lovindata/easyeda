@@ -25,13 +25,13 @@ trait ConnSvc {
    */
   def testConn(form: ConnFormIDto): IO[ConnTestODto] = (form match {
     case PostgresFormIDto(_, host, port, dbName, user, pwd)        =>
-      JdbcUtils.testIO("org.postgresql.Driver",
-                       s"jdbc:postgresql://$host:$port/$dbName",
-                       "user"     -> user,
-                       "password" -> pwd)
+      JdbcUtils.testConn("org.postgresql.Driver",
+                         s"jdbc:postgresql://$host:$port/$dbName",
+                         "user"     -> user,
+                         "password" -> pwd)
     case MongoFormIDto(_, hostPort, dbAuth, replicaSet, user, pwd) =>
-      MongoUtils.testIO(hostPort.map(x => x.host -> x.port), dbAuth, replicaSet, user, pwd)
-  }).redeem(_ => ConnTestODto(false), ConnTestODto(_))
+      MongoUtils.testConn(hostPort.map(x => x.host -> x.port), dbAuth, replicaSet, user, pwd)
+  }).map { case (isUp, errMsg) => ConnTestODto(isUp, errMsg) }
 
   /**
    * Create connection.
@@ -59,6 +59,26 @@ trait ConnSvc {
   } yield allDto
 
   /**
+   * Grant connection if user has authorization.
+   * @param user
+   *   User
+   * @param connId
+   *   Connection to grant id
+   * @return
+   *   Granted connection
+   */
+  def grantConn(user: UserMod, connId: Long)(implicit connModDB: ConnMod.DB): IO[ConnMod] = for {
+    allConn <- connModDB.select(fr"user_id = ${user.id} AND id = $connId")
+    conn    <- allConn match {
+                 case List(conn) => IO(conn)
+                 case List()     => IO.raiseError(AppException("Forbidden connection access or no connection retrievable."))
+                 case _          =>
+                   IO.raiseError(
+                     AppException(s"Corrupted table, incoherent amount (=${allConn.length}) of connections retrieved."))
+               }
+  } yield conn
+
+  /**
    * Test known connection.
    * @param user
    *   User
@@ -69,19 +89,9 @@ trait ConnSvc {
    *   - [[AppException]] if forbidden access
    */
   def testKnownConn(user: UserMod, connId: Long)(implicit connModDB: ConnMod.DB): IO[ConnTestODto] = for {
-    // Retrieve connection
-    allConn <- connModDB.select(fr"user_id = ${user.id} AND id = $connId")
-    conn    <- allConn match {
-                 case List(conn) => IO(conn)
-                 case List()     => IO.raiseError(AppException("Forbidden connection access or no connection retrievable."))
-                 case _          =>
-                   IO.raiseError(
-                     AppException(s"Corrupted table, incoherent amount (=${allConn.length}) of connections retrieved."))
-               }
-
-    // Do test
-    isUp    <- conn.testIO
-  } yield ConnTestODto(isUp)
+    conn <- grantConn(user, connId)
+    dto  <- conn.testConn
+  } yield dto
 
 }
 

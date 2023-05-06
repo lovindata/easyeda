@@ -9,8 +9,10 @@ import sttp.tapir.Schema
  * DTO for testing connection.
  * @param isUp
  *   Connection usable
+ * @param err
+ *   Error message
  */
-case class ConnTestODto(isUp: Boolean)
+case class ConnTestODto(isUp: Boolean, err: Option[String])
 
 /**
  * [[ConnTestODto]] companion.

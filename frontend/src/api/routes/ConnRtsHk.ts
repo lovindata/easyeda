@@ -40,7 +40,7 @@ export function useConnRtsIdsTest(connIds: number[] | undefined) {
     (connIds || []).map((id) => {
       return {
         queryKey: `/conn/${id}/test`,
-        queryFn: () => api.post<ConnTestODto>(`/conn/${id}/test`, { headers: undefined }).then((_) => _.data),
+        queryFn: () => api.get<ConnTestODto>(`/conn/${id}/test`, { headers: undefined }).then((_) => _.data),
         refetchInterval: 10000,
       };
     })

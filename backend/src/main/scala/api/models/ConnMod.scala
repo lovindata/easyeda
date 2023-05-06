@@ -2,6 +2,8 @@ package com.ilovedatajjia
 package api.models
 
 import api.dto.input.ConnFormIDto
+import api.dto.output.ConnTestODto
+import api.helpers.BackendException.AppException
 import api.helpers.ConnTypeEnum
 import api.helpers.DoobieUtils._
 import api.models.conn._
@@ -10,7 +12,7 @@ import cats.effect._
 /**
  * DB representation of connections.
  * @param id
- *   Token id
+ *   Connection id
  * @param userId
  *   User id
  * @param type
@@ -23,21 +25,43 @@ case class ConnMod(id: Long, userId: Long, `type`: ConnTypeEnum.ConnType, name: 
   /**
    * Test if connection is up.
    * @return
-   *   If is up
+   *   [[ConnTestODto]]
    */
-  def testIO(implicit connPostgresModDB: ConnPostgresMod.DB, connMongoModDB: ConnMongoMod.DB): IO[Boolean] =
+  def testConn(implicit connPostgresModDB: ConnPostgresMod.DB, connMongoModDB: ConnMongoMod.DB): IO[ConnTestODto] =
     `type` match {
       case ConnTypeEnum.Postgres =>
         for {
           conn <- connPostgresModDB.select(fr"conn_id = $id").map(_.head)
-          isUp <- conn.testIO
-        } yield isUp
+          dto  <- conn.testConn
+        } yield dto
       case ConnTypeEnum.Mongo    =>
         for {
           conn <- connMongoModDB.select(fr"conn_id = $id").map(_.head)
-          isUp <- conn.testIO
-        } yield isUp
+          dto  <- conn.testConn
+        } yield dto
     }
+
+  /**
+   * Access postgres.
+   * @return
+   *   Postgres model OR
+   *   - [[AppException]] if incoherent access
+   */
+  def postgres(implicit connPostgresModDB: ConnPostgresMod.DB): IO[ConnPostgresMod] = `type` match {
+    case ConnTypeEnum.Postgres => connPostgresModDB.select(fr"conn_id = $id").map(_.head)
+    case _                     => IO.raiseError(AppException(s"Accessing ${ConnTypeEnum.Postgres} but connection is of type ${`type`}."))
+  }
+
+  /**
+   * Access mongodb.
+   * @return
+   *   MongoDB model OR
+   *   - [[AppException]] if incoherent access
+   */
+  def mongo(implicit connMongoModDB: ConnMongoMod.DB): IO[ConnMongoMod] = `type` match {
+    case ConnTypeEnum.Mongo => connMongoModDB.select(fr"conn_id = $id").map(_.head)
+    case _                  => IO.raiseError(AppException(s"Accessing ${ConnTypeEnum.Mongo} but connection is of type ${`type`}."))
+  }
 
 }
 

@@ -2,6 +2,7 @@ package com.ilovedatajjia
 package api.helpers
 
 import cats.effect.IO
+import cats.implicits._
 import org.bson._
 import org.mongodb.scala._
 import scala.concurrent.duration._
@@ -14,7 +15,7 @@ object MongoUtils {
   /**
    * Auto-closable provided connection to run an execution.
    * @param hostPort
-   *   Couple host port
+   *   Couple(s) host port
    * @param dbAuth
    *   Authentication source database
    * @param replicaSet
@@ -58,13 +59,13 @@ object MongoUtils {
    * @param pwd
    *   Password
    * @return
-   *   [[Boolean]] if connection available
+   *   [[Boolean]] if connection available and optional error message
    */
-  def testIO(hostPort: List[(String, Int)],
-             dbAuth: String,
-             replicaSet: String,
-             user: String,
-             pwd: String): IO[Boolean] = connIO(hostPort, dbAuth, replicaSet, user, pwd)(conn =>
+  def testConn(hostPort: List[(String, Int)],
+               dbAuth: String,
+               replicaSet: String,
+               user: String,
+               pwd: String): IO[(Boolean, Option[String])] = connIO(hostPort, dbAuth, replicaSet, user, pwd)(conn =>
     IO.interruptible {
       conn
         .getDatabase(dbAuth)
@@ -72,7 +73,7 @@ object MongoUtils {
           new BsonDocument("ping", new BsonInt64(1))
         ) // Verify connection https://www.mongodb.com/docs/drivers/java/sync/current/fundamentals/connection/connect/
       // & https://www.mongodb.com/docs/manual/reference/command/ping/
-      true
-    })
+      (true, none)
+    }).recover(t => (false, t.getMessage.some))
 
 }

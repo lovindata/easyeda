@@ -29,6 +29,12 @@ libraryDependencies += "org.apache.spark" %% "spark-mllib" % "3.4.0" % "provided
 // Cats Effect & Scala extensions
 // https://mvnrepository.com/artifact/org.typelevel/cats-effect
 libraryDependencies += "org.typelevel"              %% "cats-effect" % "3.4.10"
+scalacOptions ++= Seq(
+  "-feature",
+  "-deprecation",
+  "-unchecked",
+  "-language:postfixOps"
+)
 // https://mvnrepository.com/artifact/com.softwaremill.quicklens/quicklens
 libraryDependencies += "com.softwaremill.quicklens" %% "quicklens"   % "1.9.3"
 
@@ -78,7 +84,7 @@ libraryDependencies += "org.mongodb.scala" %% "mongo-scala-driver" % "4.9.1"
 
 // System
 // https://mvnrepository.com/artifact/com.github.oshi/oshi-core
-libraryDependencies += "com.github.oshi" % "oshi-core" % "6.4.1"
+libraryDependencies += "com.github.oshi" % "oshi-core" % "6.4.2"
 
 /**
  * Test dependencies.

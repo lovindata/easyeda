@@ -2,6 +2,8 @@ package com.ilovedatajjia
 package api.models.conn
 
 import api.dto.input.ConnFormIDto
+import api.dto.output.ConnTestODto
+import api.helpers.BackendException.AppException
 import api.helpers.DoobieUtils._
 import api.helpers.MongoUtils
 import api.models._
@@ -11,7 +13,7 @@ import cats.implicits._
 /**
  * DB representation of a mongodb connection.
  * @param id
- *   Postgres id
+ *   Mongo id
  * @param connId
  *   Connection id
  * @param dbAuth
@@ -26,14 +28,55 @@ import cats.implicits._
 case class ConnMongoMod(id: Long, connId: Long, dbAuth: String, replicaSet: String, user: String, pwd: String) {
 
   /**
+   * Get couple(s) host port corresponding to the connection.
+   * @return
+   *   List of couple(s) host port
+   */
+  private def hostPort: IO[List[(String, Int)]] =
+    ConnMongoMod.ConnMongoHostPortMod.select(fr"conn_mongo_id = $id").map(_.map(x => (x.host, x.port)))
+
+  /**
    * Test if connection is up.
    * @return
-   *   If is up
+   *   [[ConnTestODto]]
    */
-  def testIO: IO[Boolean] = for {
-    hostPort <- ConnMongoMod.ConnMongoHostPortMod.select(fr"conn_mongo_id = $id").map(_.map(x => (x.host, x.port)))
-    isUp     <- MongoUtils.testIO(hostPort, dbAuth, replicaSet, user, pwd)
-  } yield isUp
+  def testConn: IO[ConnTestODto] = for {
+    hostPorts <- hostPort
+    dto       <- MongoUtils.testConn(hostPorts, dbAuth, replicaSet, user, pwd).map { case (isUp, errMsg) =>
+                   ConnTestODto(isUp, errMsg)
+                 }
+  } yield dto
+
+  /**
+   * List databases.
+   * @return
+   *   List of databases name
+   */
+  def listDb: IO[List[String]] = for {
+    hostPort <- hostPort
+    dbs      <- MongoUtils.connIO(hostPort, dbAuth, replicaSet, user, pwd) { conn =>
+                  IO.fromFuture(IO.interruptible(conn.listDatabaseNames().collect().head()))
+                }
+  } yield dbs.toList
+
+  /**
+   * List collections for a given database.
+   * @param db
+   *   Database
+   * @return
+   *   List of collections name
+   */
+  def listColl(db: String): IO[List[String]] = for {
+    // Verify database existence (because query does not manage it)
+    dbs <- listDb
+    _   <- IO.raiseUnless(dbs.contains(db))(AppException(s"ERROR: database \"$db\" does not exist"))
+
+    // Do query
+    hostPort    <- hostPort
+    collections <- MongoUtils.connIO(hostPort, dbAuth, replicaSet, user, pwd) { conn =>
+                     IO.fromFuture(IO.interruptible(conn.getDatabase(db).listCollectionNames().collect().head()))
+                   }
+  } yield collections.toList
 
 }
 

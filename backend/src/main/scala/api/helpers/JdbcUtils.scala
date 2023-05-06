@@ -1,7 +1,8 @@
 package com.ilovedatajjia
 package api.helpers
 
-import cats.effect.IO
+import cats.effect._
+import cats.implicits._
 import java.sql._
 import java.util.Properties
 import scala.jdk.CollectionConverters._
@@ -44,47 +45,42 @@ object JdbcUtils {
    * @param prop
    *   Key-value pair for the connection such as "user", "password", "warehouse", ...
    * @return
-   *   [[Boolean]] if connection available
+   *   [[Boolean]] if connection available and optional error message
    */
-  def testIO(driver: String, dbFullUri: String, prop: (String, String)*): IO[Boolean] =
-    connIO(driver, dbFullUri, prop: _*)(conn => IO.interruptible(conn.isValid(5)))
+  def testConn(driver: String, dbFullUri: String, prop: (String, String)*): IO[(Boolean, Option[String])] =
+    connIO(driver, dbFullUri, prop: _*) { conn => IO.interruptible((conn.isValid(5), none)) }.recover(t =>
+      (false, t.getMessage.some))
 
   /**
-   * Run SQL script.
-   * @param sql
-   *   SQL script
+   * For running SQL script.
    * @param driver
    *   JDBC Driver to use
    * @param dbFullUri
    *   Database URI
    * @param prop
    *   Key-value pair for the connection such as "user", "password"
+   * @param sql
+   *   SQL to run
    * @return
    *   Optional table in string representation according the sql query
    */
-  def runSQL(
-      sql: String,
-      driver: String,
-      dbFullUri: String,
-      prop: (String, String)*): IO[Option[List[List[Option[String]]]]] = // TODO James - Refactoring into Resource
-    connIO(driver, dbFullUri, prop: _*) { conn =>
-      for {
-        stmt <- IO(conn.createStatement)
-        out  <- for {
-                  hasResult <- IO(stmt.execute(sql))
-                  out       <- if (hasResult) IO.some {
-                                 val resSet = stmt.getResultSet
-                                 val nbCols = resSet.getMetaData.getColumnCount
-                                 var output = List.empty[List[Option[String]]]
-                                 while (resSet.next()) output = output :+ (1 to nbCols).toList.map { y =>
-                                   Option(resSet.getString(y))
-                                 }
-                                 output
-                               }
-                               else IO.none
-                } yield out
-      } yield out
-    }
+  def runSQL(driver: String, dbFullUri: String, prop: (String, String)*)(
+      sql: String): IO[Option[List[List[Option[String]]]]] = connIO(driver, dbFullUri, prop: _*) { conn =>
+    for {
+      stmt      <- IO(conn.createStatement)
+      hasResult <- IO.interruptible(stmt.execute(sql))
+      out       <- if (hasResult) IO.interruptible {
+                     val resSet = stmt.getResultSet
+                     val nbCols = resSet.getMetaData.getColumnCount
+                     var output = List.empty[List[Option[String]]]
+                     while (resSet.next()) output = output :+ (1 to nbCols).toList.map { y =>
+                       Option(resSet.getString(y))
+                     }
+                     output.some
+                   }
+                   else IO.none
+    } yield out
+  }
 
   /**
    * Rich [[String]].

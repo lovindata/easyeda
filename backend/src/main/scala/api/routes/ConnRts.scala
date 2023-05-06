@@ -11,6 +11,7 @@ import api.dto.output.ConnTestODto._
 import api.helpers.BackendException
 import api.helpers.BackendException._
 import api.models.UserMod
+import api.routes.conn._
 import api.services.ConnSvc
 import cats.effect.IO
 import cats.implicits._
@@ -66,7 +67,7 @@ object ConnRts extends GenericRts {
   private val testKnownEpt: PartialServerEndpoint[String, UserMod, Long, BackendException, ConnTestODto, Any, IO] =
     authEpt
       .summary("test known connection")
-      .post
+      .get
       .in("conn" / path[Long]("id") / "test")
       .out(jsonBody[ConnTestODto])
   private val testKnownRts: HttpRoutes[IO]                                                                        =
@@ -79,13 +80,15 @@ object ConnRts extends GenericRts {
    * @return
    *   Concatenated endpoints
    */
-  override def docEpt: List[AnyEndpoint] = List(testEpt, createEpt, listEpt, testKnownEpt).map(_.endpoint)
+  override def docEpt: List[AnyEndpoint] =
+    List(testEpt, createEpt, listEpt, testKnownEpt).map(_.endpoint) ++ ConnPostgresRts.docEpt ++ ConnMongoRts.docEpt
 
   /**
    * Get all applicative routes.
    * @return
    *   Concatenated routes
    */
-  override def appRts: HttpRoutes[IO] = testRts <+> createRts <+> listRts <+> testKnownRts
+  override def appRts: HttpRoutes[IO] =
+    testRts <+> createRts <+> listRts <+> testKnownRts <+> ConnPostgresRts.appRts <+> ConnMongoRts.appRts
 
 }

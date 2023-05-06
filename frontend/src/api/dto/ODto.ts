@@ -58,6 +58,7 @@ export interface UserStatusODto {
  */
 export interface ConnTestODto {
   isUp: boolean;
+  err: string | null;
 }
 
 /**
