@@ -8,8 +8,8 @@ export type IDto = UserFormIDto | LoginFormIDto | ConnFormIDto;
  */
 export interface UserFormIDto {
   email: string;
-  username: string;
   pwd: string;
+  username: string;
   birthDate: string;
   isTermsAccepted: boolean;
 }

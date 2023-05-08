@@ -82,7 +82,7 @@ function ToastCpt(props: { toast: Toast }) {
       enterTo="scale-x-100"
       leaveFrom="scale-x-100"
       leaveTo="scale-x-0"
-      className={`duration-${duration} flex origin-right items-center space-x-3 rounded bg-neutral
+      className={`bg-opacity-90 duration-${duration} flex origin-right items-center space-x-3 rounded bg-neutral
       p-1.5 text-neutral-content shadow transition-all ease-in-out
       hover:bg-neutral-focus`}
     >
@@ -90,7 +90,7 @@ function ToastCpt(props: { toast: Toast }) {
       {IconCpt}
       <div className="w-64 pr-1.5">
         <h1 className="text-sm font-semibold">{props.toast.header}</h1>
-        {props.toast.message && <p className="text-xs brightness-75">{props.toast.message}</p>}
+        {props.toast.message && <p className="text-xs contrast-50">{props.toast.message}</p>}
       </div>
     </Transition>
   );

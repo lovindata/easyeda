@@ -72,7 +72,7 @@ export function useUserRtsLogin() {
         header: `Request success`,
         message: `${user.email} successfully connected.`,
       });
-      navigate("/app");
+      navigate("/app/connections");
     }
   }, [user]);
 

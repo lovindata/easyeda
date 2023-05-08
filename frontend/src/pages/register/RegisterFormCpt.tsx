@@ -1,9 +1,5 @@
 import { useUserRtsCreate } from "../../api/routes/UserRtsHk";
-import ButtonSubmitCpt from "../../components/form/ButtonSubmitCpt";
-import DateInputCpt from "../../components/form/DateInputCpt";
-import PwdInputCpt from "../../components/form/PwdInputCpt";
-import TextInputCpt from "../../components/form/TextInputCpt";
-import TitleCpt from "../../components/form/TitleCpt";
+import { ButtonSubmitCpt, PwdInputCpt, TextInputCpt, TitleCpt, DateInputCpt } from "../../helpers/FormUtils";
 import { useForm } from "react-hook-form";
 import { Link } from "react-router-dom";
 
@@ -22,8 +18,8 @@ export default function RegisterFormCpt() {
       onSubmit={handleSubmit((data) =>
         create({
           email: data.email,
-          username: data.username,
           pwd: data.pwd,
+          username: data.username,
           birthDate: data.birthDate,
           isTermsAccepted: data.isTermsAccepted,
         })
@@ -31,8 +27,8 @@ export default function RegisterFormCpt() {
     >
       <TitleCpt title="Create an account" desc="Just a few steps before joining the community!" />
       <TextInputCpt header="E-MAIL" isRequired={true} registerKey={register("email")} />
-      <TextInputCpt header="USERNAME" isRequired={true} registerKey={register("username")} />
       <PwdInputCpt header="PASSWORD" isRequired={true} registerKey={register("pwd")} />
+      <TextInputCpt header="USERNAME" isRequired={true} registerKey={register("username")} />
       <DateInputCpt header="BIRTH DATE" isRequired={true} registerKey={register("birthDate")} />
       <div className="flex items-center space-x-2">
         <input
@@ -57,7 +53,7 @@ export default function RegisterFormCpt() {
         name="Continue"
         isLoading={isCreating}
         extra={
-          <div className="flex space-x-1 text-sm brightness-75">
+          <div className="flex space-x-1 text-sm contrast-50">
             <p>Already have an account?</p>
             <Link to="/login" className="link-primary link text-sm">
               Sign in

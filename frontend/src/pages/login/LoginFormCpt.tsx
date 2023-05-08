@@ -1,10 +1,7 @@
 import { useUserRtsLogin } from "../../api/routes/UserRtsHk";
-import ButtonSubmitCpt from "../../components/form/ButtonSubmitCpt";
-import PwdInputCpt from "../../components/form/PwdInputCpt";
-import TextInputCpt from "../../components/form/TextInputCpt";
-import TitleCpt from "../../components/form/TitleCpt";
 import { ToastLevelEnum } from "../../context/toaster/ToasterCtx";
 import useToaster from "../../context/toaster/ToasterHk";
+import { ButtonSubmitCpt, PwdInputCpt, TextInputCpt, TitleCpt } from "../../helpers/FormUtils";
 import { useForm } from "react-hook-form";
 import { Link } from "react-router-dom";
 
@@ -49,7 +46,7 @@ export default function LoginFormCpt() {
         name="Connexion"
         isLoading={isLogingIn}
         extra={
-          <div className="flex space-x-1 text-sm brightness-75">
+          <div className="flex space-x-1 text-sm contrast-75">
             <p>Need an account? </p>
             <Link to="/register" className="link-primary link text-sm">
               Sign up

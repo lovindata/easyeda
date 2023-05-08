@@ -26,8 +26,8 @@ trait UserCtrl {
   def createUser(createUserFormDtoIn: UserFormIDto)(implicit userSvc: UserSvc): IO[UserStatusODto] = for {
     // Validate email, username and password
     _ <- createUserFormDtoIn.email.isValidEmail
-    _ <- createUserFormDtoIn.username.isValidName
     _ <- createUserFormDtoIn.pwd.isValidPwd
+    _ <- createUserFormDtoIn.username.isValidName
 
     // Validate birth day
     birthDate <- IO(Date.valueOf(createUserFormDtoIn.birthDate)).attempt.map {

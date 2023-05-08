@@ -1,8 +1,18 @@
-export { ReactComponent as Conn } from "./conn.svg";
-export { ReactComponent as Error } from "./error.svg";
-export { ReactComponent as Info } from "./info.svg";
-export { ReactComponent as Pipeline } from "./pipeline.svg";
-export { ReactComponent as Profil } from "./profil.svg";
-export { ReactComponent as Spinner } from "./spinner.svg";
-export { ReactComponent as Success } from "./success.svg";
-export { ReactComponent as Warning } from "./warning.svg";
+// General
+export { ReactComponent as Error } from "./general/error.svg";
+export { ReactComponent as Info } from "./general/info.svg";
+export { ReactComponent as Pipeline } from "./general/pipeline.svg";
+export { ReactComponent as Profil } from "./general/profil.svg";
+export { ReactComponent as Spinner } from "./general/spinner.svg";
+export { ReactComponent as Success } from "./general/success.svg";
+export { ReactComponent as Warning } from "./general/warning.svg";
+export { ReactComponent as Add } from "./general/add.svg";
+export { ReactComponent as Refresh } from "./general/refresh.svg";
+
+// Connection
+export { ReactComponent as Conn } from "./conn/conn.svg";
+export { ReactComponent as Postgres } from "./conn/postgres.svg";
+export { ReactComponent as Mongo } from "./conn/mongo.svg";
+export { ReactComponent as Database } from "./conn/database.svg";
+export { ReactComponent as Schema } from "./conn/schema.svg";
+export { ReactComponent as Table } from "./conn/table.svg";

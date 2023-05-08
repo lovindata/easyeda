@@ -6,9 +6,12 @@ import axios, { AxiosError } from "axios";
 import { NavigateFunction, useNavigate } from "react-router-dom";
 
 /**
- * Server location.
+ * Get server origin.
  */
-const SERVER_URL = `http://${window.location.hostname}:8081/`;
+const DATAPIU_BACKEND_ORIGIN = await axios
+  .get<string>(`${window.location.origin}/datapiu-backend-origin`)
+  .then((res) => res.data)
+  .catch(async () => await axios.get<string>(`http://localhost:8080/datapiu-backend-origin`).then((res) => res.data));
 
 /**
  * Cannot reach server error toast.
@@ -55,7 +58,7 @@ async function REFRESH_TOKENS_UNCONCURENT(
 ) {
   !REFRESH_TOKENS_SYNCER &&
     (REFRESH_TOKENS_SYNCER = axios
-      .post<TokenODto>(`${SERVER_URL}user/refresh`, undefined, {
+      .post<TokenODto>(`${DATAPIU_BACKEND_ORIGIN}/user/refresh`, undefined, {
         headers: { "DataPiU-Refresh-Token": tokens.refreshToken },
       })
       .then((res) => {
@@ -102,7 +105,7 @@ export default function useApi(authed: boolean, verbose: boolean) {
   const navigate = useNavigate();
   const { addToast } = useToaster();
   const { tokens, setTokens } = useAuth();
-  const api = axios.create({ baseURL: SERVER_URL });
+  const api = axios.create({ baseURL: DATAPIU_BACKEND_ORIGIN });
 
   // Pre-request process
   api.interceptors.request.use(async (req) => {

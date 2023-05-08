@@ -1,5 +1,5 @@
-import GenericDisclosureCpt from "./GenericDisclosureCpt";
 import SideBarCpt from "./SideBarCpt";
+import SideMenuCpt from "./SideMenuCpt";
 import { ConnsPg } from "./connections/ConnsPg";
 import { HomePg } from "./home/HomePg";
 import { PipelinesPg } from "./pipelines/PipelinesPg";
@@ -12,7 +12,7 @@ export default function AppPg() {
   return (
     <div className="flex">
       <SideBarCpt />
-      <GenericDisclosureCpt />
+      <SideMenuCpt />
       <Routes>
         <Route path="" element={<HomePg />} />
         <Route path="connections" element={<ConnsPg />} />
