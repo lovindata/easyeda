@@ -25,7 +25,7 @@ import cats.implicits._
  * @param pwd
  *   Password
  */
-case class ConnMongoMod(id: Long, connId: Long, dbAuth: String, replicaSet: String, user: String, pwd: String) {
+case class MongoMod(id: Long, connId: Long, dbAuth: String, replicaSet: String, user: String, pwd: String) {
 
   /**
    * Get couple(s) host port corresponding to the connection.
@@ -33,7 +33,7 @@ case class ConnMongoMod(id: Long, connId: Long, dbAuth: String, replicaSet: Stri
    *   List of couple(s) host port
    */
   private def hostPort: IO[List[(String, Int)]] =
-    ConnMongoMod.ConnMongoHostPortMod.select(fr"conn_mongo_id = $id").map(_.map(x => (x.host, x.port)))
+    MongoMod.MongoHostPortMod.select(fr"mongo_id = $id").map(_.map(x => (x.host, x.port)))
 
   /**
    * Test if connection is up.
@@ -81,17 +81,18 @@ case class ConnMongoMod(id: Long, connId: Long, dbAuth: String, replicaSet: Stri
 }
 
 /**
- * [[ConnMongoMod]] additions.
+ * [[MongoMod]] additions.
  */
-object ConnMongoMod {
+object MongoMod {
 
   /**
    * DB layer.
    */
-  trait DB extends GenericDB[ConnMongoMod] {
+  trait DB extends GenericDB[MongoMod] {
 
     /**
-     * Constructor of [[ConnMongoMod]].
+     * Constructor of [[MongoMod]].
+     *
      * @param connId
      *   [[ConnMod]] id
      * @param form
@@ -99,9 +100,9 @@ object ConnMongoMod {
      * @return
      *   A new created mongodb connection
      */
-    def apply(connId: Long, form: ConnFormIDto.MongoFormIDto): IO[ConnMongoMod] = for {
-      connMongo <- insert(ConnMongoMod(-1, connId, form.dbAuth, form.replicaSet, form.user, form.pwd))
-      _         <- form.hostPort.traverse(x => ConnMongoHostPortMod(connMongo.id, x.host, x.port))
+    def apply(connId: Long, form: ConnFormIDto.MongoFormIDto): IO[MongoMod] = for {
+      connMongo <- insert(MongoMod(-1, connId, form.dbAuth, form.replicaSet, form.user, form.pwd))
+      _         <- form.hostPort.traverse(x => MongoHostPortMod(connMongo.id, x.host, x.port))
     } yield connMongo
 
   }
@@ -110,10 +111,10 @@ object ConnMongoMod {
   /**
    * DB representation host & port for mongodb.
    */
-  private case class ConnMongoHostPortMod(id: Long, connMongoId: Long, host: String, port: Int)
-  private object ConnMongoHostPortMod extends GenericDB[ConnMongoHostPortMod] {
-    def apply(connMongoId: Long, host: String, port: Int): IO[ConnMongoHostPortMod] = insert(
-      ConnMongoHostPortMod(-1, connMongoId, host, port))
+  private case class MongoHostPortMod(id: Long, mongoId: Long, host: String, port: Int)
+  private object MongoHostPortMod extends GenericDB[MongoHostPortMod] {
+    def apply(mongoId: Long, host: String, port: Int): IO[MongoHostPortMod] = insert(
+      MongoHostPortMod(-1, mongoId, host, port))
   }
 
 }

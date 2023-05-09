@@ -82,9 +82,9 @@ function ToastCpt(props: { toast: Toast }) {
       enterTo="scale-x-100"
       leaveFrom="scale-x-100"
       leaveTo="scale-x-0"
-      className={`bg-opacity-90 duration-${duration} flex origin-right items-center space-x-3 rounded bg-neutral
+      className={`bg-opacity-80 duration-${duration} flex origin-right items-center space-x-3 rounded bg-neutral
       p-1.5 text-neutral-content shadow transition-all ease-in-out
-      hover:bg-neutral-focus`}
+      hover:bg-opacity-95`}
     >
       {VBarCpt}
       {IconCpt}

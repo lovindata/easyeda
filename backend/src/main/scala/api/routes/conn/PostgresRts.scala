@@ -18,7 +18,7 @@ import sttp.tapir.server.http4s.Http4sServerInterpreter
 /**
  * Routes for postgres connections management.
  */
-object ConnPostgresRts extends GenericRts {
+object PostgresRts extends GenericRts {
 
   // List databases
   private val listDbEpt: PartialServerEndpoint[String, UserMod, Long, BackendException, List[String], Any, IO] = authEpt

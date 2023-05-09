@@ -81,7 +81,7 @@ object ConnRts extends GenericRts {
    *   Concatenated endpoints
    */
   override def docEpt: List[AnyEndpoint] =
-    List(testEpt, createEpt, listEpt, testKnownEpt).map(_.endpoint) ++ ConnPostgresRts.docEpt ++ ConnMongoRts.docEpt
+    List(testEpt, createEpt, listEpt, testKnownEpt).map(_.endpoint) ++ PostgresRts.docEpt ++ MongoRts.docEpt
 
   /**
    * Get all applicative routes.
@@ -89,6 +89,6 @@ object ConnRts extends GenericRts {
    *   Concatenated routes
    */
   override def appRts: HttpRoutes[IO] =
-    testRts <+> createRts <+> listRts <+> testKnownRts <+> ConnPostgresRts.appRts <+> ConnMongoRts.appRts
+    testRts <+> createRts <+> listRts <+> testKnownRts <+> PostgresRts.appRts <+> MongoRts.appRts
 
 }

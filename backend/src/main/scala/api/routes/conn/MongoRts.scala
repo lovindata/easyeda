@@ -16,15 +16,15 @@ import sttp.tapir.server.PartialServerEndpoint
 import sttp.tapir.server.http4s.Http4sServerInterpreter
 
 /**
- * Routes for mongodb connections management.
+ * Routes for mongo connections management.
  */
-object ConnMongoRts extends GenericRts {
+object MongoRts extends GenericRts {
 
   // List databases
   private val listDbEpt: PartialServerEndpoint[String, UserMod, Long, BackendException, List[String], Any, IO] = authEpt
-    .summary("list mongodb databases")
+    .summary("list mongo databases")
     .get
-    .in("conn" / path[Long]("id") / "mongodb" / "databases")
+    .in("conn" / path[Long]("id") / "mongo" / "databases")
     .out(jsonBody[List[String]])
   private val listDbRts: HttpRoutes[IO]                                                                        =
     Http4sServerInterpreter[IO]().toRoutes(listDbEpt.serverLogic { user => connId =>
@@ -35,9 +35,9 @@ object ConnMongoRts extends GenericRts {
   private val listCollEpt
       : PartialServerEndpoint[String, UserMod, (Long, String), BackendException, List[String], Any, IO] =
     authEpt
-      .summary("list mongodb collections")
+      .summary("list mongo collections")
       .get
-      .in("conn" / path[Long]("id") / "mongodb" / path[String]("database") / "collections")
+      .in("conn" / path[Long]("id") / "mongo" / path[String]("database") / "collections")
       .out(jsonBody[List[String]])
   private val listCollRts: HttpRoutes[IO] = Http4sServerInterpreter[IO]().toRoutes(listCollEpt.serverLogic { user =>
     { case (connId, db) => ConnSvc.impl.grantConn(user, connId).flatMap(_.mongo).flatMap(_.listColl(db)).toErrHandled }

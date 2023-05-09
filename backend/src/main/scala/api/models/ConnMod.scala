@@ -27,7 +27,7 @@ case class ConnMod(id: Long, userId: Long, `type`: ConnTypeEnum.ConnType, name: 
    * @return
    *   [[ConnTestODto]]
    */
-  def testConn(implicit connPostgresModDB: ConnPostgresMod.DB, connMongoModDB: ConnMongoMod.DB): IO[ConnTestODto] =
+  def testConn(implicit connPostgresModDB: PostgresMod.DB, connMongoModDB: MongoMod.DB): IO[ConnTestODto] =
     `type` match {
       case ConnTypeEnum.Postgres =>
         for {
@@ -47,7 +47,7 @@ case class ConnMod(id: Long, userId: Long, `type`: ConnTypeEnum.ConnType, name: 
    *   Postgres model OR
    *   - [[AppException]] if incoherent access
    */
-  def postgres(implicit connPostgresModDB: ConnPostgresMod.DB): IO[ConnPostgresMod] = `type` match {
+  def postgres(implicit connPostgresModDB: PostgresMod.DB): IO[PostgresMod] = `type` match {
     case ConnTypeEnum.Postgres => connPostgresModDB.select(fr"conn_id = $id").map(_.head)
     case _                     => IO.raiseError(AppException(s"Accessing ${ConnTypeEnum.Postgres} but connection is of type ${`type`}."))
   }
@@ -58,7 +58,7 @@ case class ConnMod(id: Long, userId: Long, `type`: ConnTypeEnum.ConnType, name: 
    *   MongoDB model OR
    *   - [[AppException]] if incoherent access
    */
-  def mongo(implicit connMongoModDB: ConnMongoMod.DB): IO[ConnMongoMod] = `type` match {
+  def mongo(implicit connMongoModDB: MongoMod.DB): IO[MongoMod] = `type` match {
     case ConnTypeEnum.Mongo => connMongoModDB.select(fr"conn_id = $id").map(_.head)
     case _                  => IO.raiseError(AppException(s"Accessing ${ConnTypeEnum.Mongo} but connection is of type ${`type`}."))
   }
@@ -81,8 +81,8 @@ object ConnMod {
      *   A new created connection
      */
     def apply(userId: Long, form: ConnFormIDto)(implicit
-        connPostgresModDB: ConnPostgresMod.DB,
-        connMongoModDB: ConnMongoMod.DB): IO[ConnMod] = form match {
+                                                connPostgresModDB: PostgresMod.DB,
+                                                connMongoModDB: MongoMod.DB): IO[ConnMod] = form match {
       case form: ConnFormIDto.PostgresFormIDto =>
         for {
           conn <- insert(ConnMod(-1, userId, ConnTypeEnum.Postgres, form.name))

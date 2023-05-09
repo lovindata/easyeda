@@ -26,7 +26,7 @@ import cats.implicits._
  * @param pwd
  *   Password
  */
-case class ConnPostgresMod(id: Long, connId: Long, host: String, port: Int, dbName: String, user: String, pwd: String) {
+case class PostgresMod(id: Long, connId: Long, host: String, port: Int, dbName: String, user: String, pwd: String) {
 
   /**
    * Test if connection is up.
@@ -124,13 +124,14 @@ case class ConnPostgresMod(id: Long, connId: Long, host: String, port: Int, dbNa
 }
 
 /**
- * [[ConnPostgresMod]] additions.
+ * [[PostgresMod]] additions.
  */
-object ConnPostgresMod {
-  trait DB extends GenericDB[ConnPostgresMod] {
+object PostgresMod {
+  trait DB extends GenericDB[PostgresMod] {
 
     /**
-     * Constructor of [[ConnPostgresMod]].
+     * Constructor of [[PostgresMod]].
+ *
      * @param connId
      *   [[ConnMod]] id
      * @param form
@@ -138,8 +139,8 @@ object ConnPostgresMod {
      * @return
      *   A new created postgres connection
      */
-    def apply(connId: Long, form: ConnFormIDto.PostgresFormIDto): IO[ConnPostgresMod] = insert(
-      ConnPostgresMod(-1, connId, form.host, form.port, form.dbName, form.user, form.pwd))
+    def apply(connId: Long, form: ConnFormIDto.PostgresFormIDto): IO[PostgresMod] = insert(
+      PostgresMod(-1, connId, form.host, form.port, form.dbName, form.user, form.pwd))
 
   }
   object DB { implicit val impl: DB = new DB {} } // Auto-DI on import
