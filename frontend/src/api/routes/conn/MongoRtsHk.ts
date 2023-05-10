@@ -17,7 +17,7 @@ export function useMongoRtsDbs(id: number | undefined, enabled: boolean) {
 /**
  * Mongo collections listing hook for route ("/conn/{id}/mongo/{database}/collections").
  */
-export function useMongoRtsSchs(id: number | undefined, database: string | undefined, enabled: boolean) {
+export function useMongoRtsColls(id: number | undefined, database: string | undefined, enabled: boolean) {
   const api = useApi(true, false);
   const { data } = useQuery(
     `/conn/${id}/mongo/${database}/collections`,

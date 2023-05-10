@@ -4,12 +4,12 @@ import { useQuery } from "react-query";
 /**
  * Postgres databases listing hook for route ("/conn/{id}/postgres/databases").
  */
-export function usePostgresRtsDbs(id: number | undefined, enabled: boolean) {
+export function usePostgresRtsDbs(connId: number, enabled: boolean) {
   const api = useApi(true, false);
   const { data } = useQuery(
-    `/conn/${id}/postgres/databases`,
-    () => api.get<string[]>(`/conn/${id}/postgres/databases`).then((_) => _.data),
-    { enabled: enabled && !!id }
+    `/conn/${connId}/postgres/databases`,
+    () => api.get<string[]>(`/conn/${connId}/postgres/databases`).then((_) => _.data),
+    { enabled: enabled }
   );
   return data;
 }
@@ -17,12 +17,12 @@ export function usePostgresRtsDbs(id: number | undefined, enabled: boolean) {
 /**
  * Postgres schemas listing hook for route ("/conn/{id}/postgres/{database}/schemas").
  */
-export function usePostgresRtsSchs(id: number | undefined, database: string | undefined, enabled: boolean) {
+export function usePostgresRtsSchs(connId: number | undefined, database: string | undefined, enabled: boolean) {
   const api = useApi(true, false);
   const { data } = useQuery(
-    `/conn/${id}/postgres/${database}/schemas`,
-    () => api.get<string[]>(`/conn/${id}/postgres/${database}/schemas`).then((_) => _.data),
-    { enabled: enabled && !!id && !!database }
+    `/conn/${connId}/postgres/${database}/schemas`,
+    () => api.get<string[]>(`/conn/${connId}/postgres/${database}/schemas`).then((_) => _.data),
+    { enabled: enabled && !!connId && !!database }
   );
   return data;
 }
@@ -30,16 +30,16 @@ export function usePostgresRtsSchs(id: number | undefined, database: string | un
  * Postgres tables listing hook for route ("/conn/{id}/postgres/{database}/{schema}/tables").
  */
 export function usePostgresRtsTabs(
-  id: number | undefined,
+  connId: number | undefined,
   database: string | undefined,
   schema: string | undefined,
   enabled: boolean
 ) {
   const api = useApi(true, false);
   const { data } = useQuery(
-    `/conn/${id}/postgres/${database}/${schema}/tables`,
-    () => api.get<string[]>(`/conn/${id}/postgres/${database}/${schema}/tables`).then((_) => _.data),
-    { enabled: enabled && !!id && !!database && !!schema }
+    `/conn/${connId}/postgres/${database}/${schema}/tables`,
+    () => api.get<string[]>(`/conn/${connId}/postgres/${database}/${schema}/tables`).then((_) => _.data),
+    { enabled: enabled && !!connId && !!database && !!schema }
   );
   return data;
 }

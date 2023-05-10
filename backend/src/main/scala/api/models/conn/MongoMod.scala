@@ -92,7 +92,6 @@ object MongoMod {
 
     /**
      * Constructor of [[MongoMod]].
-     *
      * @param connId
      *   [[ConnMod]] id
      * @param form

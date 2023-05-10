@@ -1,6 +1,7 @@
 import { useConnRtsList } from "../../../api/routes/ConnRtsHk";
-import { usePostgresRtsDbs } from "../../../api/routes/conn/PostgresRtsHk";
-import { Add, Dropdown, Mongo, Postgres } from "../../../assets";
+import { useMongoRtsDbs, useMongoRtsColls } from "../../../api/routes/conn/MongoRtsHk";
+import { usePostgresRtsDbs, usePostgresRtsSchs, usePostgresRtsTabs } from "../../../api/routes/conn/PostgresRtsHk";
+import { Add, Collection, Database, Dropdown, Mongo, Postgres, Schema, Table } from "../../../assets";
 import { Refresh } from "../../../assets";
 import { Disclosure } from "@headlessui/react";
 import { useState } from "react";
@@ -11,7 +12,7 @@ import { useState } from "react";
 export default function SideMenuCpt() {
   return (
     <div
-      className="flex w-64 flex-col divide-y-[20px] divide-base-100 bg-base-300 fill-base-content text-base-content
+      className="min-w-64 flex flex-col divide-y-8 divide-base-100 bg-base-300 fill-base-content text-base-content
       shadow-inner transition-all duration-300 ease-in-out"
     >
       <HeaderConnCpt />
@@ -47,13 +48,13 @@ function HeaderConnCpt() {
 function ContentConnCpt() {
   const conns = useConnRtsList();
   return (
-    <div className="flex select-none flex-col space-y-1 px-5 py-2.5">
+    <div className="flex select-none flex-col space-y-1 overflow-y-scroll px-5 py-2.5 text-sm">
       {conns?.map((_) => {
         switch (_.type) {
           case "postgres":
-            return <PostgresCpt key={_.id} name={_.name} id={_.id} />;
+            return <PostgresCpt key={_.id} connName={_.name} connId={_.id} />;
           case "mongo":
-            return <MongoCpt key={_.id} name={_.name} id={_.id} />;
+            return <MongoCpt key={_.id} connName={_.name} connId={_.id} />;
         }
       })}
     </div>
@@ -61,50 +62,214 @@ function ContentConnCpt() {
 }
 
 /**
- * Postgres component.
+ * Generic disclosure component.
  */
-function PostgresCpt(props: { name: string; id: number }) {
-  // States
-  const [enable, setEnable] = useState(false);
-  const dbs = usePostgresRtsDbs(props.id, enable);
-  console.log(dbs);
+function GenericDisclosureCpt(props: {
+  onDiscloseClick?: () => void;
+  disclosureHeader: JSX.Element;
+  disclosureContent?: JSX.Element;
+}) {
+  // If only header render
+  if (!props.disclosureContent)
+    return (
+      <div className="flex items-center space-x-1 transition-all duration-300 ease-in-out">
+        {props.disclosureHeader}
+      </div>
+    );
 
-  // Render
+  // Else
   return (
     <Disclosure>
-      {/* Disclosure button & Connection info */}
-      <div className="flex items-center space-x-1 transition-all duration-300 ease-in-out">
-        <Disclosure.Button>
-          {({ open }) => (
+      {/* Disclosure button & Info */}
+      <Disclosure.Button onClick={props.onDiscloseClick}>
+        {({ open }) => (
+          <div className="flex items-center space-x-1 transition-all duration-300 ease-in-out">
             <Dropdown
               className={"h-3 w-3 cursor-pointer transition-all duration-300 ease-in-out" + (open ? " rotate-90" : "")}
-              onClick={() => setEnable(open)}
             />
-          )}
-        </Disclosure.Button>
-        <Postgres className="h-5 w-5 p-0.5" />
-        {<div className="text-sm">{props.name}</div>}
-        {<div className="font-thin italic">(#{props.id})</div>}
-      </div>
+            {props.disclosureHeader}
+          </div>
+        )}
+      </Disclosure.Button>
 
-      {/* Databases info */}
+      {/* Disclosure content */}
       <Disclosure.Panel>
-        <div className="flex flex-col">{!dbs ? <div>Loading...</div> : <div>{dbs}</div>}</div>
+        <div className="flex flex-col">{props.disclosureContent}</div>
       </Disclosure.Panel>
     </Disclosure>
   );
 }
 
 /**
- * Mongo component.
+ * Postgres connection component.
  */
-function MongoCpt(props: { name: string; id: number }) {
+function PostgresCpt(props: { connId: number; connName: string }) {
+  const [enable, setEnable] = useState(false);
+  const dbs = usePostgresRtsDbs(props.connId, enable);
   return (
-    <div className="flex items-center space-x-1 rounded">
-      <Dropdown className="h-3 w-3" />
-      <Mongo className="h-5 w-5 p-0.5" />
-      {<div className="text-sm">{props.name}</div>}
-      {<div className="font-thin italic">(#{props.id})</div>}
-    </div>
+    <GenericDisclosureCpt
+      onDiscloseClick={() => setEnable(!enable)}
+      disclosureHeader={
+        <>
+          <Postgres className="h-5 w-5 p-0.5" />
+          <div>{props.connName}</div>
+          <div className="font-thin italic">(#{props.connId})</div>
+        </>
+      }
+      disclosureContent={
+        <>
+          {dbs?.map((_, idx) => (
+            <div key={idx} className="ml-2.5">
+              <PostgresDbCpt connId={props.connId} database={_} />
+            </div>
+          ))}
+        </>
+      }
+    />
+  );
+}
+
+/**
+ * Postgres database component.
+ */
+function PostgresDbCpt(props: { connId: number; database: string }) {
+  const [enable, setEnable] = useState(false);
+  const schs = usePostgresRtsSchs(props.connId, props.database, enable);
+  return (
+    <GenericDisclosureCpt
+      onDiscloseClick={() => setEnable(!enable)}
+      disclosureHeader={
+        <>
+          <Database className="h-5 w-5 p-0.5" />
+          <div>{props.database}</div>
+        </>
+      }
+      disclosureContent={
+        <>
+          {schs?.map((_, idx) => (
+            <div key={idx} className="ml-2.5">
+              <PostgresSchCpt connId={props.connId} database={props.database} schema={_} />
+            </div>
+          ))}
+        </>
+      }
+    />
+  );
+}
+
+/**
+ * Postgres schema component.
+ */
+function PostgresSchCpt(props: { connId: number; database: string; schema: string }) {
+  const [enable, setEnable] = useState(false);
+  const tabs = usePostgresRtsTabs(props.connId, props.database, props.schema, enable);
+  return (
+    <GenericDisclosureCpt
+      onDiscloseClick={() => setEnable(!enable)}
+      disclosureHeader={
+        <>
+          <Schema className="h-5 w-5 p-0.5" />
+          <div>{props.schema}</div>
+        </>
+      }
+      disclosureContent={
+        <>
+          {tabs?.map((_, idx) => (
+            <div key={idx} className="ml-7">
+              <PostgresTabCpt table={_} />
+            </div>
+          ))}
+        </>
+      }
+    />
+  );
+}
+
+/**
+ * Postgres table component.
+ */
+function PostgresTabCpt(props: { table: string }) {
+  return (
+    <GenericDisclosureCpt
+      disclosureHeader={
+        <>
+          <Table className="h-5 w-5 p-0.5" />
+          <div>{props.table}</div>
+        </>
+      }
+    />
+  );
+}
+
+/**
+ * Mongo connection component.
+ */
+function MongoCpt(props: { connId: number; connName: string }) {
+  const [enable, setEnable] = useState(false);
+  const dbs = useMongoRtsDbs(props.connId, enable);
+  return (
+    <GenericDisclosureCpt
+      onDiscloseClick={() => setEnable(!enable)}
+      disclosureHeader={
+        <>
+          <Mongo className="h-5 w-5 p-0.5" />
+          <div>{props.connName}</div>
+          <div className="font-thin italic">(#{props.connId})</div>
+        </>
+      }
+      disclosureContent={
+        <>
+          {dbs?.map((_, idx) => (
+            <div key={idx} className="ml-2.5">
+              <MongoDbCpt connId={props.connId} database={_} />
+            </div>
+          ))}
+        </>
+      }
+    />
+  );
+}
+
+/**
+ * Mongo database component.
+ */
+function MongoDbCpt(props: { connId: number; database: string }) {
+  const [enable, setEnable] = useState(false);
+  const schs = useMongoRtsColls(props.connId, props.database, enable);
+  return (
+    <GenericDisclosureCpt
+      onDiscloseClick={() => setEnable(!enable)}
+      disclosureHeader={
+        <>
+          <Database className="h-5 w-5 p-0.5" />
+          <div>{props.database}</div>
+        </>
+      }
+      disclosureContent={
+        <>
+          {schs?.map((_, idx) => (
+            <div key={idx} className="ml-7">
+              <MongoCollCpt collection={_} />
+            </div>
+          ))}
+        </>
+      }
+    />
+  );
+}
+
+/**
+ * Mongo collection component.
+ */
+function MongoCollCpt(props: { collection: string }) {
+  return (
+    <GenericDisclosureCpt
+      disclosureHeader={
+        <>
+          <Collection className="h-5 w-5 p-0.5" />
+          <div>{props.collection}</div>
+        </>
+      }
+    />
   );
 }
