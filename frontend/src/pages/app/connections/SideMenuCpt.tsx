@@ -12,7 +12,7 @@ import { useState } from "react";
 export default function SideMenuCpt() {
   return (
     <div
-      className="min-w-64 flex flex-col divide-y-8 divide-base-100 bg-base-300 fill-base-content text-base-content
+      className="flex h-screen w-64 flex-col divide-y-8 divide-base-100 bg-base-300 fill-base-content text-base-content
       shadow-inner transition-all duration-300 ease-in-out"
     >
       <HeaderConnCpt />
@@ -26,7 +26,7 @@ export default function SideMenuCpt() {
  */
 function HeaderConnCpt() {
   return (
-    <div className="flex select-none items-center justify-between rounded px-5 py-2.5">
+    <div className="flex select-none items-center justify-between px-5 py-2.5">
       <div className="text-xs font-semibold">CONNECTIONS</div>
       <div className="flex space-x-1">
         <Refresh
@@ -48,7 +48,10 @@ function HeaderConnCpt() {
 function ContentConnCpt() {
   const conns = useConnRtsList();
   return (
-    <div className="flex select-none flex-col space-y-1 overflow-y-scroll px-5 py-2.5 text-sm">
+    <div
+      className="flex select-none flex-col space-y-1 overflow-hidden scroll-smooth px-5 py-2.5
+      text-sm scrollbar-thin scrollbar-thumb-neutral hover:overflow-auto"
+    >
       {conns?.map((_) => {
         switch (_.type) {
           case "postgres":
@@ -72,7 +75,10 @@ function GenericDisclosureCpt(props: {
   // If only header render
   if (!props.disclosureContent)
     return (
-      <div className="flex items-center space-x-1 transition-all duration-300 ease-in-out">
+      <div
+        className="flex cursor-pointer items-center space-x-1 rounded p-0.5
+        transition-all duration-300 ease-in-out hover:backdrop-contrast-50"
+      >
         {props.disclosureHeader}
       </div>
     );
@@ -81,11 +87,14 @@ function GenericDisclosureCpt(props: {
   return (
     <Disclosure>
       {/* Disclosure button & Info */}
-      <Disclosure.Button onClick={props.onDiscloseClick}>
+      <Disclosure.Button onClick={props.onDiscloseClick} className="min-w-full">
         {({ open }) => (
-          <div className="flex items-center space-x-1 transition-all duration-300 ease-in-out">
+          <div
+            className="flex items-center space-x-1 rounded p-0.5
+            transition-all duration-300 ease-in-out hover:backdrop-contrast-50"
+          >
             <Dropdown
-              className={"h-3 w-3 cursor-pointer transition-all duration-300 ease-in-out" + (open ? " rotate-90" : "")}
+              className={"h-3 w-3 min-w-max transition-all duration-300 ease-in-out" + (open ? " rotate-90" : "")}
             />
             {props.disclosureHeader}
           </div>
@@ -111,7 +120,7 @@ function PostgresCpt(props: { connId: number; connName: string }) {
       onDiscloseClick={() => setEnable(!enable)}
       disclosureHeader={
         <>
-          <Postgres className="h-5 w-5 p-0.5" />
+          <Postgres className="h-5 w-5 min-w-max p-0.5" />
           <div>{props.connName}</div>
           <div className="font-thin italic">(#{props.connId})</div>
         </>
@@ -140,7 +149,7 @@ function PostgresDbCpt(props: { connId: number; database: string }) {
       onDiscloseClick={() => setEnable(!enable)}
       disclosureHeader={
         <>
-          <Database className="h-5 w-5 p-0.5" />
+          <Database className="h-5 w-5 min-w-max p-0.5" />
           <div>{props.database}</div>
         </>
       }
@@ -168,7 +177,7 @@ function PostgresSchCpt(props: { connId: number; database: string; schema: strin
       onDiscloseClick={() => setEnable(!enable)}
       disclosureHeader={
         <>
-          <Schema className="h-5 w-5 p-0.5" />
+          <Schema className="h-5 w-5 min-w-max p-0.5" />
           <div>{props.schema}</div>
         </>
       }
@@ -193,8 +202,8 @@ function PostgresTabCpt(props: { table: string }) {
     <GenericDisclosureCpt
       disclosureHeader={
         <>
-          <Table className="h-5 w-5 p-0.5" />
-          <div>{props.table}</div>
+          <Table className="h-5 w-5 min-w-max p-0.5" />
+          <div className="truncate">{props.table}</div>
         </>
       }
     />
@@ -212,7 +221,7 @@ function MongoCpt(props: { connId: number; connName: string }) {
       onDiscloseClick={() => setEnable(!enable)}
       disclosureHeader={
         <>
-          <Mongo className="h-5 w-5 p-0.5" />
+          <Mongo className="h-5 w-5 min-w-max p-0.5" />
           <div>{props.connName}</div>
           <div className="font-thin italic">(#{props.connId})</div>
         </>
@@ -241,7 +250,7 @@ function MongoDbCpt(props: { connId: number; database: string }) {
       onDiscloseClick={() => setEnable(!enable)}
       disclosureHeader={
         <>
-          <Database className="h-5 w-5 p-0.5" />
+          <Database className="h-5 w-5 min-w-max p-0.5" />
           <div>{props.database}</div>
         </>
       }
@@ -266,7 +275,7 @@ function MongoCollCpt(props: { collection: string }) {
     <GenericDisclosureCpt
       disclosureHeader={
         <>
-          <Collection className="h-5 w-5 p-0.5" />
+          <Collection className="h-5 w-5 min-w-max p-0.5" />
           <div>{props.collection}</div>
         </>
       }

@@ -17,6 +17,7 @@
     "react-hook-form": "^7.43.9",
     "react-query": "^3.39.3",
     "react-router-dom": "^6.11.1",
+    "tailwind-scrollbar": "^3.0.1",
     "vite-plugin-svgr": "^2.4.0"
   },
   "devDependencies": {
