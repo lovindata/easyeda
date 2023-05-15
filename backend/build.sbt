@@ -28,7 +28,7 @@ libraryDependencies += "org.apache.spark" %% "spark-mllib" % "3.4.0" % "provided
 
 // Cats Effect & Scala extensions
 // https://mvnrepository.com/artifact/org.typelevel/cats-effect
-libraryDependencies += "org.typelevel"              %% "cats-effect" % "3.4.10"
+libraryDependencies += "org.typelevel"              %% "cats-effect" % "3.5.0"
 scalacOptions ++= Seq(
   "-feature",
   "-deprecation",
@@ -36,7 +36,7 @@ scalacOptions ++= Seq(
   "-language:postfixOps"
 )
 // https://mvnrepository.com/artifact/com.softwaremill.quicklens/quicklens
-libraryDependencies += "com.softwaremill.quicklens" %% "quicklens"   % "1.9.3"
+libraryDependencies += "com.softwaremill.quicklens" %% "quicklens"   % "1.9.4"
 
 // Tapir
 // https://mvnrepository.com/artifact/com.softwaremill.sttp.tapir/tapir-http4s-server
@@ -48,11 +48,11 @@ libraryDependencies += "com.softwaremill.sttp.tapir" %% "tapir-swagger-ui-bundle
 
 // Http4s
 // https://mvnrepository.com/artifact/org.http4s/http4s-ember-server
-libraryDependencies += "org.http4s" %% "http4s-ember-server" % "0.23.18"
+libraryDependencies += "org.http4s" %% "http4s-ember-server" % "0.23.19"
 // https://mvnrepository.com/artifact/org.http4s/http4s-circe
-libraryDependencies += "org.http4s" %% "http4s-circe"        % "0.23.18"
+libraryDependencies += "org.http4s" %% "http4s-circe"        % "0.23.19"
 // https://mvnrepository.com/artifact/org.http4s/http4s-dsl
-libraryDependencies += "org.http4s" %% "http4s-dsl"          % "0.23.18"
+libraryDependencies += "org.http4s" %% "http4s-dsl"          % "0.23.19"
 
 // Circe
 // https://mvnrepository.com/artifact/io.circe/circe-parser
